@@ -1,8 +1,4 @@
-"use client";
-
-import { use } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Calendar, Tag, User, MessageSquare, ArrowRight, Star } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -13,8 +9,9 @@ interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default function BlogPostPage({ params }: BlogPostPageProps) {
-  const { slug } = use(params);
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const resolvedParams = await params;
+  const slug = resolvedParams.slug;
   const post = blogPosts.find((p) => p.slug === slug);
 
   // Fallback if post not found
@@ -192,4 +189,10 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
       <Footer />
     </>
   );
+}
+
+export async function generateStaticParams() {
+  return blogPosts.map((post) => ({
+    slug: post.slug,
+  }));
 }
