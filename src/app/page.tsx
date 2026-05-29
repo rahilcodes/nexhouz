@@ -464,11 +464,13 @@ export default function HomePage() {
                       Experience intelligent property assistance with our AI-powered bots available on both web and WhatsApp. Get instant responses, property recommendations, and expert guidance 24/7 to help you find your right home.
                     </p>
                   </div>
-                  <img
-                    src="/images/robot_advisor_mascot.png"
-                    alt="AI Robot Mascot"
-                    className="w-28 h-36 object-contain shrink-0 filter brightness-[1.05] contrast-[1.05] mix-blend-multiply group-hover:scale-105 group-hover:-rotate-2 transition-all duration-500"
-                  />
+                  <div className="w-28 h-40 rounded-2xl bg-gray-50/80 border border-gray-150 shrink-0 overflow-hidden relative flex items-end justify-center group-hover:border-brand-red/20 transition-all duration-300">
+                    <img
+                      src="/images/robot_advisor_mascot.png"
+                      alt="AI Robot Mascot"
+                      className="w-full h-full object-contain pointer-events-none filter brightness-[1.05] contrast-[1.05] mix-blend-multiply group-hover:scale-105 group-hover:-rotate-2 transition-all duration-500"
+                    />
+                  </div>
                 </div>
 
                 {/* Highlights */}
@@ -518,11 +520,13 @@ export default function HomePage() {
                       Consult with our certified real estate experts to find the perfect property that matches your needs and budget with personalized advice, expert local market insights, end-to-end buying assistance, and complete post-purchase support.
                     </p>
                   </div>
-                  <img
-                    src="/images/real_estate_advisor_portrait.png"
-                    alt="Real Estate Expert"
-                    className="w-28 h-36 object-contain shrink-0 filter brightness-[1.05] contrast-[1.05] mix-blend-multiply group-hover:scale-105 transition-all duration-500"
-                  />
+                  <div className="w-28 h-40 rounded-2xl bg-gray-50/80 border border-gray-150 shrink-0 overflow-hidden relative flex items-end justify-center group-hover:border-brand-red/20 transition-all duration-300">
+                    <img
+                      src="/images/real_estate_advisor_portrait.png"
+                      alt="Real Estate Expert"
+                      className="w-full h-full object-contain pointer-events-none filter brightness-[1.05] contrast-[1.05] mix-blend-multiply group-hover:scale-105 transition-all duration-500"
+                    />
+                  </div>
                 </div>
 
                 {/* Highlights */}
@@ -581,7 +585,7 @@ export default function HomePage() {
                   <img
                     src="/images/obsidian_pavilion.png"
                     alt="Modern Property"
-                    className="w-28 h-36 object-cover rounded-2xl shrink-0 border border-gray-100 group-hover:scale-105 transition-transform duration-500"
+                    className="w-28 h-40 object-cover rounded-2xl shrink-0 border border-gray-150 group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
 
