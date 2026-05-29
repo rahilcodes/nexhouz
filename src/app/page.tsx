@@ -457,8 +457,8 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                <div className="flex items-start justify-between gap-4 flex-1">
-                  <div className="flex-1 space-y-3">
+                 <div className="relative flex items-start justify-between gap-4 flex-1 min-h-[160px]">
+                  <div className="flex-1 pr-28 space-y-3 z-10">
                     <h3 className="text-xl font-extrabold text-brand-black leading-tight">AI Property Match Making</h3>
                     <p className="text-xs text-gray-500 leading-relaxed font-medium">
                       Experience intelligent property assistance with our AI-powered bots available on both web and WhatsApp. Get instant responses, property recommendations, and expert guidance 24/7 to help you find your right home.
@@ -467,7 +467,7 @@ export default function HomePage() {
                   <img
                     src="/images/robot_advisor_mascot.png"
                     alt="AI Robot Mascot"
-                    className="w-32 h-44 object-contain shrink-0 mix-blend-multiply group-hover:scale-105 group-hover:-rotate-3 transition-transform duration-500"
+                    className="absolute right-0 bottom-0 h-44 w-auto object-contain pointer-events-none z-0 filter brightness-[1.05] contrast-[1.05] mix-blend-multiply group-hover:scale-105 group-hover:-rotate-2 transition-all duration-500"
                   />
                 </div>
 
@@ -511,8 +511,8 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                <div className="flex items-start justify-between gap-4 flex-1">
-                  <div className="flex-1 space-y-3">
+                 <div className="relative flex items-start justify-between gap-4 flex-1 min-h-[160px]">
+                  <div className="flex-1 pr-28 space-y-3 z-10">
                     <h3 className="text-xl font-extrabold text-brand-black leading-tight">Expert Property Guidance</h3>
                     <p className="text-xs text-gray-500 leading-relaxed font-medium">
                       Consult with our certified real estate experts to find the perfect property that matches your needs and budget with personalized advice, expert local market insights, end-to-end buying assistance, and complete post-purchase support.
@@ -521,7 +521,7 @@ export default function HomePage() {
                   <img
                     src="/images/real_estate_advisor_portrait.png"
                     alt="Real Estate Expert"
-                    className="w-32 h-44 object-contain shrink-0 mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
+                    className="absolute right-0 bottom-0 h-44 w-auto object-contain pointer-events-none z-0 filter brightness-[1.05] contrast-[1.05] mix-blend-multiply group-hover:scale-105 transition-all duration-500"
                   />
                 </div>
 
