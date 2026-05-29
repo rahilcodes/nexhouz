@@ -467,7 +467,7 @@ export default function HomePage() {
                   <img
                     src="/images/robot_advisor_mascot.png"
                     alt="AI Robot Mascot"
-                    className="w-28 h-28 object-contain shrink-0 group-hover:scale-105 group-hover:-rotate-3 transition-transform duration-500"
+                    className="w-32 h-44 object-contain shrink-0 mix-blend-multiply group-hover:scale-105 group-hover:-rotate-3 transition-transform duration-500"
                   />
                 </div>
 
@@ -521,7 +521,7 @@ export default function HomePage() {
                   <img
                     src="/images/real_estate_advisor_portrait.png"
                     alt="Real Estate Expert"
-                    className="w-28 h-28 object-contain shrink-0 group-hover:scale-105 transition-transform duration-500"
+                    className="w-32 h-44 object-contain shrink-0 mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
 
@@ -581,7 +581,7 @@ export default function HomePage() {
                   <img
                     src="/images/obsidian_pavilion.png"
                     alt="Modern Property"
-                    className="w-28 h-28 object-cover rounded-2xl shrink-0 border border-gray-100 group-hover:scale-105 transition-transform duration-500"
+                    className="w-32 h-44 object-cover rounded-2xl shrink-0 border border-gray-100 group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
 
