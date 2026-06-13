@@ -1,0 +1,26 @@
+# Force DirectoryIndex for all subfolders
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # 1. If the request is already pointing inside the out/ directory, do nothing
+  RewriteCond %{REQUEST_URI} ^/out/ [NC]
+  RewriteRule ^ - [L]
+
+  # 2. Transparently rewrite requests to existing files/folders inside the out/ directory
+  RewriteCond %{DOCUMENT_ROOT}/out/$1 -f [OR]
+  RewriteCond %{DOCUMENT_ROOT}/out/$1 -d
+  RewriteRule ^(.*)$ out/$1 [L]
+
+  # 3. SPA Fallback for dynamic (admin-added) properties that aren't in out/
+  RewriteRule ^properties/([^/]+)/?$ out/index.html [L]
+
+  # 4. General fallback for any other clean Next.js routes to the SPA root index.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !^/_next/
+  RewriteCond %{REQUEST_URI} !^/images/
+  RewriteRule ^(.*)$ out/index.html [L]
+</IfModule>
