@@ -36,7 +36,7 @@ export default function HomeLoanCalculatorPage() {
           <div className="relative max-w-7xl mx-auto px-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/20 rounded-full mb-4">
               <Calculator size={10} className="text-white" />
-              <span className="text-[9px] font-extrabold tracking-[0.2em] uppercase text-white">Free Calculator</span>
+              <span className="text-xs font-extrabold tracking-[0.2em] uppercase text-white">Free Calculator</span>
             </div>
             <h1 className="text-5xl font-extrabold text-white tracking-tight mb-4">Home Loan Eligibility Calculator</h1>
             <p className="text-sm text-white/55 font-medium max-w-xl">Find out exactly how much home loan you qualify for based on your income, existing obligations, and preferred tenure.</p>
@@ -66,7 +66,7 @@ export default function HomeLoanCalculatorPage() {
                       onChange={e => { field.setter(parseFloat(e.target.value)); setCalculated(true); }}
                       className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-brand-red"
                     />
-                    <div className="flex justify-between text-[9px] font-bold text-gray-400">
+                    <div className="flex justify-between text-xs font-bold text-gray-400">
                       <span>{field.format(field.min)}</span><span>{field.format(field.max)}</span>
                     </div>
                   </div>
@@ -74,14 +74,14 @@ export default function HomeLoanCalculatorPage() {
 
                 <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex gap-3">
                   <Info size={14} className="text-blue-500 shrink-0 mt-0.5" />
-                  <p className="text-[11px] text-blue-700 font-medium leading-relaxed">Based on RBI's standard FOIR (Fixed Obligation to Income Ratio) of 40%. Actual eligibility may vary by bank.</p>
+                  <p className="text-sm text-blue-700 font-medium leading-relaxed">Based on RBI's standard FOIR (Fixed Obligation to Income Ratio) of 40%. Actual eligibility may vary by bank.</p>
                 </div>
               </div>
 
               {/* Results */}
               <div className="space-y-5">
                 <motion.div animate={{ scale: calculated ? [1, 1.02, 1] : 1 }} transition={{ duration: 0.3 }} className="bg-brand-black rounded-3xl p-8 text-white space-y-2">
-                  <p className="text-[10px] font-extrabold uppercase tracking-widest text-white/50">Maximum Loan Eligibility</p>
+                  <p className="text-xs font-extrabold uppercase tracking-widest text-white/50">Maximum Loan Eligibility</p>
                   <p className="text-5xl font-extrabold text-white">{formatCr(eligibleLoan)}</p>
                   <p className="text-xs text-white/40 font-medium">Based on your income and existing obligations</p>
                 </motion.div>
@@ -94,9 +94,9 @@ export default function HomeLoanCalculatorPage() {
                     { label: "FOIR Available", value: `₹${Math.max(0, maxEmi).toLocaleString("en-IN")}`, sub: "per month for EMI" },
                   ].map(stat => (
                     <div key={stat.label} className="bg-gray-50 border border-gray-100 rounded-2xl p-5 space-y-1">
-                      <p className="text-[9px] font-extrabold uppercase tracking-widest text-gray-400">{stat.label}</p>
+                      <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400">{stat.label}</p>
                       <p className="text-lg font-extrabold text-brand-black">{stat.value}</p>
-                      <p className="text-[9px] text-gray-400 font-medium">{stat.sub}</p>
+                      <p className="text-xs text-gray-400 font-medium">{stat.sub}</p>
                     </div>
                   ))}
                 </div>

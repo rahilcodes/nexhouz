@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu, X, Heart, Phone, Building2, Home, LayoutGrid, Scale,
   Globe, UserCheck, Info, Users, Briefcase, Calculator,
-  ArrowLeftRight, Ruler, ChevronDown, Sparkles, ArrowRight
+  ArrowLeftRight, Ruler, ChevronDown, Sparkles, ArrowRight, AlertTriangle
 } from "lucide-react";
 
 const menus = [
@@ -25,6 +25,7 @@ const menus = [
     items: [
       { icon: Globe, label: "Second Opinion Services", desc: "Neutral expert review of any property deal", href: "/second-opinion" },
       { icon: UserCheck, label: "Expert Advisory", desc: "Book a dedicated real estate consultant", href: "/expert-advisory" },
+      { icon: Sparkles, label: "AI Advisor Chat", desc: "24/7 smart real estate advisor", href: "/chat", badge: "Live" },
     ]
   },
   {
@@ -39,7 +40,6 @@ const menus = [
     label: "About",
     items: [
       { icon: Info, label: "About Us", desc: "Our story, mission and audit philosophy", href: "/about" },
-      { icon: Users, label: "Team", desc: "Meet the advisors behind NexHouz", href: "/team" },
       { icon: Briefcase, label: "Careers", desc: "Join Hyderabad's most trusted property firm", href: "/careers" },
     ]
   }
@@ -101,7 +101,7 @@ export default function Navbar() {
               onMouseLeave={handleMouseLeave}
             >
               <button
-                className={`flex items-center gap-1 px-3 py-2 rounded-lg text-[11px] font-bold tracking-widest uppercase transition-all cursor-pointer ${
+                className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-bold tracking-widest uppercase transition-all cursor-pointer ${
                   activeMenu === menu.label
                     ? "text-brand-red bg-brand-red/4"
                     : "text-brand-black/55 hover:text-brand-black hover:bg-gray-50"
@@ -149,12 +149,12 @@ export default function Navbar() {
                                   {item.label}
                                 </span>
                                 {"badge" in item && item.badge && (
-                                  <span className="text-[8px] font-extrabold uppercase tracking-wider bg-brand-red text-white px-1.5 py-0.5 rounded-full">
+                                  <span className="text-xs font-extrabold uppercase tracking-wider bg-brand-red text-white px-1.5 py-0.5 rounded-full">
                                     {item.badge}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[10px] text-gray-400 font-medium mt-0.5 leading-snug">{item.desc}</p>
+                              <p className="text-xs text-gray-400 font-medium mt-0.5 leading-snug">{item.desc}</p>
                             </div>
                           </Link>
                         );
@@ -163,8 +163,8 @@ export default function Navbar() {
                     {/* Footer link */}
                     <div className="px-3 pb-3">
                       <div className="border-t border-gray-100 pt-2.5 flex items-center justify-between">
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-gray-400">NexHouz</span>
-                        <Link href="/contact" className="text-[9px] font-bold text-brand-red hover:underline flex items-center gap-1">
+                        <span className="text-xs font-bold uppercase tracking-widest text-gray-400">NexHouz</span>
+                        <Link href="/contact" className="text-xs font-bold text-brand-red hover:underline flex items-center gap-1">
                           Talk to Expert <ArrowRight size={9} />
                         </Link>
                       </div>
@@ -178,22 +178,24 @@ export default function Navbar() {
 
         {/* Right Controls */}
         <div className="hidden lg:flex items-center gap-3 shrink-0">
-          <a href="tel:+918585854853" className="flex items-center gap-1.5 text-[11px] font-bold text-brand-black/55 hover:text-brand-black transition-colors">
+          <a href="tel:+918585854853" className="flex items-center gap-1.5 text-sm font-bold text-brand-black/55 hover:text-brand-black transition-colors">
             <Phone size={12} className="stroke-[2]" />
             <span>+91 85858 54853</span>
           </a>
           <Link href="/dashboard?tab=saved" className="p-2 hover:bg-gray-50 rounded-full transition-colors text-brand-black/40 hover:text-brand-black" aria-label="Saved">
             <Heart size={16} className="stroke-[2]" />
           </Link>
-          <Link href="/contact" className="flex items-center justify-center text-[10px] font-extrabold tracking-widest text-white bg-brand-red hover:bg-brand-red/90 px-5 py-2.5 rounded-full uppercase transition-all shadow-sm hover:shadow-lg hover:shadow-brand-red/20 hover:scale-105 active:scale-95 whitespace-nowrap">
+          <Link href="/contact" className="flex items-center justify-center text-xs font-extrabold tracking-widest text-white bg-brand-red hover:bg-brand-red/90 px-5 py-2.5 rounded-full uppercase transition-all shadow-sm hover:shadow-lg hover:shadow-brand-red/20 hover:scale-105 active:scale-95 whitespace-nowrap">
             Book Free Consultation
           </Link>
         </div>
 
         {/* Mobile toggle */}
-        <button onClick={() => setIsOpen(!isOpen)} className="lg:hidden p-2 text-brand-black focus:outline-none cursor-pointer" aria-label="Toggle menu">
-          {isOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="lg:hidden flex items-center gap-2">
+          <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-brand-black focus:outline-none cursor-pointer" aria-label="Toggle menu">
+            {isOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -260,6 +262,7 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
     </header>
   );
 }

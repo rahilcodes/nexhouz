@@ -51,7 +51,7 @@ export default function EmiCalculatorPage() {
           <div className="relative max-w-7xl mx-auto px-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/20 rounded-full mb-4">
               <ArrowLeftRight size={10} className="text-white" />
-              <span className="text-[9px] font-extrabold tracking-[0.2em] uppercase text-white">EMI Calculator</span>
+              <span className="text-xs font-extrabold tracking-[0.2em] uppercase text-white">EMI Calculator</span>
             </div>
             <h1 className="text-5xl font-extrabold text-white tracking-tight mb-4">Property EMI Calculator</h1>
             <p className="text-sm text-white/55 font-medium max-w-xl">Calculate your exact monthly EMI, total interest outgo, and view a year-by-year repayment schedule for any property loan.</p>
@@ -75,7 +75,7 @@ export default function EmiCalculatorPage() {
                       <span className="text-sm font-extrabold text-brand-red bg-brand-red/5 px-3 py-1 rounded-full">{field.format(field.value)}</span>
                     </div>
                     <input type="range" min={field.min} max={field.max} step={field.step} value={field.value} onChange={e => field.setter(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-brand-red" />
-                    <div className="flex justify-between text-[9px] font-bold text-gray-400">
+                    <div className="flex justify-between text-xs font-bold text-gray-400">
                       <span>{field.format(field.min)}</span><span>{field.format(field.max)}</span>
                     </div>
                   </div>
@@ -85,7 +85,7 @@ export default function EmiCalculatorPage() {
               {/* Results */}
               <div className="space-y-5">
                 <div className="bg-brand-black rounded-3xl p-8 text-white text-center space-y-1">
-                  <p className="text-[10px] font-extrabold uppercase tracking-widest text-white/50">Monthly EMI</p>
+                  <p className="text-xs font-extrabold uppercase tracking-widest text-white/50">Monthly EMI</p>
                   <p className="text-6xl font-extrabold">{formatCr(emi)}</p>
                   <p className="text-xs text-white/40 font-medium">per month for {tenure} years</p>
                 </div>
@@ -98,7 +98,7 @@ export default function EmiCalculatorPage() {
                     { label: "Interest %", value: `${interestPercent}%`, color: "text-amber-600" },
                   ].map(stat => (
                     <div key={stat.label} className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
-                      <p className="text-[9px] font-extrabold uppercase tracking-widest text-gray-400">{stat.label}</p>
+                      <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400">{stat.label}</p>
                       <p className={`text-xl font-extrabold ${stat.color} mt-1`}>{stat.value}</p>
                     </div>
                   ))}
@@ -112,7 +112,7 @@ export default function EmiCalculatorPage() {
                       <circle cx="18" cy="18" r="15.9" fill="none" stroke="#D31E28" strokeWidth="3" strokeDasharray={`${interestPercent} ${100 - interestPercent}`} />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <p className="text-[10px] font-extrabold text-gray-400">Interest</p>
+                      <p className="text-xs font-extrabold text-gray-400">Interest</p>
                       <p className="text-sm font-extrabold text-brand-red">{interestPercent}%</p>
                     </div>
                   </div>
@@ -132,7 +132,7 @@ export default function EmiCalculatorPage() {
                   <thead className="bg-brand-black text-white">
                     <tr>
                       {["Year", "Principal Paid", "Interest Paid", "Outstanding Balance"].map(h => (
-                        <th key={h} className="text-left px-5 py-4 text-[10px] font-extrabold uppercase tracking-widest">{h}</th>
+                        <th key={h} className="text-left px-5 py-4 text-xs font-extrabold uppercase tracking-widest">{h}</th>
                       ))}
                     </tr>
                   </thead>

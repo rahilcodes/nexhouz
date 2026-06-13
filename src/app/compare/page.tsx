@@ -1,19 +1,66 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Scale, X, Plus, ArrowRight, ShieldCheck, Star, TrendingUp, Check, ChevronDown, Info } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { properties, Property } from "@/data/properties";
+import { properties as defaultProperties, Property } from "@/data/properties";
+import { fetchAllProperties } from "@/lib/db";
+import { supabase } from "@/lib/supabaseClient";
+import { AlertTriangle } from "lucide-react";
 
 export default function ComparePage() {
+  const [liveProperties, setLiveProperties] = useState<Property[]>([]);
+  const [dbError, setDbError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [selected, setSelected] = useState<(Property | null)[]>([null, null, null]);
   const [openSlot, setOpenSlot] = useState<number | null>(null);
   const [search, setSearch] = useState("");
+  const [isOffline, setIsOffline] = useState(false);
+  const [isDebugMode, setIsDebugMode] = useState(false);
 
-  const filteredProps = properties.filter(p =>
+  useEffect(() => {
+    const isDev = process.env.NODE_ENV === "development";
+    const params = new URLSearchParams(window.location.search);
+    const hasDebug = params.get("debug") === "true";
+    if (isDev || hasDebug) {
+      setIsDebugMode(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    async function loadProperties() {
+      setIsLoading(true);
+      setIsOffline(false);
+      setDbError(null);
+      try {
+        const data = await fetchAllProperties();
+        if (data && data.length > 0) {
+          setLiveProperties(data);
+        } else {
+          setIsOffline(true);
+          setLiveProperties(defaultProperties);
+          const { error } = await supabase.from("properties").select("id").limit(1);
+          if (error) {
+            setDbError(`Supabase connection failed: ${error.message}`);
+          } else {
+            setDbError("Supabase reached successfully, but no properties were found.");
+          }
+        }
+      } catch (e: any) {
+        setIsOffline(true);
+        setLiveProperties(defaultProperties);
+        setDbError(`Connection failed: ${e.message}`);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadProperties();
+  }, []);
+
+  const filteredProps = liveProperties.filter(p =>
     p.title.toLowerCase().includes(search.toLowerCase()) ||
     p.location.toLowerCase().includes(search.toLowerCase())
   );
@@ -58,7 +105,7 @@ export default function ComparePage() {
           <div className="relative max-w-7xl mx-auto px-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/20 rounded-full mb-5">
               <Scale size={10} className="text-white" />
-              <span className="text-[9px] font-extrabold tracking-[0.2em] uppercase text-white">Side-by-Side Comparison</span>
+              <span className="text-xs font-extrabold tracking-[0.2em] uppercase text-white">Side-by-Side Comparison</span>
             </div>
             <h1 className="text-5xl md:text-6xl font-extrabold text-white leading-tight tracking-tight mb-4">
               Compare Properties.<br />Make the Right Call.
@@ -67,8 +114,31 @@ export default function ComparePage() {
           </div>
         </section>
 
-        {/* Selection Row */}
-        <section className="py-10 border-b border-gray-100 bg-gray-50/40 sticky top-16 z-30 backdrop-blur-sm">
+        {isOffline && (
+          <div className="max-w-7xl mx-auto px-6 pt-10">
+            <div className="border border-amber-200 bg-amber-50/50 rounded-3xl py-4 px-6 flex items-center justify-between gap-4 shadow-sm w-full text-left animate-fadeIn">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 shadow-inner">
+                  <AlertTriangle size={18} className="stroke-[2]" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-amber-950">Database Offline Preview</h3>
+                  <p className="text-xs text-amber-805 font-medium mt-0.5 leading-relaxed">
+                    We are currently experiencing connection latency with our database server. Displaying verified local properties.
+                  </p>
+                </div>
+              </div>
+              {isDebugMode && dbError && (
+                <div className="text-[10px] text-red-655 font-mono bg-red-50 border border-red-100 p-2 rounded-xl max-w-sm overflow-x-auto truncate">
+                  {dbError}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+          <>
+            {/* Selection Row */}
+            <section className="py-10 border-b border-gray-100 bg-gray-50/40 sticky top-16 z-30 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-3 gap-4">
               {selected.map((prop, idx) => (
@@ -78,7 +148,7 @@ export default function ComparePage() {
                       <img src={prop.image} alt={prop.title} className="w-14 h-14 rounded-xl object-cover shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-extrabold text-brand-black truncate">{prop.title}</p>
-                        <p className="text-[10px] text-gray-400 font-medium">{prop.location.split(",")[0]}</p>
+                        <p className="text-xs text-gray-400 font-medium">{prop.location.split(",")[0]}</p>
                         <p className="text-sm font-extrabold text-brand-red mt-0.5">₹{(prop.price / 10000000).toFixed(1)} Cr</p>
                       </div>
                       <button onClick={() => handleRemove(idx)} className="w-6 h-6 rounded-full bg-gray-100 hover:bg-red-50 hover:text-brand-red flex items-center justify-center transition-colors shrink-0 cursor-pointer">
@@ -107,7 +177,7 @@ export default function ComparePage() {
                                 <img src={p.image} alt={p.title} className="w-10 h-10 rounded-lg object-cover shrink-0" />
                                 <div>
                                   <p className="text-xs font-bold text-brand-black">{p.title}</p>
-                                  <p className="text-[10px] text-gray-400">{p.location.split(",")[0]} · ₹{(p.price / 10000000).toFixed(1)} Cr</p>
+                                  <p className="text-xs text-gray-400">{p.location.split(",")[0]} · ₹{(p.price / 10000000).toFixed(1)} Cr</p>
                                 </div>
                                 {alreadySelected && <Check size={12} className="ml-auto text-brand-red" />}
                               </button>
@@ -138,13 +208,13 @@ export default function ComparePage() {
                   <thead>
                     <tr>
                       <th className="text-left py-4 pr-8 w-48">
-                        <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Feature</span>
+                        <span className="text-xs font-extrabold uppercase tracking-widest text-gray-400">Feature</span>
                       </th>
                       {activeProps.map(p => (
                         <th key={p.id} className="py-4 px-4 text-left">
                           <div className="space-y-1">
                             <p className="text-sm font-extrabold text-brand-black">{p.title}</p>
-                            <p className="text-[10px] text-gray-400 font-medium">{p.location.split(",")[0]}</p>
+                            <p className="text-xs text-gray-400 font-medium">{p.location.split(",")[0]}</p>
                           </div>
                         </th>
                       ))}
@@ -181,7 +251,7 @@ export default function ComparePage() {
                               <td key={p.id} className="py-4 px-4">
                                 <div className="flex items-center gap-2">
                                   <span className={`text-sm font-bold ${isBest ? "text-emerald-600" : "text-brand-black"}`}>{val}</span>
-                                  {isBest && <span className="text-[8px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-600 border border-emerald-200 px-1.5 py-0.5 rounded-full">Best</span>}
+                                  {isBest && <span className="text-xs font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-600 border border-emerald-200 px-1.5 py-0.5 rounded-full">Best</span>}
                                 </div>
                               </td>
                             );
@@ -221,6 +291,7 @@ export default function ComparePage() {
             )}
           </div>
         </section>
+      </>
 
         {/* Expert CTA */}
         <section className="bg-brand-black py-16">

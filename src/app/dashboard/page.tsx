@@ -25,17 +25,34 @@ import {
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { properties, Property } from "@/data/properties";
+import { properties as defaultProperties, Property } from "@/data/properties";
+import { fetchAllProperties, submitLead } from "@/lib/db";
+import { supabase } from "@/lib/supabaseClient";
+import { AlertTriangle } from "lucide-react";
 
 export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"listings" | "compare" | "visit">("listings");
+  const [liveProperties, setLiveProperties] = useState<Property[]>([]);
+  const [dbError, setDbError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(false);
+  const [isDebugMode, setIsDebugMode] = useState(false);
   
   // Site visit booking state
   const [bookingForm, setBookingForm] = useState({ name: "", phone: "", email: "", date: "", notes: "" });
   const [bookingSubmitted, setBookingSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const isDev = process.env.NODE_ENV === "development";
+    const params = new URLSearchParams(window.location.search);
+    const hasDebug = params.get("debug") === "true";
+    if (isDev || hasDebug) {
+      setIsDebugMode(true);
+    }
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -47,6 +64,34 @@ export default function DashboardPage() {
         console.error(e);
       }
     }
+
+    async function loadProperties() {
+      setIsLoading(true);
+      setIsOffline(false);
+      setDbError(null);
+      try {
+        const data = await fetchAllProperties();
+        if (data && data.length > 0) {
+          setLiveProperties(data);
+        } else {
+          setIsOffline(true);
+          setLiveProperties(defaultProperties);
+          const { error } = await supabase.from("properties").select("id").limit(1);
+          if (error) {
+            setDbError(`Supabase connection failed: ${error.message}`);
+          } else {
+            setDbError("Supabase reached successfully, but no properties were found.");
+          }
+        }
+      } catch (e: any) {
+        setIsOffline(true);
+        setLiveProperties(defaultProperties);
+        setDbError(`Connection failed: ${e.message}`);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadProperties();
   }, []);
 
   const removeFavorite = (id: string) => {
@@ -55,21 +100,29 @@ export default function DashboardPage() {
     localStorage.setItem("nexhouz_favorites", JSON.stringify(next));
   };
 
-  const handleBookingSubmit = (e: React.FormEvent) => {
+  const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    const propertyTitles = savedProperties.map(p => p.title).join(", ");
+    const success = await submitLead({
+      name: bookingForm.name,
+      email: bookingForm.email,
+      phone: bookingForm.phone,
+      notes: `Consolidated Curation Tour Request for: [${propertyTitles}]. Date: ${bookingForm.date}. Instructions: ${bookingForm.notes}`,
+      leadType: "callback"
+    });
+    setIsSubmitting(false);
+    if (success) {
       setBookingSubmitted(true);
       setTimeout(() => {
         setBookingSubmitted(false);
         setBookingForm({ name: "", phone: "", email: "", date: "", notes: "" });
       }, 3500);
-    }, 1500);
+    }
   };
 
   // Filter actual properties that are favorited
-  const savedProperties = properties.filter((p) => favorites.includes(p.id));
+  const savedProperties = liveProperties.filter((p) => favorites.includes(p.id));
 
   // Format price helper
   const formatPrice = (price: number) => {
@@ -100,7 +153,7 @@ export default function DashboardPage() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center justify-center w-2 h-2 rounded-full bg-brand-red animate-ping" />
-                  <span className="text-[9px] font-extrabold tracking-[0.25em] uppercase text-brand-black/45">
+                  <span className="text-xs font-extrabold tracking-[0.25em] uppercase text-brand-black/45">
                     Session Curation Registry Active
                   </span>
                 </div>
@@ -116,7 +169,7 @@ export default function DashboardPage() {
                 <div className="flex items-center gap-1.5 p-1 bg-gray-50 border border-gray-200/50 rounded-full w-fit">
                   <button
                     onClick={() => setActiveTab("listings")}
-                    className={`px-4 py-2 text-[10px] font-extrabold uppercase tracking-widest rounded-full transition-all cursor-pointer ${
+                    className={`px-4 py-2 text-xs font-extrabold uppercase tracking-widest rounded-full transition-all cursor-pointer ${
                       activeTab === "listings"
                         ? "bg-brand-black text-white shadow-sm"
                         : "text-gray-400 hover:text-gray-700"
@@ -126,7 +179,7 @@ export default function DashboardPage() {
                   </button>
                   <button
                     onClick={() => setActiveTab("compare")}
-                    className={`px-4 py-2 text-[10px] font-extrabold uppercase tracking-widest rounded-full transition-all cursor-pointer ${
+                    className={`px-4 py-2 text-xs font-extrabold uppercase tracking-widest rounded-full transition-all cursor-pointer ${
                       activeTab === "compare"
                         ? "bg-brand-black text-white shadow-sm"
                         : "text-gray-400 hover:text-gray-700"
@@ -136,7 +189,7 @@ export default function DashboardPage() {
                   </button>
                   <button
                     onClick={() => setActiveTab("visit")}
-                    className={`px-4 py-2 text-[10px] font-extrabold uppercase tracking-widest rounded-full transition-all cursor-pointer ${
+                    className={`px-4 py-2 text-xs font-extrabold uppercase tracking-widest rounded-full transition-all cursor-pointer ${
                       activeTab === "visit"
                         ? "bg-brand-black text-white shadow-sm"
                         : "text-gray-400 hover:text-gray-700"
@@ -152,6 +205,27 @@ export default function DashboardPage() {
           {/* ============================================================== */}
           {/* EMPTY STATE                                                    */}
           {/* ============================================================== */}
+          {isOffline && (
+            <div className="max-w-xl mx-auto border border-amber-200 bg-amber-50/50 rounded-3xl py-4 px-6 flex items-center justify-between gap-4 shadow-sm w-full mb-8 text-left animate-fadeIn">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 shadow-inner">
+                  <AlertTriangle size={18} className="stroke-[2]" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-amber-950">Database Offline Preview</h3>
+                  <p className="text-xs text-amber-805 font-medium mt-0.5 leading-relaxed">
+                    We are currently experiencing connection latency with our database server. Displaying verified local properties.
+                  </p>
+                </div>
+              </div>
+              {isDebugMode && dbError && (
+                <div className="text-[10px] text-red-655 font-mono bg-red-50 border border-red-100 p-2 rounded-xl max-w-xs overflow-x-auto truncate">
+                  {dbError}
+                </div>
+              )}
+            </div>
+          )}
+
           {savedProperties.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 15 }}
@@ -214,7 +288,7 @@ export default function DashboardPage() {
                         </button>
 
                         <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-                          <span className="text-[10px] font-extrabold uppercase tracking-widest text-white bg-brand-red px-2.5 py-0.5 rounded-full">
+                          <span className="text-xs font-extrabold uppercase tracking-widest text-white bg-brand-red px-2.5 py-0.5 rounded-full">
                             {property.possession}
                           </span>
                           <span className="text-xs font-extrabold text-white bg-black/45 backdrop-blur-md px-2.5 py-0.5 rounded-full">
@@ -226,14 +300,14 @@ export default function DashboardPage() {
                       {/* Content details */}
                       <div className="p-6 flex flex-col flex-grow justify-between space-y-4">
                         <div className="space-y-2">
-                          <div className="flex items-center gap-1 text-[8px] font-extrabold uppercase tracking-[0.2em] text-brand-red bg-brand-red/5 border border-brand-red/10 px-2 py-0.5 rounded-full w-fit">
+                          <div className="flex items-center gap-1 text-xs font-extrabold uppercase tracking-[0.2em] text-brand-red bg-brand-red/5 border border-brand-red/10 px-2 py-0.5 rounded-full w-fit">
                             <ShieldCheck size={9} />
                             <span>14-Point Legal Vetted Clear</span>
                           </div>
                           <h3 className="text-lg font-extrabold text-brand-black tracking-tight leading-tight line-clamp-1">
                             {property.title}
                           </h3>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                          <p className="text-xs text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1">
                             <MapPin size={9} />
                             {property.location}
                           </p>
@@ -247,26 +321,26 @@ export default function DashboardPage() {
                           <div className="grid grid-cols-3 gap-2 text-center text-xs">
                             <div className="p-2 bg-gray-50 border border-gray-100 rounded-xl">
                               <p className="font-extrabold text-brand-black">{property.bhk} BHK</p>
-                              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Layout</p>
+                              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Layout</p>
                             </div>
                             <div className="p-2 bg-gray-50 border border-gray-100 rounded-xl">
                               <p className="font-extrabold text-brand-black">{property.area.split(" ")[0]}</p>
-                              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Sq Ft</p>
+                              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Sq Ft</p>
                             </div>
                             <div className="p-2 bg-gray-50 border border-gray-100 rounded-xl">
                               <p className="font-extrabold text-brand-black">{property.scores.investmentYield}%</p>
-                              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Est Yield</p>
+                              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Est Yield</p>
                             </div>
                           </div>
 
                           <div className="flex items-center justify-between pt-1">
                             <div>
                               <p className="text-lg font-extrabold text-brand-black leading-none">{formatPrice(property.price)}</p>
-                              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Outright Capital</p>
+                              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Outright Capital</p>
                             </div>
                             <Link
                               href={`/properties/${property.slug}`}
-                              className="inline-flex items-center gap-1.5 px-4.5 py-2 bg-brand-black hover:bg-brand-red text-white text-[9px] font-extrabold uppercase tracking-widest rounded-full transition-all hover:scale-105"
+                              className="inline-flex items-center gap-1.5 px-4.5 py-2 bg-brand-black hover:bg-brand-red text-white text-xs font-extrabold uppercase tracking-widest rounded-full transition-all hover:scale-105"
                             >
                               Details <ArrowRight size={10} />
                             </Link>
@@ -294,12 +368,12 @@ export default function DashboardPage() {
                       <thead>
                         <tr className="border-b border-gray-100 bg-gray-50/50">
                           <th className="py-5 px-6 text-left w-1/4">
-                            <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Spec Metric</span>
+                            <span className="text-xs font-extrabold uppercase tracking-widest text-gray-400">Spec Metric</span>
                           </th>
                           {savedProperties.map((prop) => (
                             <th key={prop.id} className="py-5 px-6 text-center border-l border-gray-100 w-1/4">
                               <span className="text-xs font-extrabold text-brand-black block line-clamp-1">{prop.title}</span>
-                              <span className="text-[9px] font-bold text-brand-red mt-0.5 block">{formatPrice(prop.price)}</span>
+                              <span className="text-xs font-bold text-brand-red mt-0.5 block">{formatPrice(prop.price)}</span>
                             </th>
                           ))}
                         </tr>
@@ -337,13 +411,13 @@ export default function DashboardPage() {
                             <td key={prop.id} className="py-5 px-6 text-center border-l border-gray-100 space-y-2">
                               <Link
                                 href={`/properties/${prop.slug}`}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-brand-black hover:bg-brand-red text-white text-[8px] font-extrabold uppercase tracking-widest rounded-full transition-all"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-brand-black hover:bg-brand-red text-white text-xs font-extrabold uppercase tracking-widest rounded-full transition-all"
                               >
                                 View Curation
                               </Link>
                               <button
                                 onClick={() => removeFavorite(prop.id)}
-                                className="block mx-auto text-[8px] font-bold text-gray-400 hover:text-brand-red transition-colors"
+                                className="block mx-auto text-xs font-bold text-gray-400 hover:text-brand-red transition-colors"
                               >
                                 Remove Saved
                               </button>
@@ -389,7 +463,7 @@ export default function DashboardPage() {
                       >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                           <div className="space-y-1">
-                            <label className="text-[8px] font-extrabold uppercase tracking-widest text-gray-400">Full Name*</label>
+                            <label className="text-xs font-extrabold uppercase tracking-widest text-gray-400">Full Name*</label>
                             <input
                               type="text"
                               required
@@ -400,7 +474,7 @@ export default function DashboardPage() {
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[8px] font-extrabold uppercase tracking-widest text-gray-400">Phone Number*</label>
+                            <label className="text-xs font-extrabold uppercase tracking-widest text-gray-400">Phone Number*</label>
                             <input
                               type="tel"
                               required
@@ -414,7 +488,7 @@ export default function DashboardPage() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                           <div className="space-y-1">
-                            <label className="text-[8px] font-extrabold uppercase tracking-widest text-gray-400">Email Address*</label>
+                            <label className="text-xs font-extrabold uppercase tracking-widest text-gray-400">Email Address*</label>
                             <input
                               type="email"
                               required
@@ -425,7 +499,7 @@ export default function DashboardPage() {
                             />
                           </div>
                           <div className="space-y-1">
-                            <label className="text-[8px] font-extrabold uppercase tracking-widest text-gray-400">Preferred Date*</label>
+                            <label className="text-xs font-extrabold uppercase tracking-widest text-gray-400">Preferred Date*</label>
                             <input
                               type="date"
                               required
@@ -437,7 +511,7 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-[8px] font-extrabold uppercase tracking-widest text-gray-400">Special Instructions / Requests</label>
+                          <label className="text-xs font-extrabold uppercase tracking-widest text-gray-400">Special Instructions / Requests</label>
                           <textarea
                             rows={3}
                             value={bookingForm.notes}
@@ -449,10 +523,10 @@ export default function DashboardPage() {
 
                         {/* List of assets to be sent */}
                         <div className="p-4 bg-gray-50 border border-gray-150 rounded-2xl space-y-2">
-                          <span className="text-[8px] font-extrabold uppercase tracking-widest text-gray-400 block">Requested Properties Curation List</span>
+                          <span className="text-xs font-extrabold uppercase tracking-widest text-gray-400 block">Requested Properties Curation List</span>
                           <div className="flex flex-wrap gap-2 pt-1">
                             {savedProperties.map((p) => (
-                              <span key={p.id} className="inline-flex items-center gap-1 text-[10px] font-bold text-gray-700 bg-white border border-gray-200 px-2.5 py-1 rounded-full">
+                              <span key={p.id} className="inline-flex items-center gap-1 text-xs font-bold text-gray-700 bg-white border border-gray-200 px-2.5 py-1 rounded-full">
                                 <Building size={9} className="text-brand-red shrink-0" />
                                 {p.title}
                               </span>
@@ -463,7 +537,7 @@ export default function DashboardPage() {
                         <button
                           type="submit"
                           disabled={isSubmitting}
-                          className="w-full py-4 bg-brand-black hover:bg-brand-red disabled:bg-black/30 text-white text-[10px] tracking-[0.25em] font-extrabold uppercase transition-all duration-300 flex items-center justify-center gap-2 rounded-xl shadow-luxury hover:scale-101 cursor-pointer"
+                          className="w-full py-4 bg-brand-black hover:bg-brand-red disabled:bg-black/30 text-white text-xs tracking-[0.25em] font-extrabold uppercase transition-all duration-300 flex items-center justify-center gap-2 rounded-xl shadow-luxury hover:scale-101 cursor-pointer"
                         >
                           {isSubmitting ? (
                             <span>Scheduling Curation Tour...</span>

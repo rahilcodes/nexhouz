@@ -18,7 +18,7 @@ export default function SecondOpinionPage() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="space-y-6">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/20 rounded-full">
                 <Globe size={10} className="text-white" />
-                <span className="text-[9px] font-extrabold tracking-[0.2em] uppercase text-white">Neutral Expert Review</span>
+                <span className="text-xs font-extrabold tracking-[0.2em] uppercase text-white">Neutral Expert Review</span>
               </div>
               <h1 className="text-5xl md:text-6xl font-extrabold text-white leading-tight tracking-tight">
                 Someone Already Showed You a Property?<br />
@@ -66,7 +66,7 @@ export default function SecondOpinionPage() {
         <section className="py-20 border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-14 space-y-3">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-red">The Process</p>
+              <p className="text-xs font-extrabold uppercase tracking-widest text-brand-red">The Process</p>
               <h2 className="text-4xl font-extrabold text-brand-black">How Our Second Opinion Works</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
@@ -91,7 +91,7 @@ export default function SecondOpinionPage() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-4">
-                <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-red">What You Get</p>
+                <p className="text-xs font-extrabold uppercase tracking-widest text-brand-red">What You Get</p>
                 <h2 className="text-4xl font-extrabold text-brand-black">A complete, unbiased property health check.</h2>
                 <p className="text-sm text-gray-500 font-medium leading-relaxed">Unlike brokers who earn commissions on your deal, our advisors are paid only by you — which means their only goal is to protect your interests.</p>
                 {[
@@ -113,9 +113,9 @@ export default function SecondOpinionPage() {
               </div>
               <div className="bg-white border border-gray-100 rounded-3xl p-10 shadow-sm space-y-6">
                 <div className="text-center space-y-2">
-                  <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-red">Pricing</p>
-                  <p className="text-5xl font-extrabold text-brand-black">₹5,999</p>
-                  <p className="text-xs text-gray-400 font-medium">One-time fee per property review</p>
+                  <p className="text-xs font-extrabold uppercase tracking-widest text-brand-red">Service Inquiry</p>
+                  <p className="text-3xl font-extrabold text-brand-black">Professional Curation</p>
+                  <p className="text-xs text-gray-400 font-medium">Independent analysis & risk assessment</p>
                 </div>
                 <div className="border-t border-gray-100 pt-6 space-y-3">
                   {["Delivery within 48 hours", "100% commission-free advice", "Covers any property in Hyderabad", "No follow-up sales pressure"].map(f => (
@@ -127,7 +127,7 @@ export default function SecondOpinionPage() {
                 <Link href="/contact" className="w-full flex items-center justify-center gap-2 py-4 bg-brand-red hover:bg-brand-red/90 text-white font-extrabold uppercase tracking-wide text-sm rounded-xl transition-all shadow-lg shadow-brand-red/20">
                   Request Second Opinion <ArrowRight size={14} />
                 </Link>
-                <p className="text-[10px] text-center text-gray-400">Satisfaction guaranteed. Full refund if we can't assess your property.</p>
+                <p className="text-xs text-center text-gray-400">Get complete peace of mind before making your final investment.</p>
               </div>
             </div>
           </div>

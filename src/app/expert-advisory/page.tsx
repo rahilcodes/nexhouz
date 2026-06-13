@@ -9,8 +9,8 @@ import Footer from "@/components/layout/Footer";
 
 const advisors = [
   {
-    name: "Ravi Shankar Reddy",
-    title: "Senior Property Advisor",
+    name: "Senior Property Consultant",
+    title: "Residential Curation Specialist",
     specialization: "Luxury Villas & Kokapet Corridor",
     experience: "14 Years",
     deals: "340+",
@@ -20,8 +20,8 @@ const advisors = [
     available: true,
   },
   {
-    name: "Priya Venkatesh",
-    title: "NRI Investment Specialist",
+    name: "NRI Investment Specialist",
+    title: "Overseas Portfolio Advisor",
     specialization: "NRI Investments & Financial District",
     experience: "11 Years",
     deals: "280+",
@@ -31,8 +31,8 @@ const advisors = [
     available: true,
   },
   {
-    name: "Suresh Mohan Varma",
-    title: "Legal & RERA Expert",
+    name: "Legal & RERA Advisor",
+    title: "Property Law Specialist",
     specialization: "Legal Clearances & Title Deeds",
     experience: "17 Years",
     deals: "520+",
@@ -65,7 +65,7 @@ export default function ExpertAdvisoryPage() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-red/5 border border-brand-red/20 rounded-full mb-5">
                 <UserCheck size={10} className="text-brand-red" />
-                <span className="text-[9px] font-extrabold tracking-[0.2em] uppercase text-brand-red">Certified Human Advisors</span>
+                <span className="text-xs font-extrabold tracking-[0.2em] uppercase text-brand-red">Certified Human Advisors</span>
               </div>
               <h1 className="text-5xl md:text-6xl font-extrabold text-brand-black leading-tight tracking-tight mb-5">
                 Your Dedicated<br /><span className="text-brand-red">Property Expert</span> in Hyderabad.
@@ -98,7 +98,7 @@ export default function ExpertAdvisoryPage() {
         <section className="py-20 border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-6">
             <div className="space-y-3 mb-12">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-red">Meet the Team</p>
+              <p className="text-xs font-extrabold uppercase tracking-widest text-brand-red">Meet the Team</p>
               <h2 className="text-4xl font-extrabold text-brand-black">Our Certified Property Advisors</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -108,7 +108,7 @@ export default function ExpertAdvisoryPage() {
                     <img src={advisor.image} alt={advisor.name} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <div className="absolute bottom-4 left-4">
-                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-wider ${advisor.available ? "bg-emerald-500 text-white" : "bg-gray-600 text-white"}`}>
+                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider ${advisor.available ? "bg-emerald-500 text-white" : "bg-gray-600 text-white"}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${advisor.available ? "bg-white animate-pulse" : "bg-gray-400"}`} />
                         {advisor.available ? "Available Today" : "Next Available"}
                       </div>
@@ -127,16 +127,16 @@ export default function ExpertAdvisoryPage() {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-gray-50 rounded-xl p-3 text-center">
                         <p className="text-xl font-extrabold text-brand-black">{advisor.experience}</p>
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wide">Experience</p>
+                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wide">Experience</p>
                       </div>
                       <div className="bg-gray-50 rounded-xl p-3 text-center">
                         <p className="text-xl font-extrabold text-brand-black">{advisor.deals}</p>
-                        <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wide">Deals Closed</p>
+                        <p className="text-xs text-gray-400 font-bold uppercase tracking-wide">Deals Closed</p>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {advisor.languages.map(l => (
-                        <span key={l} className="px-2.5 py-1 bg-gray-100 rounded-full text-[10px] font-bold text-gray-600">{l}</span>
+                        <span key={l} className="px-2.5 py-1 bg-gray-100 rounded-full text-xs font-bold text-gray-600">{l}</span>
                       ))}
                     </div>
                     <button
@@ -157,7 +157,7 @@ export default function ExpertAdvisoryPage() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               <div className="space-y-5">
-                <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-red">Free Consultation</p>
+                <p className="text-xs font-extrabold uppercase tracking-widest text-brand-red">Free Consultation</p>
                 <h2 className="text-4xl font-extrabold text-brand-black">Book Your Expert Session</h2>
                 <p className="text-sm text-gray-500 font-medium leading-relaxed">One free 45-minute strategy call with a senior Hyderabad advisor. No obligation. No spam. Just expert guidance on your next best move.</p>
                 {[
@@ -192,12 +192,12 @@ export default function ExpertAdvisoryPage() {
                       { label: "Preferred Location", field: "location", type: "text", placeholder: "e.g. Kokapet or anywhere in Hyderabad" },
                     ].map(f => (
                       <div key={f.field} className="space-y-1">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{f.label}</label>
+                        <label className="text-xs font-bold uppercase tracking-wider text-gray-500">{f.label}</label>
                         <input type={f.type} required value={(form as any)[f.field]} onChange={e => setForm({ ...form, [f.field]: e.target.value })} placeholder={f.placeholder} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-red transition-all" />
                       </div>
                     ))}
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Anything specific?</label>
+                      <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Anything specific?</label>
                       <textarea rows={3} value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="Any questions, property concerns, or requirements…" className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-red transition-all resize-none" />
                     </div>
                     <button type="submit" className="w-full py-4 bg-brand-red hover:bg-brand-red/90 text-white font-extrabold uppercase tracking-wider text-sm rounded-xl transition-all shadow-lg shadow-brand-red/15">

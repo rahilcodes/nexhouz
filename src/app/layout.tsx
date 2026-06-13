@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import FloatingChat from "@/components/chat/FloatingChat";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,11 +22,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://nexhouz.com"),
   title: "NexHouz | Luxury Real Estate Proptech Intelligence",
   description: "Discover globally elite properties. NexHouz is a premium real estate intelligence platform built for modern buyers, pairing modernist architectural design with sophisticated fintech analytics.",
   keywords: ["Luxury Real Estate", "PropTech", "Modernist Architecture", "Real Estate Intelligence", "Investment Properties"],
   authors: [{ name: "NexHouz Elite Group" }],
 };
+
 
 export default function RootLayout({
   children,
@@ -39,6 +42,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-white text-brand-black selection:bg-brand-red selection:text-white">
         {children}
+        <FloatingChat />
       </body>
     </html>
   );

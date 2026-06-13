@@ -53,7 +53,7 @@ export default function AreaConverterPage() {
           <div className="relative max-w-7xl mx-auto px-6">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/20 rounded-full mb-4">
               <Ruler size={10} className="text-white" />
-              <span className="text-[9px] font-extrabold tracking-[0.2em] uppercase text-white">Property Tool</span>
+              <span className="text-xs font-extrabold tracking-[0.2em] uppercase text-white">Property Tool</span>
             </div>
             <h1 className="text-5xl font-extrabold text-white tracking-tight mb-4">Area Unit Converter</h1>
             <p className="text-sm text-white/55 font-medium max-w-xl">Convert between square feet, square metres, square yards, cent, acre, and guntha — all commonly used in Hyderabad property listings.</p>
@@ -69,7 +69,7 @@ export default function AreaConverterPage() {
               <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-end">
                 {/* From */}
                 <div className="space-y-3">
-                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-gray-500">From</label>
+                  <label className="text-xs font-extrabold uppercase tracking-widest text-gray-500">From</label>
                   <select value={fromUnit} onChange={e => setFromUnit(e.target.value as Unit)} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm font-bold focus:outline-none focus:border-brand-red transition-all cursor-pointer">
                     {unitOptions.map(([key, { label, abbr }]) => <option key={key} value={key}>{label} ({abbr})</option>)}
                   </select>
@@ -98,7 +98,7 @@ export default function AreaConverterPage() {
 
                 {/* To */}
                 <div className="space-y-3">
-                  <label className="text-[10px] font-extrabold uppercase tracking-widest text-gray-500">To</label>
+                  <label className="text-xs font-extrabold uppercase tracking-widest text-gray-500">To</label>
                   <select value={toUnit} onChange={e => setToUnit(e.target.value as Unit)} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm font-bold focus:outline-none focus:border-brand-red transition-all cursor-pointer">
                     {unitOptions.map(([key, { label, abbr }]) => <option key={key} value={key}>{label} ({abbr})</option>)}
                   </select>
@@ -106,7 +106,7 @@ export default function AreaConverterPage() {
                     <p className="text-3xl font-extrabold text-brand-red">
                       {isNaN(result) ? "—" : result < 0.0001 ? result.toExponential(4) : parseFloat(result.toFixed(6)).toLocaleString("en-IN", { maximumFractionDigits: 6 })}
                     </p>
-                    <p className="text-[10px] text-brand-red/60 font-bold uppercase tracking-wider mt-1">{unitLabels[toUnit].abbr}</p>
+                    <p className="text-xs text-brand-red/60 font-bold uppercase tracking-wider mt-1">{unitLabels[toUnit].abbr}</p>
                   </div>
                   <p className="text-xs text-gray-400 font-medium text-center">{unitLabels[toUnit].label}</p>
                 </div>
@@ -116,7 +116,7 @@ export default function AreaConverterPage() {
               <div className="p-4 bg-gray-50 border border-gray-100 rounded-2xl">
                 <p className="text-xs font-extrabold text-gray-500 uppercase tracking-widest mb-1">Formula</p>
                 <p className="text-sm font-bold text-brand-black">{inputValue || "1"} {unitLabels[fromUnit].abbr} = {parseFloat((rawValue * conversions[fromUnit] / conversions[toUnit]).toFixed(6)).toLocaleString()} {unitLabels[toUnit].abbr}</p>
-                <p className="text-[10px] text-gray-400 mt-1 font-medium">via: 1 {unitLabels[fromUnit].abbr} = {conversions[fromUnit]} sq ft</p>
+                <p className="text-xs text-gray-400 mt-1 font-medium">via: 1 {unitLabels[fromUnit].abbr} = {conversions[fromUnit]} sq ft</p>
               </div>
             </div>
 
@@ -127,9 +127,9 @@ export default function AreaConverterPage() {
                 <table className="w-full">
                   <thead className="bg-brand-black text-white">
                     <tr>
-                      <th className="text-left px-5 py-4 text-[10px] font-extrabold uppercase tracking-widest">Unit</th>
-                      <th className="text-left px-5 py-4 text-[10px] font-extrabold uppercase tracking-widest">Abbreviation</th>
-                      <th className="text-right px-5 py-4 text-[10px] font-extrabold uppercase tracking-widest">= 1 {unitLabels[fromUnit].abbr}</th>
+                      <th className="text-left px-5 py-4 text-xs font-extrabold uppercase tracking-widest">Unit</th>
+                      <th className="text-left px-5 py-4 text-xs font-extrabold uppercase tracking-widest">Abbreviation</th>
+                      <th className="text-right px-5 py-4 text-xs font-extrabold uppercase tracking-widest">= 1 {unitLabels[fromUnit].abbr}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -166,7 +166,7 @@ export default function AreaConverterPage() {
                       <ArrowLeftRight size={12} className="text-brand-red" />
                       <span>{c.to}</span>
                     </div>
-                    <p className="text-[10px] text-gray-400 font-medium">{c.note}</p>
+                    <p className="text-xs text-gray-400 font-medium">{c.note}</p>
                   </div>
                 ))}
               </div>

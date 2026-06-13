@@ -26,7 +26,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </p>
           <Link
             href="/blog"
-            className="px-6 py-3 bg-brand-black text-white text-[9px] tracking-widest font-extrabold uppercase"
+            className="px-6 py-3 bg-brand-black text-white text-xs tracking-widest font-extrabold uppercase"
           >
             Return to Insights
           </Link>
@@ -49,7 +49,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           {/* Back Nav Link */}
           <Link
             href="/blog"
-            className="inline-flex items-center space-x-2 text-[10px] tracking-widest font-extrabold text-brand-black/60 hover:text-brand-black uppercase mb-12 group"
+            className="inline-flex items-center space-x-2 text-xs tracking-widest font-extrabold text-brand-black/60 hover:text-brand-black uppercase mb-12 group"
           >
             <ArrowLeft size={12} className="transform transition-transform duration-300 group-hover:-translate-x-0.5" />
             <span>Back to Insights</span>
@@ -64,7 +64,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               
               {/* Meta Tags */}
               <div className="space-y-6">
-                <div className="flex items-center space-x-4 text-[10px] tracking-widest font-bold uppercase text-brand-black/40">
+                <div className="flex items-center space-x-4 text-xs tracking-widest font-bold uppercase text-brand-black/40">
                   <span className="flex items-center space-x-1">
                     <Tag size={10} className="text-brand-red" />
                     <span>{post.category}</span>
@@ -102,10 +102,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-brand-black">{post.author}</h4>
-                    <p className="text-[9px] text-brand-black/40 font-bold uppercase tracking-wider">{post.authorRole}</p>
+                    <p className="text-xs text-brand-black/40 font-bold uppercase tracking-wider">{post.authorRole}</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-1.5 text-[10px] text-brand-black/50 font-semibold uppercase">
+                <div className="flex items-center space-x-1.5 text-xs text-brand-black/50 font-semibold uppercase">
                   <Calendar size={12} className="text-brand-red" />
                   <span>{post.date}</span>
                 </div>
@@ -131,7 +131,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               
               <div className="glass-panel p-6 shadow-luxury space-y-6 bg-brand-gray/10">
                 <div className="space-y-1">
-                  <span className="text-[8px] tracking-widest text-brand-black/40 font-bold uppercase">Spatial Connection</span>
+                  <span className="text-xs tracking-widest text-brand-black/40 font-bold uppercase">Spatial Connection</span>
                   <h4 className="text-serif text-xl font-light text-brand-black">Corresponding Estatement</h4>
                 </div>
 
@@ -140,21 +140,21 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                     <img src={featuredProp.image} alt={featuredProp.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
                     <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2 py-0.5 flex items-center space-x-1 border border-black/5">
                       <Star size={8} className="text-brand-red fill-brand-red" />
-                      <span className="text-[8px] font-bold text-brand-black">{featuredProp.scores.architecturalIntegrity} AQ</span>
+                      <span className="text-xs font-bold text-brand-black">{featuredProp.scores.architecturalIntegrity} AQ</span>
                     </div>
                   </div>
                   <div className="p-5 space-y-4">
                     <div className="space-y-1">
-                      <span className="text-[8px] text-brand-black/40 font-bold uppercase tracking-wider">{featuredProp.location}</span>
+                      <span className="text-xs text-brand-black/40 font-bold uppercase tracking-wider">{featuredProp.location}</span>
                       <h5 className="text-serif text-lg font-light text-brand-black">{featuredProp.title}</h5>
                     </div>
-                    <div className="flex justify-between items-center pt-3 border-t border-brand-gray-dark text-[10px] text-brand-black/50 uppercase font-bold">
+                    <div className="flex justify-between items-center pt-3 border-t border-brand-gray-dark text-xs text-brand-black/50 uppercase font-bold">
                       <span>{featuredProp.bhk} BHK • {featuredProp.area}</span>
                       <span className="text-xs font-semibold text-brand-black">${(featuredProp.price / 1000000).toFixed(1)}M</span>
                     </div>
                     <Link
                       href={`/properties`}
-                      className="w-full py-3 bg-brand-black hover:bg-brand-red text-white text-[9px] tracking-widest font-extrabold uppercase text-center block transition-all duration-300"
+                      className="w-full py-3 bg-brand-black hover:bg-brand-red text-white text-xs tracking-widest font-extrabold uppercase text-center block transition-all duration-300"
                     >
                       Acquire Intelligence
                     </Link>
@@ -165,14 +165,14 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               {/* Call to Register Briefing */}
               <div className="bg-brand-black text-white p-6 shadow-luxury space-y-4 relative overflow-hidden">
                 <div className="absolute inset-0 opacity-5 architectural-grid pointer-events-none" />
-                <span className="text-[8px] tracking-widest text-white/40 font-bold uppercase block relative z-10">Private Briefing</span>
+                <span className="text-xs tracking-widest text-white/40 font-bold uppercase block relative z-10">Private Briefing</span>
                 <h4 className="text-serif text-xl font-light text-white relative z-10">Subscribe to Curation Reports</h4>
-                <p className="text-[11px] font-light text-white/60 leading-relaxed relative z-10">
+                <p className="text-sm font-light text-white/60 leading-relaxed relative z-10">
                   Receive full structural dossiers and off-market asset disclosures direct to your private inbox.
                 </p>
                 <Link
                   href="/dashboard"
-                  className="flex items-center justify-between text-[9px] tracking-widest font-bold uppercase text-white bg-brand-red hover:bg-white hover:text-brand-black px-4 py-3 relative z-10 transition-colors duration-300 group"
+                  className="flex items-center justify-between text-xs tracking-widest font-bold uppercase text-white bg-brand-red hover:bg-white hover:text-brand-black px-4 py-3 relative z-10 transition-colors duration-300 group"
                 >
                   <span>Register KYC Portal</span>
                   <ArrowRight size={12} className="transform transition-transform duration-300 group-hover:translate-x-0.5" />

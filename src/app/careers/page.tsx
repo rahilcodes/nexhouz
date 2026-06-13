@@ -49,7 +49,7 @@ export default function CareersPage() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/20 rounded-full">
                 <Briefcase size={10} className="text-white" />
-                <span className="text-[9px] font-extrabold tracking-[0.2em] uppercase text-white">We're Hiring</span>
+                <span className="text-xs font-extrabold tracking-[0.2em] uppercase text-white">We're Hiring</span>
               </div>
               <h1 className="text-5xl font-extrabold text-white leading-tight tracking-tight">
                 Build the Future of<br /><span className="text-brand-red">Hyderabad Real Estate.</span>
@@ -67,7 +67,7 @@ export default function CareersPage() {
               ].map(s => (
                 <div key={s.label} className="bg-white/5 border border-white/10 rounded-2xl p-6 text-center space-y-1 backdrop-blur-sm">
                   <p className="text-3xl font-extrabold text-white">{s.value}</p>
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-white/40">{s.label}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-white/40">{s.label}</p>
                 </div>
               ))}
             </motion.div>
@@ -78,7 +78,7 @@ export default function CareersPage() {
         <section className="py-16 border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-10 space-y-2">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-red">Our Culture</p>
+              <p className="text-xs font-extrabold uppercase tracking-widest text-brand-red">Our Culture</p>
               <h2 className="text-3xl font-extrabold text-brand-black">Why people love working at NexHouz</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -116,7 +116,7 @@ export default function CareersPage() {
         <section className="py-20">
           <div className="max-w-4xl mx-auto px-6">
             <div className="space-y-3 mb-10">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-brand-red">Open Positions</p>
+              <p className="text-xs font-extrabold uppercase tracking-widest text-brand-red">Open Positions</p>
               <h2 className="text-4xl font-extrabold text-brand-black">{openings.length} Open Roles</h2>
             </div>
             <div className="space-y-4">
@@ -133,10 +133,10 @@ export default function CareersPage() {
                         <div>
                           <h3 className="text-base font-extrabold text-brand-black group-hover:text-brand-red transition-colors">{role.title}</h3>
                           <div className="flex flex-wrap items-center gap-3 mt-1">
-                            <span className="text-[10px] font-bold text-brand-red bg-brand-red/5 border border-brand-red/15 px-2.5 py-0.5 rounded-full">{role.department}</span>
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400"><MapPin size={9} />{role.location}</span>
-                            <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400"><Clock size={9} />{role.experience}</span>
-                            <span className="text-[10px] font-bold text-gray-400">{role.type}</span>
+                            <span className="text-xs font-bold text-brand-red bg-brand-red/5 border border-brand-red/15 px-2.5 py-0.5 rounded-full">{role.department}</span>
+                            <span className="flex items-center gap-1 text-xs font-bold text-gray-400"><MapPin size={9} />{role.location}</span>
+                            <span className="flex items-center gap-1 text-xs font-bold text-gray-400"><Clock size={9} />{role.experience}</span>
+                            <span className="text-xs font-bold text-gray-400">{role.type}</span>
                           </div>
                         </div>
                       </div>

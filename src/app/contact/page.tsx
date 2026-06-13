@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Phone, Mail, Check, Info, Send, Landmark, ShieldAlert } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { submitLead } from "@/lib/db";
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -18,20 +19,27 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agree) return;
     
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    const success = await submitLead({
+      name: `${form.firstName} ${form.lastName}`,
+      email: form.email,
+      phone: form.mobile,
+      notes: form.message,
+      leadType: "general"
+    });
+    setIsSubmitting(false);
+    if (success) {
       setSubmitted(true);
       setTimeout(() => {
         setSubmitted(false);
         setForm({ firstName: "", lastName: "", email: "", mobile: "", message: "" });
         setAgree(false);
       }, 3500);
-    }, 1500);
+    }
   };
 
   return (
@@ -43,7 +51,7 @@ export default function ContactPage() {
           
           {/* Header */}
           <div className="max-w-2xl space-y-4 mb-16 border-b border-brand-gray-dark pb-10">
-            <span className="text-[10px] tracking-[0.3em] font-bold text-brand-red uppercase">Corporate Touchpoints</span>
+            <span className="text-xs tracking-[0.3em] font-bold text-brand-red uppercase">Corporate Touchpoints</span>
             <h1 className="text-serif text-4xl md:text-5xl font-light tracking-tight text-brand-black">
               Get in Touch
             </h1>
@@ -60,7 +68,7 @@ export default function ContactPage() {
             <div className="lg:col-span-5 space-y-8">
               
               <div className="glass-panel p-8 md:p-10 shadow-luxury space-y-8 bg-brand-gray/10">
-                <span className="text-[9px] tracking-widest text-brand-black/40 font-bold uppercase block">Headquarters Node</span>
+                <span className="text-xs tracking-widest text-brand-black/40 font-bold uppercase block">Headquarters Node</span>
                 
                 {/* Office Address */}
                 <div className="flex items-start space-x-4">
@@ -68,9 +76,9 @@ export default function ContactPage() {
                     <MapPin size={18} />
                   </div>
                   <div className="space-y-1 text-xs">
-                    <span className="font-bold text-[9px] uppercase text-brand-black/40 block">Corporate Address</span>
+                    <span className="font-bold text-xs uppercase text-brand-black/40 block">Corporate Address</span>
                     <p className="font-light text-brand-black/70 leading-relaxed font-sans">
-                      B 109, B-BLOCK Asian Sun City,<br />
+                      B 609, 6th Floor, B-BLOCK Asian Sun City,<br />
                       Behind AMB Mall, Forest Dept Colony,<br />
                       Kothaguda X Road, Kondapur,<br />
                       Hyderabad, Telangana 500084
@@ -84,7 +92,7 @@ export default function ContactPage() {
                     <Phone size={18} />
                   </div>
                   <div className="space-y-1 text-xs">
-                    <span className="font-bold text-[9px] uppercase text-brand-black/40 block">Active Phone Channels</span>
+                    <span className="font-bold text-xs uppercase text-brand-black/40 block">Active Phone Channels</span>
                     <p className="font-semibold text-brand-black space-y-1">
                       <a href="tel:+918585854853" className="block hover:text-brand-red transition-all duration-300">
                         +91 8585854853
@@ -102,7 +110,7 @@ export default function ContactPage() {
                     <Mail size={18} />
                   </div>
                   <div className="space-y-1 text-xs">
-                    <span className="font-bold text-[9px] uppercase text-brand-black/40 block">Digital Sourcing Inbox</span>
+                    <span className="font-bold text-xs uppercase text-brand-black/40 block">Digital Sourcing Inbox</span>
                     <a href="mailto:Info@nexhouz.com" className="font-semibold text-brand-black hover:text-brand-red transition-all duration-300">
                       Info@nexhouz.com
                     </a>
@@ -113,7 +121,7 @@ export default function ContactPage() {
 
               {/* STYLISH CUSTOM VECTOR SVG ABSTRACT MAP */}
               <div className="border border-black/5 bg-brand-gray/10 shadow-luxury overflow-hidden p-6 space-y-4">
-                <span className="text-[9px] tracking-widest text-brand-black/40 font-bold uppercase block">Kondapur / Kothaguda Node Map</span>
+                <span className="text-xs tracking-widest text-brand-black/40 font-bold uppercase block">Kondapur / Kothaguda Node Map</span>
                 <div className="w-full h-44 bg-white border border-black/5 relative overflow-hidden flex items-center justify-center">
                   
                   {/* Abstract Street Grid */}
@@ -129,8 +137,8 @@ export default function ContactPage() {
                     <rect x="150" y="90" width="120" height="45" fill="#F9F9FB" stroke="#EAEAEA" strokeWidth="1" /> {/* Asian Sun City */}
                     
                     {/* Text tags */}
-                    <text x="185" y="38" className="text-[7px] font-sans font-bold fill-brand-black/30 tracking-widest uppercase">AMB MALL</text>
-                    <text x="165" y="115" className="text-[7px] font-sans font-bold fill-brand-black/30 tracking-widest uppercase">ASIAN SUN CITY</text>
+                    <text x="185" y="38" className="text-xs font-sans font-bold fill-brand-black/30 tracking-widest uppercase">AMB MALL</text>
+                    <text x="165" y="115" className="text-xs font-sans font-bold fill-brand-black/30 tracking-widest uppercase">ASIAN SUN CITY</text>
                     <text x="10" y="80" className="text-[6px] font-sans font-bold fill-brand-black/30 tracking-wider uppercase">Kothaguda Road</text>
                     
                     {/* Pin indicator */}
@@ -138,7 +146,7 @@ export default function ContactPage() {
                     <circle cx="160" cy="100" r="4" fill="#D31E28" />
                   </svg>
                   
-                  <div className="absolute bottom-2 left-2 bg-brand-black text-white px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider">
+                  <div className="absolute bottom-2 left-2 bg-brand-black text-white px-2 py-0.5 text-xs font-bold uppercase tracking-wider">
                     Asian Sun City Site
                   </div>
                 </div>
@@ -152,9 +160,9 @@ export default function ContactPage() {
             <div className="lg:col-span-7 bg-white border border-black/5 p-8 md:p-12 shadow-luxury space-y-8">
               
               <div className="space-y-2">
-                <span className="text-[8px] tracking-widest text-brand-black/40 font-bold uppercase block">Acquisition Protocol</span>
+                <span className="text-xs tracking-widest text-brand-black/40 font-bold uppercase block">Acquisition Protocol</span>
                 <h2 className="text-serif text-3xl font-light text-brand-black">Register Curation Query</h2>
-                <p className="text-[11px] font-light text-brand-black/50 font-sans leading-relaxed">
+                <p className="text-sm font-light text-brand-black/50 font-sans leading-relaxed">
                   Provide your active contact coordinates and spatial parameters. A certified regional advisor will respond within 4 hours.
                 </p>
               </div>
@@ -172,7 +180,7 @@ export default function ContactPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Field: First Name */}
                       <div className="space-y-1">
-                        <label className="text-[8px] tracking-[0.2em] uppercase font-bold text-brand-black/50">First Name*</label>
+                        <label className="text-xs tracking-[0.2em] uppercase font-bold text-brand-black/50">First Name*</label>
                         <input
                           type="text"
                           required
@@ -185,7 +193,7 @@ export default function ContactPage() {
 
                       {/* Field: Last Name */}
                       <div className="space-y-1">
-                        <label className="text-[8px] tracking-[0.2em] uppercase font-bold text-brand-black/50">Last Name*</label>
+                        <label className="text-xs tracking-[0.2em] uppercase font-bold text-brand-black/50">Last Name*</label>
                         <input
                           type="text"
                           required
@@ -200,7 +208,7 @@ export default function ContactPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Field: Email */}
                       <div className="space-y-1">
-                        <label className="text-[8px] tracking-[0.2em] uppercase font-bold text-brand-black/50">Email Address*</label>
+                        <label className="text-xs tracking-[0.2em] uppercase font-bold text-brand-black/50">Email Address*</label>
                         <input
                           type="email"
                           required
@@ -213,7 +221,7 @@ export default function ContactPage() {
 
                       {/* Field: Mobile */}
                       <div className="space-y-1">
-                        <label className="text-[8px] tracking-[0.2em] uppercase font-bold text-brand-black/50">Mobile Number*</label>
+                        <label className="text-xs tracking-[0.2em] uppercase font-bold text-brand-black/50">Mobile Number*</label>
                         <input
                           type="tel"
                           required
@@ -227,7 +235,7 @@ export default function ContactPage() {
 
                     {/* Field: Message */}
                     <div className="space-y-1">
-                      <label className="text-[8px] tracking-[0.2em] uppercase font-bold text-brand-black/50">Message Query</label>
+                      <label className="text-xs tracking-[0.2em] uppercase font-bold text-brand-black/50">Message Query</label>
                       <textarea
                         rows={4}
                         required
@@ -248,7 +256,7 @@ export default function ContactPage() {
                         onChange={(e) => setAgree(e.target.checked)}
                         className="mt-0.5 cursor-pointer accent-brand-red"
                       />
-                      <label htmlFor="privacy-agree" className="text-[10px] leading-relaxed text-brand-black/50 cursor-pointer select-none">
+                      <label htmlFor="privacy-agree" className="text-xs leading-relaxed text-brand-black/50 cursor-pointer select-none">
                         I understand that by submitting my details, I may receive promotional emails. I can opt out whenever I choose, and my information will remain private and never be sold.
                       </label>
                     </div>
@@ -256,7 +264,7 @@ export default function ContactPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting || !agree}
-                      className="w-full py-4 bg-brand-black hover:bg-brand-red disabled:bg-brand-black/35 text-white text-[10px] tracking-[0.3em] font-extrabold uppercase transition-all duration-300 flex items-center justify-center space-x-2 shadow-luxury focus:outline-none"
+                      className="w-full py-4 bg-brand-black hover:bg-brand-red disabled:bg-brand-black/35 text-white text-xs tracking-[0.3em] font-extrabold uppercase transition-all duration-300 flex items-center justify-center space-x-2 shadow-luxury focus:outline-none"
                     >
                       {isSubmitting ? (
                         <span>TRANSMITTING Briefing...</span>

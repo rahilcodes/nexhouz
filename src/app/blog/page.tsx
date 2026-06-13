@@ -26,7 +26,7 @@ export default function BlogIndexPage() {
           
           {/* Header */}
           <div className="max-w-2xl space-y-4 mb-16 border-b border-brand-gray-dark pb-10">
-            <span className="text-[10px] tracking-[0.3em] font-bold text-brand-red uppercase">Essays & Perspectives</span>
+            <span className="text-xs tracking-[0.3em] font-bold text-brand-red uppercase">Essays & Perspectives</span>
             <h1 className="text-serif text-4xl md:text-5xl font-light tracking-tight text-brand-black">
               The Editorial Insights
             </h1>
@@ -41,7 +41,7 @@ export default function BlogIndexPage() {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 text-[10px] font-bold tracking-widest uppercase transition-all duration-300 rounded-none border ${
+                className={`px-4 py-2 text-xs font-bold tracking-widest uppercase transition-all duration-300 rounded-none border ${
                   selectedCategory === cat
                     ? "bg-brand-black border-brand-black text-white"
                     : "bg-transparent border-black/10 hover:border-brand-black text-brand-black/60 hover:text-brand-black"
@@ -76,7 +76,7 @@ export default function BlogIndexPage() {
                       />
                       
                       {post.featured && (
-                        <div className="absolute top-4 left-4 bg-brand-red text-white px-2 py-0.5 text-[8px] tracking-widest font-extrabold uppercase">
+                        <div className="absolute top-4 left-4 bg-brand-red text-white px-2 py-0.5 text-xs tracking-widest font-extrabold uppercase">
                           Featured Essay
                         </div>
                       )}
@@ -84,7 +84,7 @@ export default function BlogIndexPage() {
                     
                     <div className="p-8 flex-grow flex flex-col justify-between space-y-6">
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between text-[9px] tracking-widest font-bold uppercase text-brand-black/40">
+                        <div className="flex items-center justify-between text-xs tracking-widest font-bold uppercase text-brand-black/40">
                           <span className="flex items-center space-x-1">
                             <Tag size={10} className="text-brand-red" />
                             <span>{post.category}</span>
@@ -104,10 +104,10 @@ export default function BlogIndexPage() {
                         </p>
                       </div>
 
-                      <div className="pt-6 border-t border-brand-gray-dark flex items-center justify-between text-[10px] tracking-wider text-brand-black/75">
+                      <div className="pt-6 border-t border-brand-gray-dark flex items-center justify-between text-xs tracking-wider text-brand-black/75">
                         <div className="flex flex-col">
                           <span className="font-semibold">By {post.author}</span>
-                          <span className="text-[8px] text-brand-black/40 font-bold uppercase mt-0.5">{post.authorRole.split(" ")[0]}</span>
+                          <span className="text-xs text-brand-black/40 font-bold uppercase mt-0.5">{post.authorRole.split(" ")[0]}</span>
                         </div>
                         <span className="font-light">{post.date}</span>
                       </div>

@@ -28,11 +28,14 @@ import {
   LayoutGrid,
   List,
   Grid3X3,
-  ChevronDown
+  ChevronDown,
+  AlertTriangle
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { properties, Property } from "@/data/properties";
+import { fetchAllProperties, submitLead } from "@/lib/db";
+import { properties as defaultProperties, Property } from "@/data/properties";
+import { supabase } from "@/lib/supabaseClient";
 
 function PropertiesExplorerContent() {
   const searchParams = useSearchParams();
@@ -52,6 +55,50 @@ function PropertiesExplorerContent() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isInquirySubmitted, setIsInquirySubmitted] = useState(false);
   const [inquiryForm, setInquiryForm] = useState({ name: "", email: "", phone: "", notes: "" });
+  const [liveProperties, setLiveProperties] = useState<Property[]>([]);
+  const [dbError, setDbError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isOffline, setIsOffline] = useState(false);
+  const [isDebugMode, setIsDebugMode] = useState(false);
+
+  useEffect(() => {
+    const isDev = process.env.NODE_ENV === "development";
+    const params = new URLSearchParams(window.location.search);
+    const hasDebug = params.get("debug") === "true";
+    if (isDev || hasDebug) {
+      setIsDebugMode(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    async function loadProperties() {
+      setIsLoading(true);
+      setIsOffline(false);
+      setDbError(null);
+      try {
+        const data = await fetchAllProperties();
+        if (data && data.length > 0) {
+          setLiveProperties(data);
+        } else {
+          setIsOffline(true);
+          setLiveProperties(defaultProperties);
+          const { error } = await supabase.from("properties").select("id").limit(1);
+          if (error) {
+            setDbError(`Supabase connection failed: ${error.message} (Code: ${error.code})`);
+          } else {
+            setDbError("Supabase reached successfully, but the 'properties' table has 0 listings.");
+          }
+        }
+      } catch (e: any) {
+        setIsOffline(true);
+        setLiveProperties(defaultProperties);
+        setDbError(`Network/Connection failure: ${e.message || String(e)}`);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadProperties();
+  }, []);
   
   // Listing view mode: grid (spacious 2-col), list (horizontal), compact (dense 3-col)
   const [viewMode, setViewMode] = useState<"grid" | "list" | "compact">("grid");
@@ -73,27 +120,34 @@ function PropertiesExplorerContent() {
   })();
 
   const amenitiesList = [
-    "Private Infinity Lap Pool",
-    "Retractable Glass Walls",
-    "Private Elevators",
-    "Tier 3 (Elite) Automation",
-    "24/7 Monitored Security",
-    "Subterranean Wine Cellar",
-    "Forest Courtyard Views",
-    "Thermal Climate Grids",
-    "Geothermal Cooling",
-    "Private Yacht Mooring",
-    "Double Height Voids",
-    "Private Rooftop Helipad",
-    "Lush Lagoon Gardens",
-    "360 Rooftop Lounge",
-    "Smart Contract Secured",
-    "Sub-terranean Garage",
-    "Exposed Brick Facade",
-    "Solar Micro-Grid",
-    "Forest Walkways Access",
-    "Custom Water Gardens",
-    "Italian Marble Bathrooms"
+    "Grand Clubhouse",
+    "Multipurpose Hall",
+    "Gymnasium",
+    "Swimming Pool",
+    "24/7 Security",
+    "Power Backup",
+    "Landscaped Gardens",
+    "Children's Play Area",
+    "Jogging Track",
+    "EV Charging Stations",
+    "Indoor Games Room",
+    "Tennis Court",
+    "Badminton Court",
+    "Cricket Practice Net",
+    "CCTV Surveillance",
+    "Gated Community Access Control",
+    "Central Park",
+    "Co-working Spaces",
+    "Guest Rooms",
+    "Spa & Sauna",
+    "Pet Park",
+    "Mini Theatre",
+    "Banquet Hall",
+    "Yoga & Meditation Deck",
+    "Cycling Track",
+    "Visitor Parking",
+    "Café & Lounge Areas",
+    "Toddler Zone"
   ];
 
   // Load favorites from local storage on mount
@@ -156,18 +210,28 @@ function PropertiesExplorerContent() {
     });
   };
 
-  const handleInquirySubmit = (e: React.FormEvent) => {
+  const handleInquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsInquirySubmitted(true);
-    setTimeout(() => {
-      setSelectedProperty(null);
-      setIsInquirySubmitted(false);
-      setInquiryForm({ name: "", email: "", phone: "", notes: "" });
-    }, 2500);
+    const success = await submitLead({
+      propertyId: selectedProperty?.id,
+      name: inquiryForm.name,
+      email: inquiryForm.email,
+      phone: inquiryForm.phone,
+      notes: inquiryForm.notes,
+      leadType: "property_inquiry"
+    });
+    if (success) {
+      setIsInquirySubmitted(true);
+      setTimeout(() => {
+        setSelectedProperty(null);
+        setIsInquirySubmitted(false);
+        setInquiryForm({ name: "", email: "", phone: "", notes: "" });
+      }, 2500);
+    }
   };
 
   // Filtering Logic
-  const filteredProperties = properties.filter((prop) => {
+  const filteredProperties = liveProperties.filter((prop) => {
     const matchLocation = selectedLocation === "All" || prop.location.toLowerCase().includes(selectedLocation.toLowerCase());
     const matchType = selectedType === "All" || prop.type === selectedType;
     const matchBHK = selectedBHK === "All" || prop.bhk === parseInt(selectedBHK);
@@ -195,7 +259,7 @@ function PropertiesExplorerContent() {
       {/* Header and Search */}
       <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-gray-200 pb-8 mb-12 space-y-6 md:space-y-0">
         <div className="space-y-3">
-          <span className="text-[10px] tracking-[0.3em] font-extrabold text-brand-red uppercase">Discovery Index</span>
+          <span className="text-xs tracking-[0.3em] font-extrabold text-brand-red uppercase">Discovery Index</span>
           <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-brand-black leading-tight">
             Find Your Dream Home in Hyderabad
           </h1>
@@ -226,12 +290,12 @@ function PropertiesExplorerContent() {
       <div className="lg:hidden flex items-center justify-between gap-4 p-3.5 bg-white border border-gray-200/80 rounded-2xl shadow-sm mb-6">
         <button
           onClick={() => setShowMobileFilters(!showMobileFilters)}
-          className="flex items-center space-x-2 text-[10px] font-extrabold text-brand-black uppercase tracking-wider px-4 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 active:scale-98 transition-all cursor-pointer"
+          className="flex items-center space-x-2 text-xs font-extrabold text-brand-black uppercase tracking-wider px-4 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 active:scale-98 transition-all cursor-pointer"
         >
           <SlidersHorizontal size={12} className="text-brand-red" />
           <span>{showMobileFilters ? "Hide Filters" : "Show Filters"}</span>
           {activeFilterCount > 0 && (
-            <span className="w-5 h-5 rounded-full bg-brand-red text-white flex items-center justify-center text-[9px] font-bold ml-1 animate-pulse">
+            <span className="w-5 h-5 rounded-full bg-brand-red text-white flex items-center justify-center text-xs font-bold ml-1 animate-pulse">
               {activeFilterCount}
             </span>
           )}
@@ -241,7 +305,7 @@ function PropertiesExplorerContent() {
           {activeFilterCount > 0 && (
             <button
               onClick={resetFilters}
-              className="text-[9px] tracking-wider font-extrabold text-gray-400 hover:text-brand-red uppercase transition-colors cursor-pointer"
+              className="text-xs tracking-wider font-extrabold text-gray-400 hover:text-brand-red uppercase transition-colors cursor-pointer"
             >
               Reset
             </button>
@@ -263,7 +327,7 @@ function PropertiesExplorerContent() {
             </div>
             <button
               onClick={resetFilters}
-              className="text-[9px] tracking-wider font-extrabold text-gray-400 hover:text-brand-red uppercase flex items-center space-x-1 cursor-pointer transition-colors"
+              className="text-xs tracking-wider font-extrabold text-gray-400 hover:text-brand-red uppercase flex items-center space-x-1 cursor-pointer transition-colors"
             >
               <RotateCcw size={10} />
               <span>Reset</span>
@@ -272,7 +336,7 @@ function PropertiesExplorerContent() {
 
           {/* Location Selector */}
           <div className="relative space-y-1.5 border-b border-gray-200/40 pb-4">
-            <label className="text-[9px] tracking-widest uppercase font-extrabold text-gray-400">Location</label>
+            <label className="text-xs tracking-widest uppercase font-extrabold text-gray-400">Location</label>
             <button
               type="button"
               onClick={(e) => {
@@ -330,7 +394,7 @@ function PropertiesExplorerContent() {
 
           {/* Property Type Selector */}
           <div className="relative space-y-1.5 border-b border-gray-200/40 pb-4">
-            <label className="text-[9px] tracking-widest uppercase font-extrabold text-gray-400">Property Type</label>
+            <label className="text-xs tracking-widest uppercase font-extrabold text-gray-400">Property Type</label>
             <button
               type="button"
               onClick={(e) => {
@@ -384,7 +448,7 @@ function PropertiesExplorerContent() {
 
           {/* BHK Selector */}
           <div className="relative space-y-1.5 border-b border-gray-200/40 pb-4">
-            <label className="text-[9px] tracking-widest uppercase font-extrabold text-gray-400">Bedrooms (BHK)</label>
+            <label className="text-xs tracking-widest uppercase font-extrabold text-gray-400">Bedrooms (BHK)</label>
             <button
               type="button"
               onClick={(e) => {
@@ -438,7 +502,7 @@ function PropertiesExplorerContent() {
 
           {/* Possession Selector */}
           <div className="relative space-y-1.5 border-b border-gray-200/40 pb-4">
-            <label className="text-[9px] tracking-widest uppercase font-extrabold text-gray-400">Move-In Status</label>
+            <label className="text-xs tracking-widest uppercase font-extrabold text-gray-400">Move-In Status</label>
             <button
               type="button"
               onClick={(e) => {
@@ -490,7 +554,7 @@ function PropertiesExplorerContent() {
 
           {/* Yield Profile Selector */}
           <div className="relative space-y-1.5 border-b border-gray-200/40 pb-4">
-            <label className="text-[9px] tracking-widest uppercase font-extrabold text-gray-400">Investment Goal</label>
+            <label className="text-xs tracking-widest uppercase font-extrabold text-gray-400">Investment Goal</label>
             <button
               type="button"
               onClick={(e) => {
@@ -543,7 +607,7 @@ function PropertiesExplorerContent() {
 
           {/* Dynamic Price Range Selector */}
           <div className="space-y-2.5 border-b border-gray-200/40 pb-4">
-            <div className="flex justify-between items-center text-[9px] tracking-widest uppercase font-extrabold text-gray-400">
+            <div className="flex justify-between items-center text-xs tracking-widest uppercase font-extrabold text-gray-400">
               <span>Maximum Price</span>
               <span className="text-brand-red font-extrabold">₹{(maxPrice / 10000000).toFixed(1)} Cr</span>
             </div>
@@ -556,7 +620,7 @@ function PropertiesExplorerContent() {
               onChange={(e) => setMaxPrice(parseInt(e.target.value))}
               className="w-full h-1 bg-gray-200 appearance-none cursor-pointer accent-brand-red rounded-full"
             />
-            <div className="flex justify-between text-[8px] text-gray-400 font-extrabold">
+            <div className="flex justify-between text-xs text-gray-400 font-extrabold">
               <span>₹3 Cr</span>
               <span>₹30 Cr</span>
             </div>
@@ -564,7 +628,7 @@ function PropertiesExplorerContent() {
 
           {/* Amenities Multi-Checkboxes */}
           <div className="space-y-3">
-            <label className="text-[9px] tracking-widest uppercase font-extrabold text-gray-400 block">Features & Amenities</label>
+            <label className="text-xs tracking-widest uppercase font-extrabold text-gray-400 block">Features & Amenities</label>
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1 scrollbar-thin">
               {amenitiesList.map((amenity) => {
                 const checked = selectedAmenities.includes(amenity);
@@ -595,7 +659,7 @@ function PropertiesExplorerContent() {
           
           {/* Header Row: Result counter + Three View Options Toggle */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-150 pb-4">
-            <span className="text-[9px] tracking-widest uppercase text-gray-400 font-extrabold">
+            <span className="text-xs tracking-widest uppercase text-gray-400 font-extrabold">
               Query Results: {filteredProperties.length} Estates Found
             </span>
 
@@ -625,7 +689,33 @@ function PropertiesExplorerContent() {
             </div>
           </div>
 
-          {filteredProperties.length === 0 ? (
+          {isOffline && (
+            <div className="border border-amber-200 bg-amber-50/50 rounded-3xl py-4 px-6 flex items-center justify-between gap-4 shadow-sm w-full mb-8 text-left animate-fadeIn">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 shadow-inner">
+                  <AlertTriangle size={18} className="stroke-[2]" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-amber-950">Database Offline Preview</h3>
+                  <p className="text-xs text-amber-805 font-medium mt-0.5 leading-relaxed">
+                    We are currently experiencing connection latency with our database server. Displaying verified local properties.
+                  </p>
+                </div>
+              </div>
+              {isDebugMode && dbError && (
+                <div className="text-[10px] text-red-650 font-mono bg-red-50 border border-red-100 p-2 rounded-xl max-w-sm overflow-x-auto truncate">
+                  {dbError}
+                </div>
+              )}
+            </div>
+          )}
+
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-24 space-y-4">
+              <div className="w-10 h-10 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
+              <p className="text-xs text-gray-500 font-bold tracking-widest uppercase">Loading Estates...</p>
+            </div>
+          ) : filteredProperties.length === 0 ? (
             <div className="border border-gray-200/60 rounded-3xl py-20 px-6 flex flex-col items-center justify-center text-center space-y-5 bg-white shadow-luxury animate-fadeIn">
               <div className="w-12 h-12 rounded-full bg-brand-red/5 flex items-center justify-center text-brand-red">
                 <Building size={22} className="stroke-[1.8]" />
@@ -638,7 +728,7 @@ function PropertiesExplorerContent() {
               </div>
               <button
                 onClick={resetFilters}
-                className="px-5 py-3 bg-brand-black hover:bg-brand-red text-white text-[9px] tracking-widest font-extrabold uppercase rounded-xl transition-all cursor-pointer hover:scale-103 shadow-md"
+                className="px-5 py-3 bg-brand-black hover:bg-brand-red text-white text-xs tracking-widest font-extrabold uppercase rounded-xl transition-all cursor-pointer hover:scale-103 shadow-md"
               >
                 Reset Search Filters
               </button>
@@ -684,13 +774,13 @@ function PropertiesExplorerContent() {
                           {/* Elite Score Badge */}
                           <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-2.5 py-1 flex items-center space-x-1 border border-black/5 rounded-full z-10 shadow-sm">
                             <Star size={9} className="text-brand-red fill-brand-red" />
-                            <span className="text-[8px] tracking-widest font-extrabold text-brand-black uppercase">
+                            <span className="text-xs tracking-widest font-extrabold text-brand-black uppercase">
                               {property.scores.architecturalIntegrity} AQ
                             </span>
                           </div>
 
                           <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between z-10">
-                            <span className="text-[9px] font-extrabold uppercase tracking-widest text-white bg-brand-red px-2.5 py-0.5 rounded-full shadow-sm">
+                            <span className="text-xs font-extrabold uppercase tracking-widest text-white bg-brand-red px-2.5 py-0.5 rounded-full shadow-sm">
                               {property.possession}
                             </span>
                           </div>
@@ -700,11 +790,11 @@ function PropertiesExplorerContent() {
                         <div className="p-6 md:p-8 flex-grow flex flex-col justify-between space-y-4 min-w-0">
                           <div className="space-y-2">
                             <div className="flex items-center justify-between gap-3">
-                              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1 min-w-0 truncate">
+                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1 min-w-0 truncate">
                                 <MapPin size={9} className="shrink-0" />
                                 {property.location}
                               </span>
-                              <span className="text-[10px] font-extrabold text-brand-red bg-brand-red/5 px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0">
+                              <span className="text-xs font-extrabold text-brand-red bg-brand-red/5 px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0">
                                 <TrendingUp size={9} />
                                 {property.scores.investmentYield}% Yield
                               </span>
@@ -729,7 +819,7 @@ function PropertiesExplorerContent() {
                           </div>
 
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-gray-100 flex-grow-0">
-                            <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                            <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-gray-400">
                               <span>{property.bhk} BHK Suites</span>
                               <span className="text-gray-200">|</span>
                               <span>{property.area}</span>
@@ -740,11 +830,11 @@ function PropertiesExplorerContent() {
                             <div className="flex items-center gap-4 shrink-0 justify-between sm:justify-start">
                               <div>
                                 <p className="text-lg font-extrabold text-brand-black leading-none">{formatPrice(property.price)}</p>
-                                <p className="text-[7px] text-gray-400 font-bold uppercase tracking-widest mt-1">Capital price</p>
+                                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Capital price</p>
                               </div>
                               <button
                                 onClick={() => setSelectedProperty(property)}
-                                className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-brand-black hover:bg-brand-red text-white text-[9px] font-extrabold uppercase tracking-widest rounded-xl transition-all hover:scale-103 cursor-pointer shadow-md"
+                                className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-brand-black hover:bg-brand-red text-white text-xs font-extrabold uppercase tracking-widest rounded-xl transition-all hover:scale-103 cursor-pointer shadow-md"
                               >
                                 Inquiry <ArrowRight size={10} />
                               </button>
@@ -787,10 +877,10 @@ function PropertiesExplorerContent() {
                           </button>
 
                           <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between z-10">
-                            <span className="text-[8px] font-extrabold uppercase tracking-wider text-white bg-brand-red px-2 py-0.5 rounded-full shadow-sm">
+                            <span className="text-xs font-extrabold uppercase tracking-wider text-white bg-brand-red px-2 py-0.5 rounded-full shadow-sm">
                               {property.possession}
                             </span>
-                            <span className="text-[10px] font-extrabold text-white bg-black/40 backdrop-blur-sm px-2 py-0.5 rounded-full">
+                            <span className="text-xs font-extrabold text-white bg-black/40 backdrop-blur-sm px-2 py-0.5 rounded-full">
                               {property.type}
                             </span>
                           </div>
@@ -800,17 +890,17 @@ function PropertiesExplorerContent() {
                         <div className="p-4 flex-grow flex flex-col justify-between space-y-3">
                           <div className="space-y-1">
                             <div className="flex items-center justify-between gap-2">
-                              <span className="text-[8px] font-bold text-gray-400 uppercase tracking-wider line-clamp-1 truncate">
+                              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider line-clamp-1 truncate">
                                 {property.location.split(",")[0]}
                               </span>
-                              <span className="text-[8px] font-extrabold text-brand-red shrink-0">
+                              <span className="text-xs font-extrabold text-brand-red shrink-0">
                                 {property.scores.investmentYield}% Yield
                               </span>
                             </div>
                             <h3 className="text-sm font-extrabold text-brand-black tracking-tight leading-tight line-clamp-1 group-hover:text-brand-red transition-colors duration-300">
                               <Link href={`/properties/${property.slug}`}>{property.title}</Link>
                             </h3>
-                            <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                               {property.bhk} BHK • {property.area.split(" ")[0]} SQ FT
                             </p>
                           </div>
@@ -819,7 +909,7 @@ function PropertiesExplorerContent() {
                             <span className="text-sm font-extrabold text-brand-black">{formatPrice(property.price)}</span>
                             <button
                               onClick={() => setSelectedProperty(property)}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-brand-black hover:bg-brand-red text-white text-[8px] font-extrabold uppercase tracking-widest rounded-lg transition-all cursor-pointer"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-brand-black hover:bg-brand-red text-white text-xs font-extrabold uppercase tracking-widest rounded-lg transition-all cursor-pointer"
                             >
                               Inquire
                             </button>
@@ -855,7 +945,7 @@ function PropertiesExplorerContent() {
                         {/* Elite Score Badge */}
                         <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-md px-2.5 py-1 flex items-center space-x-1 border border-black/5 rounded-full z-10 shadow-sm">
                           <Star size={9} className="text-brand-red fill-brand-red" />
-                          <span className="text-[8px] tracking-widest font-extrabold text-brand-black uppercase">
+                          <span className="text-xs tracking-widest font-extrabold text-brand-black uppercase">
                             {property.scores.architecturalIntegrity} AQ
                           </span>
                         </div>
@@ -872,7 +962,7 @@ function PropertiesExplorerContent() {
                         </button>
 
                         <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between z-10">
-                          <span className="text-[9px] font-extrabold uppercase tracking-widest text-white bg-brand-red px-2.5 py-0.5 rounded-full shadow-sm">
+                          <span className="text-xs font-extrabold uppercase tracking-widest text-white bg-brand-red px-2.5 py-0.5 rounded-full shadow-sm">
                             {property.possession}
                           </span>
                           <span className="text-xs font-extrabold text-white bg-black/40 backdrop-blur-md px-2.5 py-0.5 rounded-full">
@@ -885,11 +975,11 @@ function PropertiesExplorerContent() {
                       <div className="p-6 flex-grow flex flex-col justify-between space-y-4">
                         <div className="space-y-2">
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
                               <MapPin size={9} className="shrink-0" />
                               {property.location.split(",")[0]}
                             </span>
-                            <span className="text-[10px] font-extrabold text-brand-red bg-brand-red/5 px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0">
+                            <span className="text-xs font-extrabold text-brand-red bg-brand-red/5 px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0">
                               <TrendingUp size={9} />
                               {property.scores.investmentYield}% Yield
                             </span>
@@ -912,27 +1002,27 @@ function PropertiesExplorerContent() {
                           <div className="grid grid-cols-3 gap-2 text-center text-xs">
                             <div className="p-2 bg-gray-50 border border-gray-100 rounded-xl">
                               <p className="font-extrabold text-brand-black">{property.bhk} BHK</p>
-                              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Layout</p>
+                              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Layout</p>
                             </div>
                             <div className="p-2 bg-gray-50 border border-gray-100 rounded-xl">
                               <p className="font-extrabold text-brand-black">{property.area.split(" ")[0]}</p>
-                              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Sq Ft</p>
+                              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Sq Ft</p>
                             </div>
                             <div className="p-2 bg-gray-50 border border-gray-100 rounded-xl">
                               <p className="font-extrabold text-brand-black">{property.scores.automationTier.split(" ")[1]}</p>
-                              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">Auto Tier</p>
+                              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Auto Tier</p>
                             </div>
                           </div>
 
                           <div className="flex items-center justify-between pt-1">
                             <div>
                               <p className="text-lg font-extrabold text-brand-black leading-none">{formatPrice(property.price)}</p>
-                              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest mt-1">Outright Capital</p>
+                              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Outright Capital</p>
                             </div>
                             
                             <button
                               onClick={() => setSelectedProperty(property)}
-                              className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-brand-black hover:bg-brand-red text-white text-[9px] font-extrabold uppercase tracking-widest rounded-xl transition-all hover:scale-103 cursor-pointer shadow-md"
+                              className="inline-flex items-center gap-1.5 px-4.5 py-2.5 bg-brand-black hover:bg-brand-red text-white text-xs font-extrabold uppercase tracking-widest rounded-xl transition-all hover:scale-103 cursor-pointer shadow-md"
                             >
                               Initiate Inquiry <ArrowRight size={10} />
                             </button>
@@ -978,7 +1068,7 @@ function PropertiesExplorerContent() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-5">
                   <div className="flex flex-col space-y-1">
-                    <span className="text-[8px] tracking-[0.25em] text-gray-400 font-extrabold uppercase">
+                    <span className="text-xs tracking-[0.25em] text-gray-400 font-extrabold uppercase">
                       Inquiry Protocol
                     </span>
                     <span className="text-xl font-extrabold text-brand-black line-clamp-1">
@@ -1004,7 +1094,7 @@ function PropertiesExplorerContent() {
                   </div>
                   <div className="flex-grow min-w-0">
                     <h4 className="text-xs font-bold text-brand-black line-clamp-1">{selectedProperty.title}</h4>
-                    <p className="text-[10px] text-gray-400 font-medium line-clamp-1 mt-0.5">{selectedProperty.location.split(",")[0]}</p>
+                    <p className="text-xs text-gray-400 font-medium line-clamp-1 mt-0.5">{selectedProperty.location.split(",")[0]}</p>
                     <p className="text-xs font-extrabold text-brand-red mt-1">
                       {formatPrice(selectedProperty.price)}
                     </p>
@@ -1023,7 +1113,7 @@ function PropertiesExplorerContent() {
                       exit={{ opacity: 0 }}
                     >
                       <div className="space-y-1">
-                        <label className="text-[8px] tracking-[0.2em] uppercase font-extrabold text-gray-400">Full Name*</label>
+                        <label className="text-xs tracking-[0.2em] uppercase font-extrabold text-gray-400">Full Name*</label>
                         <input
                           type="text"
                           required
@@ -1035,7 +1125,7 @@ function PropertiesExplorerContent() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[8px] tracking-[0.2em] uppercase font-extrabold text-gray-400">Corporate Email*</label>
+                        <label className="text-xs tracking-[0.2em] uppercase font-extrabold text-gray-400">Corporate Email*</label>
                         <input
                           type="email"
                           required
@@ -1047,7 +1137,7 @@ function PropertiesExplorerContent() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[8px] tracking-[0.2em] uppercase font-extrabold text-gray-400">Secure Telephone*</label>
+                        <label className="text-xs tracking-[0.2em] uppercase font-extrabold text-gray-400">Secure Telephone*</label>
                         <input
                           type="tel"
                           required
@@ -1059,7 +1149,7 @@ function PropertiesExplorerContent() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[8px] tracking-[0.2em] uppercase font-extrabold text-gray-400">Acquisition Profile Notes</label>
+                        <label className="text-xs tracking-[0.2em] uppercase font-extrabold text-gray-400">Acquisition Profile Notes</label>
                         <textarea
                           rows={4}
                           value={inquiryForm.notes}
@@ -1071,7 +1161,7 @@ function PropertiesExplorerContent() {
 
                       <button
                         type="submit"
-                        className="w-full py-4 bg-brand-black hover:bg-brand-red text-white text-[10px] tracking-[0.25em] font-extrabold uppercase transition-all duration-300 rounded-xl shadow-luxury hover:scale-101 cursor-pointer"
+                        className="w-full py-4 bg-brand-black hover:bg-brand-red text-white text-xs tracking-[0.25em] font-extrabold uppercase transition-all duration-300 rounded-xl shadow-luxury hover:scale-101 cursor-pointer"
                       >
                         Submit Acquisition Profile
                       </button>
@@ -1096,7 +1186,7 @@ function PropertiesExplorerContent() {
                 </AnimatePresence>
               </div>
 
-              <div className="flex items-start space-x-2 text-[9px] text-gray-400 pt-6 border-t border-gray-100 font-medium">
+              <div className="flex items-start space-x-2 text-xs text-gray-400 pt-6 border-t border-gray-100 font-medium">
                 <Info size={12} className="flex-shrink-0 mt-0.5 text-brand-red" />
                 <span>
                   All listings are subject to strict KYC procedures and structural verification checks to ensure RERA and title deed authenticity.

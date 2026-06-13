@@ -12,12 +12,9 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
 const milestones = [
-  { year: "2019", title: "NexHouz Founded", desc: "Started with a single mission: make Hyderabad property buying transparent, safe, and human." },
-  { year: "2020", title: "500 Properties Scanned", desc: "Built the first internal RERA + GHMC audit framework. Manually reviewed 500+ builder projects." },
-  { year: "2021", title: "First 100 Families Settled", desc: "Reached 100 successful property transactions with zero legal disputes — a milestone we're deeply proud of." },
-  { year: "2022", title: "AI Matching Launched", desc: "Introduced our AI-powered property matching engine, reducing average search time from weeks to days." },
-  { year: "2023", title: "NRI Desk Launched", desc: "Opened our dedicated NRI advisory desk. Now serving clients across 12 countries remotely." },
-  { year: "2024", title: "4,800+ Properties Verified", desc: "Our verified property database crossed 4,800 listings — the most audited property collection in Hyderabad." },
+  { year: "2024", title: "NexHouz Founded", desc: "Started with a single mission: make Hyderabad property buying transparent, safe, and human." },
+  { year: "2025", title: "800+ Properties Scanned", desc: "Built our advanced internal RERA + GHMC audit framework. Manually reviewed 800+ builder projects." },
+  { year: "2026", title: "130+ Families Served", desc: "Helping buyers with zero disputes and complete peace of mind, now offering 1,500+ verified properties." },
 ];
 
 const values = [
@@ -30,9 +27,9 @@ const values = [
 ];
 
 const stats = [
-  { value: "5+", label: "Years in Hyderabad" },
-  { value: "4,800+", label: "Properties Verified" },
-  { value: "1,300+", label: "Families Helped" },
+  { value: "2", label: "Years in Hyderabad" },
+  { value: "1,500+", label: "Properties Verified" },
+  { value: "130+", label: "Families Served" },
   { value: "98%", label: "Satisfaction Rate" },
   { value: "0", label: "Legal Disputes" },
   { value: "12", label: "Countries Served (NRI)" },
@@ -44,7 +41,7 @@ export default function AboutPage() {
   const tabContent = {
     story: {
       heading: "How NexHouz was born",
-      body: "NexHouz was founded in 2019 by a group of Hyderabad residents who had personally experienced the pain of buying property in the city — legal confusion, broker pressure, undisclosed disputes, and zero transparency. We built the firm we wished had existed when we were looking for our own homes. Today, NexHouz is Hyderabad's most trusted property curation firm — not because we have the most listings, but because every listing we show you has been personally verified by our legal and advisory team.",
+      body: "NexHouz was founded in 2024 by a group of Hyderabad residents who had personally experienced the pain of buying property in the city — legal confusion, broker pressure, undisclosed disputes, and zero transparency. We built the firm we wished had existed when we were looking for our own homes. Today, NexHouz is Hyderabad's most trusted property curation firm — not because we have the most listings, but because every listing we show you has been personally verified by our legal and advisory team.",
     },
     vision: {
       heading: "Our Vision",
@@ -87,7 +84,7 @@ export default function AboutPage() {
                 className="inline-flex items-center gap-2 px-2.5 py-1 bg-white/10 border border-white/20 rounded-full"
               >
                 <BadgeCheck size={10} className="text-brand-red" />
-                <span className="text-[8px] md:text-[9px] font-extrabold tracking-[0.2em] uppercase text-white/80">
+                <span className="text-xs md:text-xs font-extrabold tracking-[0.2em] uppercase text-white/80">
                   Hyderabad's Most Trusted Property Firm
                 </span>
               </motion.div>
@@ -109,7 +106,7 @@ export default function AboutPage() {
                 transition={{ duration: 0.45, delay: 0.16 }}
                 className="text-xs md:text-sm text-white/55 font-medium leading-relaxed max-w-lg"
               >
-                NexHouz was founded by people who got burned by the broken Hyderabad property market — and decided to fix it. Since 2019, we've helped 1,300+ families buy homes with complete legal clarity and zero regret.
+                NexHouz was founded by people who got burned by the broken Hyderabad property market — and decided to fix it. In just 2 years, we've helped 130+ families buy homes with complete legal clarity and zero regret.
               </motion.p>
 
               <motion.div
@@ -141,7 +138,7 @@ export default function AboutPage() {
             transition={{ delay: 0.8 }}
             className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
           >
-            <span className="text-[8px] font-bold uppercase tracking-widest text-white/30">Our Story</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-white/30">Our Story</span>
             <motion.div animate={{ y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-px h-8 bg-gradient-to-b from-white/30 to-transparent" />
           </motion.div>
         </section>
@@ -162,7 +159,7 @@ export default function AboutPage() {
                   className="text-center space-y-1"
                 >
                   <p className="text-3xl font-extrabold text-white">{stat.value}</p>
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-white/35">{stat.label}</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-white/35">{stat.label}</p>
                 </motion.div>
               ))}
             </div>
@@ -197,7 +194,7 @@ export default function AboutPage() {
                     </div>
                     <div>
                       <p className="text-xs font-extrabold text-brand-black">100% Commission-Free Advisory</p>
-                      <p className="text-[10px] text-gray-500 font-medium">Our advisors earn salaries, not commissions on your deal</p>
+                      <p className="text-xs text-gray-500 font-medium">Our advisors earn salaries, not commissions on your deal</p>
                     </div>
                   </div>
                 </div>
@@ -217,7 +214,7 @@ export default function AboutPage() {
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`px-4 py-2 text-[10px] font-extrabold uppercase tracking-widest rounded-full transition-all cursor-pointer ${activeTab === tab ? "bg-brand-black text-white shadow-sm" : "text-gray-400 hover:text-gray-700"}`}
+                      className={`px-4 py-2 text-xs font-extrabold uppercase tracking-widest rounded-full transition-all cursor-pointer ${activeTab === tab ? "bg-brand-black text-white shadow-sm" : "text-gray-400 hover:text-gray-700"}`}
                     >
                       {tab === "story" ? "Our Story" : tab === "vision" ? "Vision" : "Mission"}
                     </button>
@@ -268,7 +265,7 @@ export default function AboutPage() {
         <section className="py-24 bg-gray-50/50 border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16 space-y-3">
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.3em] text-brand-red">What We Stand For</p>
+              <p className="text-xs font-extrabold uppercase tracking-[0.3em] text-brand-red">What We Stand For</p>
               <h2 className="text-4xl md:text-5xl font-extrabold text-brand-black tracking-tight">
                 Six principles we never compromise on.
               </h2>
@@ -309,9 +306,9 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
               {/* Left heading */}
               <div className="space-y-5 lg:sticky lg:top-28">
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.3em] text-brand-red">Our Journey</p>
+                <p className="text-xs font-extrabold uppercase tracking-[0.3em] text-brand-red">Our Journey</p>
                 <h2 className="text-4xl md:text-5xl font-extrabold text-brand-black leading-tight">
-                  Five years of building trust, one verified listing at a time.
+                  Two years of building trust, one verified listing at a time.
                 </h2>
                 <p className="text-sm text-gray-500 font-medium leading-relaxed">
                   From a small team with a simple idea to Hyderabad's most verified property firm — every milestone here represents real families who found their right home.
@@ -360,19 +357,19 @@ export default function AboutPage() {
         <section className="py-24 bg-gray-50/40 border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16 space-y-3">
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.3em] text-brand-red">The Difference</p>
+              <p className="text-xs font-extrabold uppercase tracking-[0.3em] text-brand-red">The Difference</p>
               <h2 className="text-4xl font-extrabold text-brand-black">NexHouz vs. Traditional Brokers</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr>
-                    <th className="text-left py-4 pr-8 w-1/3"><span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Factor</span></th>
+                    <th className="text-left py-4 pr-8 w-1/3"><span className="text-xs font-extrabold uppercase tracking-widest text-gray-400">Factor</span></th>
                     <th className="py-4 px-6 text-center bg-brand-black rounded-t-2xl">
-                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-white">NexHouz</span>
+                      <span className="text-xs font-extrabold uppercase tracking-widest text-white">NexHouz</span>
                     </th>
                     <th className="py-4 px-6 text-center">
-                      <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">Traditional Broker</span>
+                      <span className="text-xs font-extrabold uppercase tracking-widest text-gray-400">Traditional Broker</span>
                     </th>
                   </tr>
                 </thead>
@@ -416,78 +413,29 @@ export default function AboutPage() {
         {/* TESTIMONIAL + TEAM TEASER                                         */}
         {/* ================================================================ */}
         <section className="py-24 bg-white border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Testimonial */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="bg-brand-black rounded-3xl p-10 flex flex-col justify-between min-h-[340px] relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-48 h-48 bg-brand-red/10 rounded-full blur-3xl" />
-                <div className="relative space-y-6">
-                  <div className="flex items-center gap-0.5">
-                    {[...Array(5)].map((_, i) => <Star key={i} size={14} className="fill-brand-red text-brand-red" />)}
-                  </div>
-                  <blockquote className="text-xl font-light text-white leading-relaxed italic">
-                    "I had been misled by two different brokers before NexHouz. Their team personally audited the property I wanted, found a pending litigation, and saved me from a catastrophic mistake. I can't recommend them enough."
-                  </blockquote>
+          <div className="max-w-4xl mx-auto px-6">
+            {/* Testimonial */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="bg-brand-black rounded-3xl p-10 md:p-12 flex flex-col justify-between min-h-[300px] relative overflow-hidden text-center items-center"
+            >
+              <div className="absolute top-0 right-0 w-48 h-48 bg-brand-red/10 rounded-full blur-3xl" />
+              <div className="relative space-y-6 max-w-2xl">
+                <div className="flex items-center gap-0.5 justify-center">
+                  {[...Array(5)].map((_, i) => <Star key={i} size={16} className="fill-brand-red text-brand-red" />)}
                 </div>
-                <div className="relative pt-8 border-t border-white/10">
-                  <p className="text-xs font-extrabold uppercase tracking-widest text-white">Karthik Mehta</p>
-                  <p className="text-[10px] text-white/40 font-medium mt-0.5">Software Architect, Gachibowli — bought a villa in Narsingi</p>
-                </div>
-              </motion.div>
-
-              {/* Team preview + link */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="space-y-6"
-              >
-                <div className="space-y-3">
-                  <p className="text-[10px] font-extrabold uppercase tracking-[0.3em] text-brand-red">The People</p>
-                  <h2 className="text-4xl font-extrabold text-brand-black">A small team with serious expertise.</h2>
-                  <p className="text-sm text-gray-500 font-medium leading-relaxed">
-                    Every NexHouz advisor holds deep Hyderabad market knowledge, RERA certification, and a track record of closing deals that their clients never regret. We don't hire fast — we hire right.
-                  </p>
-                </div>
-                <div className="flex -space-x-3">
-                  {["/images/real_estate_advisor_portrait.png", "/images/expert_advisory_visual.png", "/images/purchase_tracker_visual.png", "/images/ai_matchmaker_visual.png"].map((src, i) => (
-                    <div key={i} className="w-12 h-12 rounded-full border-2 border-white overflow-hidden shadow-sm">
-                      <img src={src} alt="Team member" className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                  <div className="w-12 h-12 rounded-full border-2 border-white bg-brand-red flex items-center justify-center text-white text-xs font-extrabold shadow-sm">
-                    20+
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { icon: Award, label: "RERA Certified", value: "All Advisors" },
-                    { icon: Clock, label: "Avg Experience", value: "9+ Years" },
-                    { icon: Star, label: "Client Rating", value: "4.9 / 5.0" },
-                    { icon: MapPin, label: "City Coverage", value: "Pan-Hyderabad" },
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <div key={item.label} className="bg-gray-50 border border-gray-100 rounded-2xl p-5 space-y-1">
-                        <Icon size={15} className="text-brand-red" />
-                        <p className="text-base font-extrabold text-brand-black">{item.value}</p>
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400">{item.label}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-                <Link href="/team" className="inline-flex items-center gap-2 text-sm font-bold text-brand-black hover:text-brand-red border-b border-brand-black hover:border-brand-red pb-0.5 transition-all">
-                  Meet the Full Team <ChevronRight size={14} />
-                </Link>
-              </motion.div>
-            </div>
+                <blockquote className="text-xl md:text-2xl font-light text-white leading-relaxed italic">
+                  "I had been misled by two different brokers before NexHouz. Their team personally audited the property I wanted, found a pending litigation, and saved me from a catastrophic mistake. I can't recommend them enough."
+                </blockquote>
+              </div>
+              <div className="relative pt-8 border-t border-white/10 w-full max-w-md mt-6">
+                <p className="text-xs font-extrabold uppercase tracking-widest text-white">Karthik Mehta</p>
+                <p className="text-xs text-white/40 font-medium mt-0.5">Software Architect, Gachibowli — bought a villa in Narsingi</p>
+              </div>
+            </motion.div>
           </div>
         </section>
 
@@ -514,7 +462,7 @@ export default function AboutPage() {
             </div>
             <div className="flex flex-wrap justify-center gap-6 pt-4">
               {["Zero broker pressure", "100% legal clear listings", "Hyderabad's most trusted team"].map(badge => (
-                <div key={badge} className="flex items-center gap-2 text-[10px] font-bold text-white/40 uppercase tracking-wider">
+                <div key={badge} className="flex items-center gap-2 text-xs font-bold text-white/40 uppercase tracking-wider">
                   <Check size={11} className="text-brand-red" />{badge}
                 </div>
               ))}

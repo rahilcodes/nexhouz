@@ -120,7 +120,7 @@ export default function CalculatorPage() {
           
           {/* Header */}
           <div className="max-w-2xl space-y-4 mb-16 border-b border-brand-gray-dark pb-10">
-            <span className="text-[10px] tracking-[0.3em] font-bold text-brand-red uppercase">Fintech Engine</span>
+            <span className="text-xs tracking-[0.3em] font-bold text-brand-red uppercase">Fintech Engine</span>
             <h1 className="text-serif text-4xl md:text-5xl font-light tracking-tight text-brand-black">
               Mortgage & Yield Analytics
             </h1>
@@ -140,7 +140,7 @@ export default function CalculatorPage() {
                 
                 {/* Parameter: Property Value */}
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center text-[10px] tracking-widest uppercase font-bold text-brand-black/40">
+                  <div className="flex justify-between items-center text-xs tracking-widest uppercase font-bold text-brand-black/40">
                     <span>Property Index Value</span>
                     <span className="text-brand-black font-extrabold text-xs">₹{(propertyPrice).toLocaleString()}</span>
                   </div>
@@ -153,7 +153,7 @@ export default function CalculatorPage() {
                     onChange={(e) => setPropertyPrice(parseInt(e.target.value))}
                     className="w-full h-1 bg-brand-gray-dark appearance-none cursor-pointer accent-brand-red"
                   />
-                  <div className="flex justify-between text-[8px] text-brand-black/40 font-bold">
+                  <div className="flex justify-between text-xs text-brand-black/40 font-bold">
                     <span>₹1 Cr</span>
                     <span>₹15 Cr</span>
                     <span>₹30 Cr</span>
@@ -162,7 +162,7 @@ export default function CalculatorPage() {
 
                 {/* Parameter: Down Payment Percent */}
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center text-[10px] tracking-widest uppercase font-bold text-brand-black/40">
+                  <div className="flex justify-between items-center text-xs tracking-widest uppercase font-bold text-brand-black/40">
                     <span>Down Payment Allocation</span>
                     <span className="text-brand-black font-extrabold text-xs">
                       {downPaymentPercent}% (₹{downPayment.toLocaleString()})
@@ -177,7 +177,7 @@ export default function CalculatorPage() {
                     onChange={(e) => setDownPaymentPercent(parseInt(e.target.value))}
                     className="w-full h-1 bg-brand-gray-dark appearance-none cursor-pointer accent-brand-red"
                   />
-                  <div className="flex justify-between text-[8px] text-brand-black/40 font-bold">
+                  <div className="flex justify-between text-xs text-brand-black/40 font-bold">
                     <span>10% (₹1 Cr)</span>
                     <span>30% (₹3 Cr)</span>
                     <span>50% (₹5 Cr)</span>
@@ -187,7 +187,7 @@ export default function CalculatorPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Parameter: Interest Rate */}
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center text-[10px] tracking-widest uppercase font-bold text-brand-black/40">
+                    <div className="flex justify-between items-center text-xs tracking-widest uppercase font-bold text-brand-black/40">
                       <span>Annual Cost of Debt</span>
                       <span className="text-brand-black font-extrabold text-xs">{interestRate}%</span>
                     </div>
@@ -200,7 +200,7 @@ export default function CalculatorPage() {
                       onChange={(e) => setInterestRate(parseFloat(e.target.value))}
                       className="w-full h-1 bg-brand-gray-dark appearance-none cursor-pointer accent-brand-red"
                     />
-                    <div className="flex justify-between text-[8px] text-brand-black/40 font-bold">
+                    <div className="flex justify-between text-xs text-brand-black/40 font-bold">
                       <span>2.0%</span>
                       <span>7.0%</span>
                       <span>12.0%</span>
@@ -209,7 +209,7 @@ export default function CalculatorPage() {
 
                   {/* Parameter: Tenure Years */}
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center text-[10px] tracking-widest uppercase font-bold text-brand-black/40">
+                    <div className="flex justify-between items-center text-xs tracking-widest uppercase font-bold text-brand-black/40">
                       <span>Loan Tenure Horizon</span>
                       <span className="text-brand-black font-extrabold text-xs">{tenureYears} Years</span>
                     </div>
@@ -222,7 +222,7 @@ export default function CalculatorPage() {
                       onChange={(e) => setTenureYears(parseInt(e.target.value))}
                       className="w-full h-1 bg-brand-gray-dark appearance-none cursor-pointer accent-brand-red"
                     />
-                    <div className="flex justify-between text-[8px] text-brand-black/40 font-bold">
+                    <div className="flex justify-between text-xs text-brand-black/40 font-bold">
                       <span>5 Yrs</span>
                       <span>15 Yrs</span>
                       <span>30 Yrs</span>
@@ -237,7 +237,7 @@ export default function CalculatorPage() {
                 <Info size={18} className="text-brand-red flex-shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <h4 className="text-xs font-bold text-brand-black tracking-wider uppercase">KYC Acquisition Standard</h4>
-                  <p className="text-[11px] font-light text-brand-black/60 leading-relaxed font-sans">
+                  <p className="text-sm font-light text-brand-black/60 leading-relaxed font-sans">
                     These metrics represent algorithmic estimates for institutional capital analysis. Exact lender terms and private ledger certifications may vary based on international tax nodes and personal sovereign balance sheets.
                   </p>
                 </div>
@@ -255,7 +255,7 @@ export default function CalculatorPage() {
                 
                 {/* Result: Monthly EMI */}
                 <div className="space-y-2 relative z-10">
-                  <span className="text-[9px] tracking-widest font-extrabold text-white/40 uppercase block">
+                  <span className="text-xs tracking-widest font-extrabold text-white/40 uppercase block">
                     Calculated Monthly Premium (EMI)
                   </span>
                   <div className="flex items-baseline space-x-1">
@@ -272,22 +272,22 @@ export default function CalculatorPage() {
                 <div className="grid grid-cols-2 gap-6 relative z-10">
                   
                   <div className="space-y-1">
-                    <span className="text-[8px] tracking-widest text-white/40 font-bold uppercase block">Down Payment</span>
+                    <span className="text-xs tracking-widest text-white/40 font-bold uppercase block">Down Payment</span>
                     <span className="text-sm font-semibold">₹{Math.round(downPayment).toLocaleString()}</span>
                   </div>
 
                   <div className="space-y-1">
-                    <span className="text-[8px] tracking-widest text-white/40 font-bold uppercase block">Debt Principal</span>
+                    <span className="text-xs tracking-widest text-white/40 font-bold uppercase block">Debt Principal</span>
                     <span className="text-sm font-semibold">₹{Math.round(loanAmount).toLocaleString()}</span>
                   </div>
 
                   <div className="space-y-1">
-                    <span className="text-[8px] tracking-widest text-white/40 font-bold uppercase block">Interest Cost</span>
+                    <span className="text-xs tracking-widest text-white/40 font-bold uppercase block">Interest Cost</span>
                     <span className="text-sm font-semibold text-brand-red">₹{Math.round(totalInterest).toLocaleString()}</span>
                   </div>
 
                   <div className="space-y-1">
-                    <span className="text-[8px] tracking-widest text-white/40 font-bold uppercase block">Target Income</span>
+                    <span className="text-xs tracking-widest text-white/40 font-bold uppercase block">Target Income</span>
                     <span className="text-sm font-semibold text-emerald-400">₹{Math.round(suggestedIncome).toLocaleString()}</span>
                   </div>
 
@@ -332,7 +332,7 @@ export default function CalculatorPage() {
                     
                     {/* Centered details */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                      <span className="text-[9px] tracking-widest font-extrabold text-white/30 uppercase leading-none">Interest</span>
+                      <span className="text-xs tracking-widest font-extrabold text-white/30 uppercase leading-none">Interest</span>
                       <span className="text-sm font-bold text-brand-red leading-none mt-1">
                         {Math.round(interestPercentage)}%
                       </span>
@@ -388,7 +388,7 @@ export default function CalculatorPage() {
                   <div className="p-8 overflow-x-auto">
                     <table className="w-full text-left text-xs font-sans">
                       <thead>
-                        <tr className="border-b border-brand-gray-dark pb-4 text-[9px] tracking-widest font-extrabold uppercase text-brand-black/40">
+                        <tr className="border-b border-brand-gray-dark pb-4 text-xs tracking-widest font-extrabold uppercase text-brand-black/40">
                           <th className="pb-3">Year Node</th>
                           <th className="pb-3 text-right">Principal Paid</th>
                           <th className="pb-3 text-right">Interest Paid</th>

@@ -5,6 +5,45 @@ export interface LuxuryScore {
   automationTier: "Tier 1 (Integrated)" | "Tier 2 (Pro)" | "Tier 3 (Elite)";
 }
 
+export interface NearbyAmenities {
+  hospitals: number;
+  malls: number;
+  schools: number;
+  restaurants: number;
+  metroStations: number;
+  railwayStations: number;
+  itParks: number;
+}
+
+export interface AQIData {
+  score: number;
+  dominantPollutant: string;
+  pm25: number;
+  pm10: number;
+  o3: number;
+  no2: number;
+  so2: number;
+  co: number;
+}
+
+export interface FloorPlan {
+  type: string;    // e.g. "4 BHK", "3 BHK", "2 BHK", "Studio"
+  size: number;    // sq ft
+  facing: string;  // e.g. "East", "North", "West", "South"
+  price: number;   // in INR
+}
+
+export interface RecommendationReport {
+  investmentPotential: number;
+  familyFriendliness: number;
+  commuteConvenience: number;
+  schoolAccess: number;
+  hospitalAccess: number;
+  futureAppreciation: number;
+  builderTrustRating: number;
+  whyRecommended: string;
+}
+
 export interface Property {
   id: string;
   title: string;
@@ -22,7 +61,17 @@ export interface Property {
   image: string;
   scores: LuxuryScore;
   featured: boolean;
+  // Extended editable fields
+  reraNumber?: string;
+  possessionDate?: string;      // e.g. "Dec 2027" or "Ready to Move"
+  nearby?: NearbyAmenities;
+  aqi?: AQIData;
+  floorPlans?: FloorPlan[];  // custom pricing table rows
+  projectName?: string;
+  images?: string[];
+  recommendationReport?: RecommendationReport;
 }
+
 
 export const properties: Property[] = [
   {
@@ -624,3 +673,20 @@ export const properties: Property[] = [
     featured: false
   }
 ];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// getProperties() — reads admin edits from localStorage, falls back to static.
+// Use this on all public-facing pages so admin changes are reflected live.
+// ─────────────────────────────────────────────────────────────────────────────
+export function getProperties(): Property[] {
+  if (typeof window === "undefined") return properties;
+  try {
+    const stored = localStorage.getItem("nexhouz_listings");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {}
+  return properties;
+}
+

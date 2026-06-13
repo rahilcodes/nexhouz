@@ -96,23 +96,23 @@ export default function Footer() {
             <h4 className="text-xs font-bold tracking-[0.3em] uppercase text-white/40">Hyderabad Office</h4>
             <div className="space-y-4 text-xs font-light text-white/70 leading-relaxed font-sans">
               <div>
-                <span className="font-bold text-[9px] uppercase text-white/40 block mb-1">Corporate Address</span>
+                <span className="font-bold text-xs uppercase text-white/40 block mb-1">Corporate Address</span>
                 <p>
-                  B 109, B-BLOCK Asian Sun City,<br />
+                  B 609, 6th Floor, B-BLOCK Asian Sun City,<br />
                   Behind AMB Mall, Forest Dept Colony,<br />
                   Kothaguda X Road, Kondapur,<br />
                   Hyderabad, Telangana 500084
                 </p>
               </div>
               <div>
-                <span className="font-bold text-[9px] uppercase text-white/40 block mb-1">Direct Lines</span>
+                <span className="font-bold text-xs uppercase text-white/40 block mb-1">Direct Lines</span>
                 <p className="space-y-1">
                   <span className="block">+91 8585854853</span>
                   <span className="block">+91 9966998665</span>
                 </p>
               </div>
               <div>
-                <span className="font-bold text-[9px] uppercase text-white/40 block mb-1">Email Curation</span>
+                <span className="font-bold text-xs uppercase text-white/40 block mb-1">Email Curation</span>
                 <p>Info@nexhouz.com</p>
               </div>
             </div>
@@ -121,7 +121,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Metadata & Legal */}
-        <div className="flex flex-col md:flex-row items-center justify-between pt-12 text-[10px] tracking-widest uppercase text-white/40 font-semibold space-y-4 md:space-y-0">
+        <div className="flex flex-col md:flex-row items-center justify-between pt-12 text-xs tracking-widest uppercase text-white/40 font-semibold space-y-4 md:space-y-0">
           <div>
             © {new Date().getFullYear()} NexHouz Real Estate Advisor. All rights reserved.
           </div>
