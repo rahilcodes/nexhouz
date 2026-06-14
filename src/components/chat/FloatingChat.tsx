@@ -212,10 +212,10 @@ export default function FloatingChat() {
 
   // Active steps roadmap chips fallback
   const STEP_CHIPS: Record<number, string[]> = {
-    1: ["Under ₹3 Cr", "₹3–5 Cr", "₹5–8 Cr", "₹8 Cr+"],
+    1: ["Under ₹1.5 Cr", "₹1.5–3 Cr", "₹3–5 Cr", "₹5 Cr+"],
     2: ["Self Use", "Investment", "Both"],
     3: ["Hitec City", "Financial District", "Gachibowli", "Jubilee Hills", "Work from Home"],
-    4: ["2 members", "3–4 members", "5+ members (joint family)"],
+    4: ["2 BHK", "3 BHK", "4 BHK", "5 BHK+"],
     5: ["Apartment", "Villa", "Penthouse", "Flexible"],
     6: ["Ready to Move", "Under Construction", "Flexible"],
     7: ["Commute", "Schools", "Appreciation", "Luxury Lifestyle", "Rental Yield", "Peaceful Living"],

@@ -213,12 +213,20 @@ function runLocalFallback(
     const budgetMatch = q.match(/([\d.]+)\s*(?:cr|crore|crores)/);
     if (budgetMatch) {
       nextState.profile.budget = parseFloat(budgetMatch[1]) * 10000000;
-    } else if (q.includes("3") && q.includes("5")) {
+    } else if (q.includes("1.5") && q.includes("under")) {
+      nextState.profile.budget = 12000000;
+    } else if (q.includes("1.5") && q.includes("3")) {
+      nextState.profile.budget = 22500000;
+    } else if (q.includes("3-5") || (q.includes("3") && q.includes("5"))) {
       nextState.profile.budget = 40000000;
-    } else if (q.includes("5") && q.includes("8")) {
+    } else if (q.includes("5") && (q.includes("above") || q.includes("+") || q.includes("more"))) {
       nextState.profile.budget = 65000000;
-    } else if (q.includes("8")) {
-      nextState.profile.budget = 90000000;
+    } else if (q.includes("1.5")) {
+      nextState.profile.budget = 12000000;
+    } else if (q.includes("3")) {
+      nextState.profile.budget = 30000000;
+    } else if (q.includes("5")) {
+      nextState.profile.budget = 50000000;
     } else {
       nextState.profile.budget = 30000000; // default 3 Cr
     }
@@ -416,7 +424,7 @@ function runLocalFallback(
   switch (nextState.step) {
     case 1:
       responseText = "Welcome to **NexHouz Elite Property Advisory**. I am your digital luxury real estate consultant.\n\nTo help shortlist the absolute best property fits for you in Hyderabad, may I know roughly what **budget range** you are considering?";
-      chips = ["Under ₹3 Cr", "₹3–5 Cr", "₹5–8 Cr", "₹8 Cr+"];
+      chips = ["Under ₹1.5 Cr", "₹1.5–3 Cr", "₹3–5 Cr", "₹5 Cr+"];
       break;
 
     case 2:
@@ -430,8 +438,8 @@ function runLocalFallback(
       break;
 
     case 4:
-      responseText = `Perfect. To ensure the space meets your family's needs, what is your **family size** or required configuration? (e.g., 2 members, 3-4 members, 5+ members)`;
-      chips = ["2 members", "3–4 members", "5+ members (joint family)"];
+      responseText = `Perfect. To ensure the space meets your family's needs, what is your preferred **BHK configuration**? (e.g., 2 BHK, 3 BHK, 4 BHK, or 5 BHK+)`;
+      chips = ["2 BHK", "3 BHK", "4 BHK", "5 BHK+"];
       break;
 
     case 5:
@@ -581,7 +589,7 @@ function detectStepFromResponse(text: string, currentStep: number): number {
   if (lower.includes("property type") || lower.includes("apartment") || lower.includes("villa") || lower.includes("penthouse") || lower.includes("independent house")) {
     return 5;
   }
-  if (lower.includes("family size") || lower.includes("family configuration") || lower.includes("members") || lower.includes("family structure") || lower.includes("many people")) {
+  if (lower.includes("family size") || lower.includes("family configuration") || lower.includes("members") || lower.includes("family structure") || lower.includes("many people") || lower.includes("bhk") || lower.includes("bedrooms")) {
     return 4;
   }
   if (lower.includes("commute") || lower.includes("office") || lower.includes("micro-market") || lower.includes("hitec") || lower.includes("gachibowli") || lower.includes("financial district") || lower.includes("workplace")) {
@@ -677,10 +685,10 @@ export async function getAdvisorReply(
       // Populate parsedChips if missing/empty to ensure suggestions are always dynamic
       if (!parsedChips || parsedChips.length === 0) {
         const defaultChipsMap: Record<number, string[]> = {
-          1: ["Under ₹3 Cr", "₹3–5 Cr", "₹5–8 Cr", "₹8 Cr+"],
+          1: ["Under ₹1.5 Cr", "₹1.5–3 Cr", "₹3–5 Cr", "₹5 Cr+"],
           2: ["Self Use", "Investment", "Both"],
           3: ["Hitec City", "Financial District", "Gachibowli", "Jubilee Hills", "Work from Home"],
-          4: ["2 members", "3–4 members", "5+ members (joint family)"],
+          4: ["2 BHK", "3 BHK", "4 BHK", "5 BHK+"],
           5: ["Apartment", "Villa", "Penthouse", "Flexible"],
           6: ["Ready to Move", "Under Construction", "Flexible"],
           7: ["Commute", "Schools", "Appreciation", "Luxury Lifestyle", "Rental Yield", "Peaceful Living"],
