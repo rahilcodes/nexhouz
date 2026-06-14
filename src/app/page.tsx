@@ -190,10 +190,9 @@ function HeroSection({ onCloseDropdowns }: { onCloseDropdowns: () => void }) {
             className="hero-title font-extrabold text-brand-black leading-[1.03] tracking-tight mb-4"
             style={{ fontSize: "clamp(2rem, 4.2vw + 0.5rem, 3.75rem)" }}
           >
-            The World&apos;s Best<br />
-            Curation of<br />
+            Discover<br />
             <span className="relative inline-block text-brand-red">
-              Hyderabad
+              Hyderabad&apos;s
               {/* Animated underline draws from left to right */}
               <motion.span
                 className="absolute left-0 bottom-0 h-[3px] bg-brand-red rounded-full"
@@ -201,7 +200,8 @@ function HeroSection({ onCloseDropdowns }: { onCloseDropdowns: () => void }) {
                 animate={{ width: "100%" }}
                 transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
               />
-            </span>{" "}Properties.
+            </span><br />
+            Premium Properties.
           </motion.h1>
 
           {/* Typewriter subheadline cycling through personas */}
@@ -894,7 +894,7 @@ export default function HomePage() {
     { name: "Kokapet & Financial District", desc: "High-growth commercial expansion node", icon: Building },
     { name: "Jubilee & Banjara Hills", desc: "Timeless prime premium residential hills", icon: Compass },
     { name: "Narsingi & Tellapur", desc: "Green residential suburbs popular with tech families", icon: MapPin },
-    { name: "Gandipet Lake Vista", desc: "Quiet lakeside villa enclaves with clean air", icon: Building }
+    { name: "Osman and Himayat Sagar's", desc: "Quiet lakeside villa enclaves with clean air", icon: Building }
   ];
 
   const toggleFavorite = (id: string, e: React.MouseEvent) => {
@@ -1127,7 +1127,7 @@ export default function HomePage() {
                 <p className="text-brand-red font-extrabold text-sm uppercase tracking-wide">Sovereign Curation</p>
                 <p className="text-sm text-gray-500 font-medium">Exceptional Properties Located in Stunning Surroundings.</p>
                 <Link href="/properties" className="inline-flex items-center gap-2 px-5 py-2.5 border border-brand-red text-brand-red text-xs font-extrabold uppercase tracking-wide rounded-full hover:bg-brand-red hover:text-white transition-all">
-                  Show Top-Curated Villas <ArrowRight size={12} />
+                  Show Top-Curated Properties <ArrowRight size={12} />
                 </Link>
               </div>
 
@@ -1547,7 +1547,7 @@ export default function HomePage() {
                 { badge: "Tech Growth Center", title: "Kokapet & Financial District", desc: "Hyderabad's core commercial expansion corridor. High-rise luxury residential properties with direct access to the Nehru ORR and high compound valuation trends.", tag: "Growth Corridor Node" },
                 { badge: "Family & Schools", title: "Tellapur & Narsingi", desc: "Rapidly developing, leafy residential zones. Highly popular with technology professionals due to proximity to international schools, gated villa communities, and calm streets.", tag: "Emerging Family Hub" },
                 { badge: "Timeless Luxury", title: "Jubilee & Banjara Hills", desc: "The classic premium standard in Hyderabad. Extremely quiet, safe, and exclusive residential hills. High-capital value assets with tight inventory cleared through private networks.", tag: "Sovereign Estate Corridor" },
-                { badge: "Lakeside Sanctuary", title: "Gandipet Lake Vista", desc: "Peaceful enclaves bordering the lake reserve. Perfect for buyers seeking to escape noise while remaining within a short drive of Hitec City office hubs.", tag: "Eco-Residential Sanctuary" }
+                { badge: "Lakeside Sanctuary", title: "Osman and Himayat Sagar's", desc: "Peaceful enclaves bordering the lake reserve. Perfect for buyers seeking to escape noise while remaining within a short drive of Hitec City office hubs.", tag: "Eco-Residential Sanctuary" }
               ].map((area) => (
                 <motion.div key={area.title} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} className="bg-white border border-gray-100 rounded-3xl p-7 shadow-sm flex flex-col justify-between h-72 hover:border-brand-red/20 hover:shadow-md transition-all">
                   <div className="space-y-3">

@@ -560,7 +560,8 @@ export async function saveProperty(form: any): Promise<{ success: boolean; error
       throw new Error(`Failed to clean old images: ${imgDelErr.message}`);
     }
     
-    const imageList = form.images && form.images.length > 0 ? form.images : [form.image];
+    const rawImageList = form.images && form.images.length > 0 ? form.images : [form.image];
+    const imageList = Array.from(new Set(rawImageList)).filter((url): url is string => typeof url === "string" && !!url.trim());
     for (let k = 0; k < imageList.length; k++) {
       const isPrimary = imageList[k] === form.image || k === 0;
       const { error: imgInsErr } = await supabase.from("property_images").insert({
@@ -583,7 +584,8 @@ export async function saveProperty(form: any): Promise<{ success: boolean; error
     }
 
     if (form.amenities && form.amenities.length > 0) {
-      for (const am of form.amenities) {
+      const uniqueAmenities = Array.from(new Set(form.amenities)).filter((a): a is string => typeof a === "string" && !!a.trim());
+      for (const am of uniqueAmenities) {
         let { data: amData, error: amFindErr } = await supabase
           .from("amenities")
           .select("id")
