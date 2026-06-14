@@ -12,7 +12,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
 const milestones = [
-  { year: "2024", title: "NexHouz Founded", desc: "Started with a single mission: make Hyderabad property buying transparent, safe, and human." },
+  { year: "2025", title: "NexHouz Founded", desc: "Started with a single mission: make Hyderabad property buying transparent, safe, and human." },
   { year: "2025", title: "800+ Properties Scanned", desc: "Built our advanced internal RERA + GHMC audit framework. Manually reviewed 800+ builder projects." },
   { year: "2026", title: "130+ Families Served", desc: "Helping buyers with zero disputes and complete peace of mind, now offering 1,500+ verified properties." },
 ];
@@ -41,7 +41,7 @@ export default function AboutPage() {
   const tabContent = {
     story: {
       heading: "How NexHouz was born",
-      body: "NexHouz was founded in 2024 by a group of Hyderabad residents who had personally experienced the pain of buying property in the city — legal confusion, broker pressure, undisclosed disputes, and zero transparency. We built the firm we wished had existed when we were looking for our own homes. Today, NexHouz is Hyderabad's most trusted property curation firm — not because we have the most listings, but because every listing we show you has been personally verified by our legal and advisory team.",
+      body: "NexHouz was founded in 2025 by a group of Hyderabad residents who had personally experienced the pain of buying property in the city — legal confusion, broker pressure, undisclosed disputes, and zero transparency. We built the firm we wished had existed when we were looking for our own homes. Today, NexHouz is Hyderabad's most trusted property curation firm — not because we have the most listings, but because every listing we show you has been personally verified by our legal and advisory team.",
     },
     vision: {
       heading: "Our Vision",

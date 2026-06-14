@@ -70,6 +70,8 @@ export interface Property {
   projectName?: string;
   images?: string[];
   recommendationReport?: RecommendationReport;
+  udsPerAcre?: number;
+  brochureUrl?: string;
 }
 
 

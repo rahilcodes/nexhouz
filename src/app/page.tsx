@@ -894,7 +894,7 @@ export default function HomePage() {
     { name: "Kokapet & Financial District", desc: "High-growth commercial expansion node", icon: Building },
     { name: "Jubilee & Banjara Hills", desc: "Timeless prime premium residential hills", icon: Compass },
     { name: "Narsingi & Tellapur", desc: "Green residential suburbs popular with tech families", icon: MapPin },
-    { name: "Osman and Himayat Sagar's", desc: "Quiet lakeside villa enclaves with clean air", icon: Building }
+    { name: "Osman & Himayat Sagar's", desc: "Quiet lakeside villa enclaves with clean air", icon: Building }
   ];
 
   const toggleFavorite = (id: string, e: React.MouseEvent) => {
@@ -1547,7 +1547,7 @@ export default function HomePage() {
                 { badge: "Tech Growth Center", title: "Kokapet & Financial District", desc: "Hyderabad's core commercial expansion corridor. High-rise luxury residential properties with direct access to the Nehru ORR and high compound valuation trends.", tag: "Growth Corridor Node" },
                 { badge: "Family & Schools", title: "Tellapur & Narsingi", desc: "Rapidly developing, leafy residential zones. Highly popular with technology professionals due to proximity to international schools, gated villa communities, and calm streets.", tag: "Emerging Family Hub" },
                 { badge: "Timeless Luxury", title: "Jubilee & Banjara Hills", desc: "The classic premium standard in Hyderabad. Extremely quiet, safe, and exclusive residential hills. High-capital value assets with tight inventory cleared through private networks.", tag: "Sovereign Estate Corridor" },
-                { badge: "Lakeside Sanctuary", title: "Osman and Himayat Sagar's", desc: "Peaceful enclaves bordering the lake reserve. Perfect for buyers seeking to escape noise while remaining within a short drive of Hitec City office hubs.", tag: "Eco-Residential Sanctuary" }
+                { badge: "Lakeside Sanctuary", title: "Osman & Himayat Sagar's", desc: "Peaceful enclaves bordering the lake reserve. Perfect for buyers seeking to escape noise while remaining within a short drive of Hitec City office hubs.", tag: "Eco-Residential Sanctuary" }
               ].map((area) => (
                 <motion.div key={area.title} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} className="bg-white border border-gray-100 rounded-3xl p-7 shadow-sm flex flex-col justify-between h-72 hover:border-brand-red/20 hover:shadow-md transition-all">
                   <div className="space-y-3">
@@ -1555,7 +1555,7 @@ export default function HomePage() {
                     <h3 className="text-lg font-extrabold text-brand-black leading-tight">{area.title}</h3>
                     <p className="text-xs text-gray-500 leading-relaxed font-medium">{area.desc}</p>
                   </div>
-                  <p className="text-xs font-extrabold uppercase tracking-widest text-gray-300">{area.tag}</p>
+                  <p className="text-xs font-extrabold uppercase tracking-widest text-gray-500">{area.tag}</p>
                 </motion.div>
               ))}
             </div>
@@ -1566,12 +1566,16 @@ export default function HomePage() {
         {/* ============================================================ */}
         {/* SECTION 8: ANIMATED JOURNEY FLOW                            */}
         {/* ============================================================ */}
-        <section id="process-section" className="relative py-28 overflow-hidden" style={{ background: "#0A0A0F" }}>
+        {/* ============================================================ */}
+        {/* ============================================================ */}
+        {/* SECTION 8: ANIMATED JOURNEY FLOW (LIGHT THEME)              */}
+        {/* ============================================================ */}
+        <section id="process-section" className="relative py-28 overflow-hidden bg-gray-50/60 border-y border-gray-100">
           {/* Background radial glow */}
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,23,30,0.12) 0%, transparent 70%)" }} />
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 40% at 50% 100%, rgba(201,23,30,0.07) 0%, transparent 60%)" }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,23,30,0.04) 0%, transparent 70%)" }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 40% at 50% 100%, rgba(201,23,30,0.02) 0%, transparent 60%)" }} />
           {/* Subtle grid pattern */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+          <div className="absolute inset-0 pointer-events-none opacity-[0.4]" style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
 
           <div className="relative max-w-6xl mx-auto px-6">
             {/* Section header */}
@@ -1587,11 +1591,11 @@ export default function HomePage() {
                 <p className="text-xs font-extrabold uppercase tracking-[0.4em] text-brand-red">The NexHouz Journey</p>
                 <div className="w-6 h-px bg-brand-red" />
               </div>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+              <h2 className="text-4xl md:text-5xl font-extrabold text-brand-black tracking-tight leading-tight">
                 From your first question<br />
-                <span style={{ background: "linear-gradient(90deg, #C9171E, #ff6b6b)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>to your future asset.</span>
+                <span style={{ background: "linear-gradient(90deg, #C9171E, #E53E3E)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>to your future asset.</span>
               </h2>
-              <p className="text-sm text-white/40 font-medium max-w-md mx-auto mt-4 leading-relaxed">
+              <p className="text-sm text-gray-500 font-medium max-w-md mx-auto mt-4 leading-relaxed">
                 Nine precision-crafted touchpoints. One seamless experience. Your property, secured with confidence.
               </p>
             </motion.div>
@@ -1667,7 +1671,7 @@ export default function HomePage() {
                   step: "09",
                   icon: HeartHandshake,
                   title: "Continued Support & Future Projects",
-                  desc: "Our relationship doesn't end at registration. Asset management, rental advisory, resale guidance, and priority access to future launches — for life.",
+                  desc: "Our relationship doesn't end at registration. Resale guidance and priority access to future launches — for life.",
                   side: "left",
                   tag: "Partnership"
                 }
@@ -1680,7 +1684,7 @@ export default function HomePage() {
                     {idx < 8 && (
                       <div className="hidden md:flex justify-center">
                         <motion.div
-                          className="w-px bg-gradient-to-b from-brand-red/60 to-brand-red/10"
+                          className="w-px bg-gradient-to-b from-brand-red/40 to-brand-red/5"
                           style={{ height: "56px" }}
                           initial={{ scaleY: 0, originY: 0 }}
                           whileInView={{ scaleY: 1 }}
@@ -1700,32 +1704,32 @@ export default function HomePage() {
                       transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
                     >
                       {/* Card */}
-                      <div className={`flex-1 group relative rounded-3xl p-7 border transition-all duration-500 ${
+                      <div className={`flex-1 group relative rounded-3xl p-7 border transition-all duration-500 shadow-sm ${
                         isLeft ? "md:text-left" : "md:text-right"
                       }`}
                         style={{
-                          background: "rgba(255,255,255,0.03)",
-                          borderColor: "rgba(255,255,255,0.07)",
+                          background: "#ffffff",
+                          borderColor: "#e5e7eb",
                         }}
                         onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLDivElement).style.background = "rgba(201,23,30,0.07)";
-                          (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(201,23,30,0.25)";
+                          (e.currentTarget as HTMLDivElement).style.background = "rgba(201,23,30,0.02)";
+                          (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(201,23,30,0.15)";
                         }}
                         onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLDivElement).style.background = "rgba(255,255,255,0.03)";
-                          (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(255,255,255,0.07)";
+                          (e.currentTarget as HTMLDivElement).style.background = "#ffffff";
+                          (e.currentTarget as HTMLDivElement).style.borderColor = "#e5e7eb";
                         }}
                       >
                         {/* Tag pill */}
                         <span className={`inline-flex items-center text-xs font-extrabold uppercase tracking-[0.3em] px-2.5 py-1 rounded-full mb-4 ${
                           isLeft ? "" : "md:ml-auto"
                         }`}
-                          style={{ background: "rgba(201,23,30,0.12)", color: "#ff6b6b" }}
+                          style={{ background: "rgba(201,23,30,0.08)", color: "#C9171E" }}
                         >
                           {node.tag}
                         </span>
-                        <h3 className="text-lg font-extrabold text-white mb-2 leading-snug">{node.title}</h3>
-                        <p className="text-sm text-white/45 leading-relaxed font-medium">{node.desc}</p>
+                        <h3 className="text-lg font-extrabold text-brand-black mb-2 leading-snug">{node.title}</h3>
+                        <p className="text-sm text-gray-600 leading-relaxed font-medium">{node.desc}</p>
                       </div>
 
                       {/* Centre icon node */}
@@ -1733,7 +1737,7 @@ export default function HomePage() {
                         {/* Outer pulse ring */}
                         <motion.div
                           className="absolute rounded-full"
-                          style={{ width: 80, height: 80, background: "rgba(201,23,30,0.15)", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
+                          style={{ width: 80, height: 80, background: "rgba(201,23,30,0.08)", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
                           animate={{ scale: [1, 1.35, 1], opacity: [0.7, 0, 0.7] }}
                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: idx * 0.4 }}
                         />
@@ -1743,14 +1747,14 @@ export default function HomePage() {
                           style={{
                             width: 60,
                             height: 60,
-                            background: "linear-gradient(135deg, #C9171E, #8b0000)",
-                            boxShadow: "0 0 24px rgba(201,23,30,0.5), 0 0 48px rgba(201,23,30,0.2)"
+                            background: "linear-gradient(135deg, #C9171E, #A6141A)",
+                            boxShadow: "0 0 16px rgba(201,23,30,0.25)"
                           }}
                         >
                           <Icon size={24} className="text-white" strokeWidth={1.5} />
                         </div>
                         {/* Step number */}
-                        <span className="mt-2 text-xs font-extrabold tracking-widest" style={{ color: "rgba(201,23,30,0.7)" }}>{node.step}</span>
+                        <span className="mt-2 text-xs font-extrabold tracking-widest" style={{ color: "rgba(201,23,30,0.9)" }}>{node.step}</span>
                       </div>
 
                       {/* Spacer for opposite side */}
@@ -1769,13 +1773,13 @@ export default function HomePage() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              <p className="text-white/35 text-xs font-medium uppercase tracking-widest mb-5">Ready to begin?</p>
+              <p className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-5">Ready to begin?</p>
               <Link
                 href="/contact"
                 className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-sm text-white transition-all duration-300 hover:scale-105"
                 style={{
-                  background: "linear-gradient(135deg, #C9171E, #8b0000)",
-                  boxShadow: "0 0 30px rgba(201,23,30,0.4), 0 8px 32px rgba(0,0,0,0.4)"
+                  background: "linear-gradient(135deg, #C9171E, #A6141A)",
+                  boxShadow: "0 4px 20px rgba(201,23,30,0.3)"
                 }}
               >
                 Start Your Journey

@@ -107,6 +107,8 @@ const EMPTY_FORM = {
   featured: false,
   reraNumber: "",
   possessionDate: "",
+  udsPerAcre: 100,
+  brochureUrl: "",
   nearby: { ...DEFAULT_NEARBY },
   aqi: { ...DEFAULT_AQI },
   floorPlans: [] as FloorPlan[],
@@ -1017,46 +1019,17 @@ export default function AdminPage() {
                     {/* AQI Metrics */}
                     <div className="border-t pt-5 space-y-4">
                       <div>
-                        <h4 className="text-xs font-extrabold text-brand-red uppercase tracking-wider">Air Quality Index & Pollutants</h4>
+                        <h4 className="text-xs font-extrabold text-brand-red uppercase tracking-wider">Air Quality Index</h4>
                         <p className="text-xs text-gray-400 mt-0.5">Environmental data for the neighborhood micro-market.</p>
                       </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">AQI Score</label>
-                          <input
-                            type="number" min={0}
-                            className="w-full bg-gray-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
-                            value={form.aqi?.score ?? 0}
-                            onChange={e => setAqi("score", parseInt(e.target.value) || 0)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Dominant Pollutant</label>
-                          <input
-                            type="text"
-                            className="w-full bg-gray-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
-                            value={form.aqi?.dominantPollutant ?? "PM2.5"}
-                            onChange={e => setAqi("dominantPollutant", e.target.value)}
-                          />
-                        </div>
-                        {[
-                          { key: "pm25", label: "PM2.5 Level" },
-                          { key: "pm10", label: "PM10 Level" },
-                          { key: "o3", label: "O3 Level" },
-                          { key: "no2", label: "NO2 Level" },
-                          { key: "so2", label: "SO2 Level" },
-                          { key: "co", label: "CO Level" },
-                        ].map(p => (
-                          <div key={p.key} className="space-y-1">
-                            <label className="text-xs font-bold uppercase tracking-widest text-gray-400">{p.label}</label>
-                            <input
-                              type="number" step="0.1" min={0}
-                              className="w-full bg-gray-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
-                              value={(form.aqi as any)[p.key] ?? 0}
-                              onChange={e => setAqi(p.key, parseFloat(e.target.value) || 0)}
-                            />
-                          </div>
-                        ))}
+                      <div className="max-w-xs space-y-1">
+                        <label className="text-xs font-bold uppercase tracking-widest text-gray-400">AQI Score</label>
+                        <input
+                          type="number" min={0}
+                          className="w-full bg-gray-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
+                          value={form.aqi?.score ?? 0}
+                          onChange={e => setAqi("score", parseInt(e.target.value) || 0)}
+                        />
                       </div>
                     </div>
                   </div>
@@ -1158,6 +1131,30 @@ export default function AdminPage() {
                           <option value="High-Yield Rental">High-Yield Rental</option>
                           <option value="Generational Estate">Generational Estate</option>
                         </select>
+                      </div>
+                    </div>
+
+                    {form.type === "Apartment" && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">UDS Per Acre (Sq Yds)</label>
+                          <input
+                            type="number" className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red"
+                            placeholder="e.g. 100" value={form.udsPerAcre !== undefined ? form.udsPerAcre : 100}
+                            onChange={e => setField("udsPerAcre", parseInt(e.target.value) || 0)}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+                      <div className="md:col-span-3 space-y-1">
+                        <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Google Drive Brochure Link</label>
+                        <input
+                          type="text" className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red"
+                          placeholder="e.g. https://drive.google.com/file/d/.../view?usp=sharing" value={form.brochureUrl || ""}
+                          onChange={e => setField("brochureUrl", e.target.value)}
+                        />
                       </div>
                     </div>
 
@@ -1530,6 +1527,7 @@ export default function AdminPage() {
                             <option value="West">West</option>
                             <option value="North">North</option>
                             <option value="South">South</option>
+                            <option value="Multiple">Multiple</option>
                             <option value="N/A">N/A</option>
                           </select>
                           <input

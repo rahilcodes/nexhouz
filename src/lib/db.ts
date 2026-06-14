@@ -109,7 +109,11 @@ export function normalizeProperty(dbProp: any): Property {
     aqi,
     floorPlans,
     images: allImages.length > 0 ? allImages : [primaryImage],
-    recommendationReport
+    recommendationReport,
+    udsPerAcre: dbProp.uds_per_acre !== undefined && dbProp.uds_per_acre !== null
+      ? Number(dbProp.uds_per_acre)
+      : (dbProp.property_type === "Apartment" ? Number(dbProp.nearby_railway_stations ?? 100) : undefined),
+    brochureUrl: dbProp.brochure_url || ""
   };
 }
 
@@ -519,7 +523,9 @@ export async function saveProperty(form: any): Promise<{ success: boolean; error
       nearby_restaurants: form.nearby?.restaurants ?? 15,
       nearby_metro_stations: form.nearby?.metroStations ?? 2,
       nearby_railway_stations: form.nearby?.railwayStations ?? 1,
-      nearby_it_parks: form.nearby?.itParks ?? 4
+      nearby_it_parks: form.nearby?.itParks ?? 4,
+      uds_per_acre: form.type === "Apartment" ? Number(form.udsPerAcre ?? 100) : null,
+      brochure_url: form.brochureUrl || null
     };
 
     let propertyId = form.id;

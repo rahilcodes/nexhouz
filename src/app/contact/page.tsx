@@ -119,36 +119,19 @@ export default function ContactPage() {
 
               </div>
 
-              {/* STYLISH CUSTOM VECTOR SVG ABSTRACT MAP */}
+              {/* GOOGLE MAPS EMBED */}
               <div className="border border-black/5 bg-brand-gray/10 shadow-luxury overflow-hidden p-6 space-y-4">
-                <span className="text-xs tracking-widest text-brand-black/40 font-bold uppercase block">Kondapur / Kothaguda Node Map</span>
-                <div className="w-full h-44 bg-white border border-black/5 relative overflow-hidden flex items-center justify-center">
-                  
-                  {/* Abstract Street Grid */}
-                  <svg className="w-full h-full opacity-60" viewBox="0 0 300 150">
-                    {/* Roads */}
-                    <line x1="0" y1="75" x2="300" y2="75" stroke="#EAEAEA" strokeWidth="24" /> {/* Kothaguda Road */}
-                    <line x1="120" y1="0" x2="120" y2="150" stroke="#EAEAEA" strokeWidth="20" /> {/* Kondapur X Road */}
-                    <line x1="0" y1="30" x2="300" y2="100" stroke="#F3F3F5" strokeWidth="10" />
-                    
-                    {/* Parcels */}
-                    <rect x="15" y="15" width="80" height="35" fill="#F9F9FB" stroke="#EAEAEA" strokeWidth="1" />
-                    <rect x="150" y="15" width="130" height="40" fill="#F9F9FB" stroke="#EAEAEA" strokeWidth="1" /> {/* AMB Mall Area */}
-                    <rect x="150" y="90" width="120" height="45" fill="#F9F9FB" stroke="#EAEAEA" strokeWidth="1" /> {/* Asian Sun City */}
-                    
-                    {/* Text tags */}
-                    <text x="185" y="38" className="text-xs font-sans font-bold fill-brand-black/30 tracking-widest uppercase">AMB MALL</text>
-                    <text x="165" y="115" className="text-xs font-sans font-bold fill-brand-black/30 tracking-widest uppercase">ASIAN SUN CITY</text>
-                    <text x="10" y="80" className="text-[6px] font-sans font-bold fill-brand-black/30 tracking-wider uppercase">Kothaguda Road</text>
-                    
-                    {/* Pin indicator */}
-                    <circle cx="160" cy="100" r="6" fill="#D31E28" className="animate-ping opacity-75" />
-                    <circle cx="160" cy="100" r="4" fill="#D31E28" />
-                  </svg>
-                  
-                  <div className="absolute bottom-2 left-2 bg-brand-black text-white px-2 py-0.5 text-xs font-bold uppercase tracking-wider">
-                    Asian Sun City Site
-                  </div>
+                <span className="text-xs tracking-widest text-brand-black/40 font-bold uppercase block">Corporate Location Map</span>
+                <div className="w-full h-64 bg-white border border-black/5 relative overflow-hidden">
+                  <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.024320935778!2d78.3630342!3d17.45855!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x83caa45fc340abd9%3A0xee9b39daa6d27739!2sNexdesk%20Coworking%20spaces!5e0!3m2!1sen!2sin!4v1781446910793!5m2!1sen!2sin" 
+                    width="100%" 
+                    height="100%" 
+                    style={{ border: 0 }} 
+                    allowFullScreen={true} 
+                    loading="lazy" 
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
                 </div>
               </div>
 

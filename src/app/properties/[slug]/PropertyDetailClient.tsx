@@ -429,32 +429,6 @@ export default function PropertyDetailClient({ slug }: PropertyDetailClientProps
                     <h2 className="text-base font-extrabold text-gray-900">Amenities</h2>
                   </div>
                   <div className="p-6">
-                    {/* Luxury audit meters */}
-                    <div className="grid grid-cols-3 gap-3 mb-6">
-                      {[
-                        { label: "Architectural Integrity", value: property.scores.architecturalIntegrity, suffix: "/100" },
-                        { label: "Investment Yield", value: property.scores.investmentYield, suffix: "%" },
-                        { label: "Spatial Efficiency", value: property.scores.spatialEfficiency, suffix: "/100" },
-                      ].map(s => (
-                        <div key={s.label} className="text-center p-3 rounded-xl bg-gray-50 border border-gray-100">
-                          <p className="text-xl font-extrabold text-gray-900">{s.value}<span className="text-xs text-gray-400">{s.suffix}</span></p>
-                          <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mt-1 leading-tight">{s.label}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Automation Tier */}
-                    <div className="flex items-center gap-3 p-3.5 rounded-xl bg-brand-red/4 border border-brand-red/10 mb-6">
-                      <div className="w-9 h-9 rounded-full bg-brand-red/10 flex items-center justify-center shrink-0">
-                        <Zap size={15} className="text-brand-red" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-extrabold uppercase tracking-wider text-gray-400">Home Automation Level</p>
-                        <p className="text-sm font-extrabold text-gray-900">{property.scores.automationTier}</p>
-                      </div>
-                      <span className="text-xs font-extrabold text-brand-red bg-brand-red/8 px-2.5 py-1 rounded-full uppercase tracking-wider">Verified</span>
-                    </div>
-
                     {/* Amenities grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                       {(showAllAmenities ? property.amenities : property.amenities.slice(0, 6)).map((a: string) => (
@@ -498,8 +472,6 @@ export default function PropertyDetailClient({ slug }: PropertyDetailClientProps
                           <MapPin size={20} className="text-brand-red" />
                         </div>
                         <p className="text-xs font-bold text-gray-600">{property.location}</p>
-                        <a href={`https://maps.google.com/?q=${encodeURIComponent(property.location)}`} target="_blank" rel="noreferrer"
-                          className="text-sm text-brand-red font-bold mt-1 block hover:underline">View on Google Maps →</a>
                       </div>
                     </div>
                   </div>
@@ -575,41 +547,13 @@ export default function PropertyDetailClient({ slug }: PropertyDetailClientProps
                         <p className="text-xs font-bold mt-2" style={{ color: aqiMeta.text }}>{aqiMeta.label}</p>
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-sm font-extrabold text-gray-900 mb-1">{property.location}</h3>
-                        <div className="flex items-center gap-2 mb-3">
-                          <Clock size={11} className="text-gray-400" />
-                          <span className="text-xs text-gray-400 font-medium">Dominant Pollutant: <strong className="text-gray-700">{property.aqi?.dominantPollutant ?? "PM2.5"}</strong></span>
-                        </div>
+                        <h3 className="text-sm font-extrabold text-gray-900 mb-3">{property.location}</h3>
                         <div className="space-y-1.5">
                           <p className="text-sm text-gray-600 font-medium flex items-center gap-1.5"><Check size={11} className="text-emerald-500 stroke-[3] shrink-0" /> Air quality is acceptable for most people</p>
                           <p className="text-sm text-gray-600 font-medium flex items-center gap-1.5"><Check size={11} className="text-amber-500 stroke-[3] shrink-0" /> Sensitive individuals should limit outdoor exertion</p>
                           <p className="text-sm text-gray-600 font-medium flex items-center gap-1.5"><Check size={11} className="text-emerald-500 stroke-[3] shrink-0" /> Generally safe for outdoor activities</p>
                         </div>
                       </div>
-                    </div>
-
-                    {/* Pollutant levels */}
-                    <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-3">Pollutant Levels</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-                      {([
-                        { name: "PM2.5", value: property.aqi?.pm25 ?? 17.2, unit: "μg/m³", max: 300 },
-                        { name: "PM10", value: property.aqi?.pm10 ?? 20.4, unit: "μg/m³", max: 430 },
-                        { name: "O₃", value: property.aqi?.o3 ?? 72, unit: "μg/m³", max: 504 },
-                        { name: "NO₂", value: property.aqi?.no2 ?? 32.9, unit: "μg/m³", max: 2049 },
-                        { name: "SO₂", value: property.aqi?.so2 ?? 5.6, unit: "μg/m³", max: 1004 },
-                        { name: "CO", value: property.aqi?.co ?? 587, unit: "mg/m³", max: 15400 },
-                      ] as const).map(p => (
-                        // pct is capped at 95% for display purposes
-                        <div key={p.name} className="p-3 rounded-xl bg-gray-50 border border-gray-100">
-                          <div className="flex justify-between items-baseline mb-1.5">
-                            <span className="text-xs font-extrabold text-gray-700">{p.name}</span>
-                            <span className="text-xs font-bold text-gray-500">{p.value} {p.unit}</span>
-                          </div>
-                          <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                            <div className="h-full rounded-full bg-brand-red" style={{ width: `${Math.min(95, Math.round((Number(p.value) / Number(p.max)) * 100))}%` }} />
-                          </div>
-                        </div>
-                      ))}
                     </div>
 
                     {/* AQI Scale */}
@@ -680,9 +624,20 @@ export default function PropertyDetailClient({ slug }: PropertyDetailClientProps
                       </div>
                     ))}
                   </div>
-                  <button className="mt-5 w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-extrabold text-white bg-brand-red hover:bg-brand-red/90 cursor-pointer transition-colors">
-                    <Download size={14} /> Download Brochure
-                  </button>
+                  {property.brochureUrl ? (
+                    <a
+                      href={property.brochureUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-5 w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-extrabold text-white bg-brand-red hover:bg-brand-red/90 cursor-pointer transition-colors"
+                    >
+                      <Download size={14} /> Download Brochure
+                    </a>
+                  ) : (
+                    <button className="mt-5 w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-extrabold text-white bg-brand-red hover:bg-brand-red/90 cursor-pointer transition-colors opacity-60" disabled>
+                      <Download size={14} /> Download Brochure
+                    </button>
+                  )}
                 </div>
 
                 {/* Similar Properties */}
@@ -717,11 +672,10 @@ export default function PropertyDetailClient({ slug }: PropertyDetailClientProps
 
               {/* Price Card */}
               <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-                <div className="flex items-baseline justify-between mb-1">
+                <div className="flex items-baseline justify-between mb-4">
                   <p className="text-2xl font-extrabold text-gray-900">₹{(property.price / 10000000).toFixed(1)} Cr</p>
                   <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Onwards</span>
                 </div>
-                <p className="text-xs text-gray-500 font-medium mb-4">₹{pricePerSqft.toLocaleString()} / sq.ft · {property.area}</p>
                 <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 border border-gray-100 mb-4">
                   <Calendar size={13} className="text-brand-red shrink-0" />
                   <span className="text-xs font-semibold text-gray-700">Possession: <strong>{property.possession === "Ready" ? "Ready to Move" : "Dec 2027"}</strong></span>

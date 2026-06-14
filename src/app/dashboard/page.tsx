@@ -336,7 +336,7 @@ export default function DashboardPage() {
                           <div className="flex items-center justify-between pt-1">
                             <div>
                               <p className="text-lg font-extrabold text-brand-black leading-none">{formatPrice(property.price)}</p>
-                              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Outright Capital</p>
+                              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Onwards</p>
                             </div>
                             <Link
                               href={`/properties/${property.slug}`}
@@ -386,7 +386,7 @@ export default function DashboardPage() {
                           ["Possession State", (p: Property) => p.possession],
                           ["Curation Score", (p: Property) => `${p.scores.architecturalIntegrity}/100`],
                           ["Rental Yield Est.", (p: Property) => `${p.scores.investmentYield}% Projected`],
-                          ["Automation Tier", (p: Property) => p.scores.automationTier],
+                          ["UDS / Automation", (p: Property) => p.type === "Apartment" ? `${p.udsPerAcre ?? 100} UDS/Acre` : p.scores.automationTier],
                           ["Architect Firm", (p: Property) => p.architect.split(" & ")[0]],
                         ].map(([label, getValue], rIdx) => {
                           const fn = getValue as (p: Property) => string;

@@ -824,7 +824,11 @@ function PropertiesExplorerContent() {
                               <span className="text-gray-200">|</span>
                               <span>{property.area}</span>
                               <span className="text-gray-200">|</span>
-                              <span className="text-brand-black/60">{property.scores.automationTier.split(" ")[1]} Automation</span>
+                              <span className="text-brand-black/60">
+                                {property.type === "Apartment"
+                                  ? `${property.udsPerAcre ?? 100} UDS/Acre`
+                                  : `${property.scores.automationTier.split(" ")[1]} Automation`}
+                              </span>
                             </div>
                             
                             <div className="flex items-center gap-4 shrink-0 justify-between sm:justify-start">
@@ -1009,15 +1013,24 @@ function PropertiesExplorerContent() {
                               <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Sq Ft</p>
                             </div>
                             <div className="p-2 bg-gray-50 border border-gray-100 rounded-xl">
-                              <p className="font-extrabold text-brand-black">{property.scores.automationTier.split(" ")[1]}</p>
-                              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Auto Tier</p>
+                              {property.type === "Apartment" ? (
+                                <>
+                                  <p className="font-extrabold text-brand-black">{property.udsPerAcre ?? 100}</p>
+                                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-tight">UDS Per Acre</p>
+                                </>
+                              ) : (
+                                <>
+                                  <p className="font-extrabold text-brand-black">{property.scores.automationTier.split(" ")[1]}</p>
+                                  <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Auto Tier</p>
+                                </>
+                              )}
                             </div>
                           </div>
 
                           <div className="flex items-center justify-between pt-1">
                             <div>
                               <p className="text-lg font-extrabold text-brand-black leading-none">{formatPrice(property.price)}</p>
-                              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Outright Capital</p>
+                              <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Onwards</p>
                             </div>
                             
                             <button
@@ -1120,42 +1133,42 @@ function PropertiesExplorerContent() {
                           value={inquiryForm.name}
                           onChange={(e) => setInquiryForm({ ...inquiryForm, name: e.target.value })}
                           className="w-full bg-gray-50 border border-gray-200/80 px-4 py-3 rounded-xl focus:outline-none focus:border-brand-red focus:bg-white text-xs font-semibold"
-                          placeholder="e.g. Sterling Kemp"
+                          placeholder="e.g. Rahul Sharma"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-xs tracking-[0.2em] uppercase font-extrabold text-gray-400">Corporate Email*</label>
+                        <label className="text-xs tracking-[0.2em] uppercase font-extrabold text-gray-400">Email*</label>
                         <input
                           type="email"
                           required
                           value={inquiryForm.email}
                           onChange={(e) => setInquiryForm({ ...inquiryForm, email: e.target.value })}
                           className="w-full bg-gray-50 border border-gray-200/80 px-4 py-3 rounded-xl focus:outline-none focus:border-brand-red focus:bg-white text-xs font-semibold"
-                          placeholder="e.g. s.kemp@zurichcapital.com"
+                          placeholder="e.g. rahul.sharma@gmail.com"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-xs tracking-[0.2em] uppercase font-extrabold text-gray-400">Secure Telephone*</label>
+                        <label className="text-xs tracking-[0.2em] uppercase font-extrabold text-gray-400">Mobile Number*</label>
                         <input
                           type="tel"
                           required
                           value={inquiryForm.phone}
                           onChange={(e) => setInquiryForm({ ...inquiryForm, phone: e.target.value })}
                           className="w-full bg-gray-50 border border-gray-200/80 px-4 py-3 rounded-xl focus:outline-none focus:border-brand-red focus:bg-white text-xs font-semibold"
-                          placeholder="e.g. +91 85858 54853"
+                          placeholder="e.g. +91 98765 43210"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-xs tracking-[0.2em] uppercase font-extrabold text-gray-400">Acquisition Profile Notes</label>
+                        <label className="text-xs tracking-[0.2em] uppercase font-extrabold text-gray-400">Notes</label>
                         <textarea
                           rows={4}
                           value={inquiryForm.notes}
                           onChange={(e) => setInquiryForm({ ...inquiryForm, notes: e.target.value })}
                           className="w-full bg-gray-50 border border-gray-200/80 px-4 py-3 rounded-xl focus:outline-none focus:border-brand-red focus:bg-white text-xs font-semibold resize-none"
-                          placeholder="State any specific portfolio timelines, custom spatial requests, or financing structures under consideration."
+                          placeholder="e.g. State your specific queries or requirements here."
                         />
                       </div>
 
@@ -1163,7 +1176,7 @@ function PropertiesExplorerContent() {
                         type="submit"
                         className="w-full py-4 bg-brand-black hover:bg-brand-red text-white text-xs tracking-[0.25em] font-extrabold uppercase transition-all duration-300 rounded-xl shadow-luxury hover:scale-101 cursor-pointer"
                       >
-                        Submit Acquisition Profile
+                        Submit
                       </button>
                     </motion.form>
                   ) : (
