@@ -15,7 +15,7 @@ DirectoryIndex index.html
   RewriteRule ^(.*)$ out/$1 [L]
 
   # 3. SPA Fallback for dynamic (admin-added) properties that aren't in out/
-  RewriteRule ^properties/([^/]+)/?$ out/index.html [L]
+  RewriteRule ^properties/([^/]+)/?$ out/properties/kokapet-summit-villa/index.html [L]
 
   # 4. General fallback for any other clean Next.js routes to the SPA root index.html
   RewriteCond %{REQUEST_FILENAME} !-f

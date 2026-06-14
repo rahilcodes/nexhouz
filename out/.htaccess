@@ -9,8 +9,8 @@ DirectoryIndex index.html
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # Rewrite property detail paths to index.html to allow dynamic client-side loading
-  RewriteRule ^properties/[^/]+/?$ index.html [L]
+  # Rewrite property detail paths to allow dynamic client-side loading
+  RewriteRule ^properties/[^/]+/?$ properties/kokapet-summit-villa/index.html [L]
 
   # General SPA fallback for other routes
   RewriteCond %{REQUEST_URI} !^/_next/
