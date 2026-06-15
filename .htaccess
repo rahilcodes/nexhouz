@@ -9,7 +9,14 @@ DirectoryIndex index.html
   RewriteCond %{REQUEST_URI} ^/out/ [NC]
   RewriteRule ^ - [L]
 
-  # 2. Transparently rewrite requests to existing files/folders inside the out/ directory
+  # 2. Append trailing slash to requests for directories inside out/ to prevent mod_dir from redirecting to /out/...
+  # We only do this if the request doesn't already end in a slash.
+  RewriteCond %{REQUEST_URI} !/$
+  RewriteCond %{DOCUMENT_ROOT}/out/$1 -d [OR]
+  RewriteCond out/$1 -d
+  RewriteRule ^(.*)$ $1/ [R=301,L]
+
+  # 3. Transparently rewrite requests to existing files/folders inside the out/ directory
   # We check both relative paths and %{DOCUMENT_ROOT}-based absolute paths for maximum compatibility.
   RewriteCond %{DOCUMENT_ROOT}/out/$1 -f [OR]
   RewriteCond %{DOCUMENT_ROOT}/out/$1 -d [OR]
@@ -17,7 +24,7 @@ DirectoryIndex index.html
   RewriteCond out/$1 -d
   RewriteRule ^(.*)$ out/$1 [L]
 
-  # 3. SPA Fallback for dynamic (admin-added) properties that aren't in out/
+  # 4. SPA Fallback for dynamic (admin-added) properties that aren't in out/
   RewriteRule ^properties/([^/]+)/?$ out/properties/kokapet-summit-villa/index.html [L]
 
   # 4. General fallback for any other clean Next.js routes to the SPA root index.html
