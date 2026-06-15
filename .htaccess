@@ -10,8 +10,11 @@ DirectoryIndex index.html
   RewriteRule ^ - [L]
 
   # 2. Transparently rewrite requests to existing files/folders inside the out/ directory
+  # We check both relative paths and %{DOCUMENT_ROOT}-based absolute paths for maximum compatibility.
   RewriteCond %{DOCUMENT_ROOT}/out/$1 -f [OR]
-  RewriteCond %{DOCUMENT_ROOT}/out/$1 -d
+  RewriteCond %{DOCUMENT_ROOT}/out/$1 -d [OR]
+  RewriteCond out/$1 -f [OR]
+  RewriteCond out/$1 -d
   RewriteRule ^(.*)$ out/$1 [L]
 
   # 3. SPA Fallback for dynamic (admin-added) properties that aren't in out/
