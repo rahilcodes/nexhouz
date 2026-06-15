@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, MapPin, Star, ShieldCheck, Zap, Check,
@@ -56,14 +56,25 @@ function aqiColor(aqi: number) {
 
 export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailClientProps) {
   const params = useParams();
+  const pathname = usePathname();
   const [slug, setSlug] = useState(propSlug);
   const [prevSlug, setPrevSlug] = useState(propSlug);
 
   useEffect(() => {
-    if (params?.slug) {
-      setSlug(params.slug as string);
+    let resolvedSlug = propSlug;
+    if (typeof window !== "undefined") {
+      const match = window.location.pathname.match(/\/properties\/([^/]+)/);
+      if (match && match[1]) {
+        resolvedSlug = decodeURIComponent(match[1]);
+      }
+    } else if (params?.slug) {
+      resolvedSlug = params.slug as string;
     }
-  }, [params]);
+
+    if (resolvedSlug && resolvedSlug !== slug) {
+      setSlug(resolvedSlug);
+    }
+  }, [params, pathname, slug, propSlug]);
 
   const defaultProperty = properties.find(p => p.slug === slug);
   const [property, setProperty] = useState<any | null>(defaultProperty || null);
