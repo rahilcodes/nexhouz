@@ -1,6 +1,6 @@
 1:"$Sreact.fragment"
-2:I[64489,["/_next/static/chunks/0-kxu4i4h229h.js","/_next/static/chunks/0d3shmwh5_nmn.js","/_next/static/chunks/14yfwj8ro3otv.js","/_next/static/chunks/0wbvczp-gbzb7.js","/_next/static/chunks/0c.qy.r6pjylz.js"],"default"]
+2:I[64489,["/_next/static/chunks/0-kxu4i4h229h.js","/_next/static/chunks/0d3shmwh5_nmn.js","/_next/static/chunks/14yfwj8ro3otv.js","/_next/static/chunks/0wbvczp-gbzb7.js","/_next/static/chunks/0haqi4je~7u3u.js"],"default"]
 3:I[97367,["/_next/static/chunks/0-kxu4i4h229h.js","/_next/static/chunks/0d3shmwh5_nmn.js","/_next/static/chunks/14yfwj8ro3otv.js","/_next/static/chunks/0wbvczp-gbzb7.js"],"OutletBoundary"]
 4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"slug":"financial-district-monolith"}],[["$","script","script-0",{"src":"/_next/static/chunks/0c.qy.r6pjylz.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"9urUeFTYZvNAAToq_nF3G"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"slug":"financial-district-monolith"}],[["$","script","script-0",{"src":"/_next/static/chunks/0haqi4je~7u3u.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"Bz7pj8BNKhoiTiRc-zWsm"}
 5:null

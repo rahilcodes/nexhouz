@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, MapPin, Star, ShieldCheck, Zap, Check,
@@ -53,9 +54,25 @@ function aqiColor(aqi: number) {
   return { bg: "#fde8d8", text: "#9a3412", label: "Hazardous" };
 }
 
-export default function PropertyDetailClient({ slug }: PropertyDetailClientProps) {
+export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailClientProps) {
+  const params = useParams();
+  const [slug, setSlug] = useState(propSlug);
+  const [prevSlug, setPrevSlug] = useState(propSlug);
+
+  useEffect(() => {
+    if (params?.slug) {
+      setSlug(params.slug as string);
+    }
+  }, [params]);
+
   const defaultProperty = properties.find(p => p.slug === slug);
   const [property, setProperty] = useState<any | null>(defaultProperty || null);
+
+  if (slug !== prevSlug) {
+    setPrevSlug(slug);
+    setProperty(properties.find(p => p.slug === slug) || null);
+  }
+
   const [activeTab, setActiveTab] = useState("Overview");
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [showAllAmenities, setShowAllAmenities] = useState(false);
