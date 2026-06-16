@@ -475,7 +475,6 @@ export default function AdminPage() {
 
   // Form handlers
   const setField = (k: string, v: any) => setForm(f => ({ ...f, [k]: v }));
-  const setScore = (k: string, v: any) => setForm(f => ({ ...f, scores: { ...f.scores, [k]: v } }));
   const setReport = (k: string, v: any) => setForm(f => ({ ...f, recommendationReport: { ...f.recommendationReport, [k]: v } }));
   const setNearby = (k: string, v: any) => setForm(f => ({ ...f, nearby: { ...f.nearby, [k]: v } }));
   const setAqi = (k: string, v: any) => setForm(f => ({ ...f, aqi: { ...f.aqi, [k]: v } }));
@@ -1158,7 +1157,7 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    <div className="space-y-1">
+                     <div className="space-y-1">
                       <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Property Description</label>
                       <textarea
                         rows={3} className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red resize-none"
@@ -1167,67 +1166,6 @@ export default function AdminPage() {
                       />
                     </div>
 
-                    {/* Luxury Audit Scores */}
-                    <div className="border-t pt-5 space-y-4">
-                      <div>
-                        <h4 className="text-xs font-extrabold text-brand-red uppercase tracking-wider">Verified Luxury Audit Scores</h4>
-                        <p className="text-xs text-gray-400 mt-0.5">Specify metrics verified by our advisory team.</p>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between text-xs font-bold text-gray-500">
-                            <span>Architectural Integrity Score</span>
-                            <span className="text-brand-black font-extrabold">{form.scores?.architecturalIntegrity ?? 90} / 100</span>
-                          </div>
-                          <input
-                            type="range" min={0} max={100} step={1}
-                            className="w-full h-1 bg-gray-200 accent-brand-red rounded-lg appearance-none cursor-pointer"
-                            value={form.scores?.architecturalIntegrity ?? 90}
-                            onChange={e => setScore("architecturalIntegrity", parseInt(e.target.value) || 0)}
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between text-xs font-bold text-gray-500">
-                            <span>Investment Yield (%)</span>
-                            <span className="text-brand-black font-extrabold">{form.scores?.investmentYield ?? 8.0}%</span>
-                          </div>
-                          <input
-                            type="range" min={0} max={20} step={0.1}
-                            className="w-full h-1 bg-gray-200 accent-brand-red rounded-lg appearance-none cursor-pointer"
-                            value={form.scores?.investmentYield ?? 8.0}
-                            onChange={e => setScore("investmentYield", parseFloat(e.target.value) || 0)}
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between text-xs font-bold text-gray-500">
-                            <span>Spatial Efficiency Score</span>
-                            <span className="text-brand-black font-extrabold">{form.scores?.spatialEfficiency ?? 90} / 100</span>
-                          </div>
-                          <input
-                            type="range" min={0} max={100} step={1}
-                            className="w-full h-1 bg-gray-200 accent-brand-red rounded-lg appearance-none cursor-pointer"
-                            value={form.scores?.spatialEfficiency ?? 90}
-                            onChange={e => setScore("spatialEfficiency", parseInt(e.target.value) || 0)}
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Home Automation Tier</label>
-                          <select
-                            className="w-full bg-gray-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
-                            value={form.scores?.automationTier ?? "Tier 2 (Pro)"}
-                            onChange={e => setScore("automationTier", e.target.value)}
-                          >
-                            <option value="Tier 1 (Integrated)">Tier 1 (Integrated)</option>
-                            <option value="Tier 2 (Pro)">Tier 2 (Pro)</option>
-                            <option value="Tier 3 (Elite)">Tier 3 (Elite)</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
                     <div className="border-t pt-5 space-y-4">
                       <div>
                         <h4 className="text-xs font-extrabold text-brand-red uppercase tracking-wider">NexHouz Recommendation Scores (1-10)</h4>
