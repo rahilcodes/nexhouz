@@ -826,7 +826,7 @@ function PropertiesExplorerContent() {
                               <span className="text-gray-200">|</span>
                               <span className="text-brand-black/60">
                                 {property.type === "Apartment"
-                                  ? `${property.udsPerAcre ?? 100} UDS/Acre`
+                                  ? `${property.udsPerAcre ?? 100} Flats/Acre`
                                   : `${property.scores.automationTier.split(" ")[1]} Automation`}
                               </span>
                             </div>
@@ -1016,7 +1016,7 @@ function PropertiesExplorerContent() {
                               {property.type === "Apartment" ? (
                                 <>
                                   <p className="font-extrabold text-brand-black">{property.udsPerAcre ?? 100}</p>
-                                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-tight">UDS Per Acre</p>
+                                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest leading-tight">Flats Per Acre</p>
                                 </>
                               ) : (
                                 <>

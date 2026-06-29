@@ -1136,10 +1136,10 @@ export default function AdminPage() {
                     {form.type === "Apartment" && (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
                         <div className="space-y-1">
-                          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">UDS Per Acre (Sq Yds)</label>
+                          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Flats Per Acre</label>
                           <input
                             type="number" className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red"
-                            placeholder="e.g. 100" value={form.udsPerAcre !== undefined ? form.udsPerAcre : 100}
+                            placeholder="e.g. 60" value={form.udsPerAcre !== undefined ? form.udsPerAcre : 100}
                             onChange={e => setField("udsPerAcre", parseInt(e.target.value) || 0)}
                           />
                         </div>

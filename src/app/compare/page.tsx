@@ -91,7 +91,7 @@ export default function ComparePage() {
     { key: "investmentType", label: "Investment Type", format: (p: Property) => p.investmentType },
     { key: "investmentYield", label: "Projected Yield", format: (p: Property) => `${p.scores.investmentYield}% p.a.` },
     { key: "architecturalIntegrity", label: "Architecture Score", format: (p: Property) => `${p.scores.architecturalIntegrity}/100` },
-    { key: "automationTier", label: "UDS / Auto Tier", format: (p: Property) => p.type === "Apartment" ? `${p.udsPerAcre ?? 100} UDS/Acre` : p.scores.automationTier },
+    { key: "automationTier", label: "Flats/Acre / Auto Tier", format: (p: Property) => p.type === "Apartment" ? `${p.udsPerAcre ?? 100} Flats/Acre` : p.scores.automationTier },
     { key: "architect", label: "Design Firm", format: (p: Property) => p.architect },
   ];
 

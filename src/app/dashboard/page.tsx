@@ -386,7 +386,7 @@ export default function DashboardPage() {
                           ["Possession State", (p: Property) => p.possession],
                           ["Curation Score", (p: Property) => `${p.scores.architecturalIntegrity}/100`],
                           ["Rental Yield Est.", (p: Property) => `${p.scores.investmentYield}% Projected`],
-                          ["UDS / Automation", (p: Property) => p.type === "Apartment" ? `${p.udsPerAcre ?? 100} UDS/Acre` : p.scores.automationTier],
+                          ["Flats/Acre / Automation", (p: Property) => p.type === "Apartment" ? `${p.udsPerAcre ?? 100} Flats/Acre` : p.scores.automationTier],
                           ["Architect Firm", (p: Property) => p.architect.split(" & ")[0]],
                         ].map(([label, getValue], rIdx) => {
                           const fn = getValue as (p: Property) => string;

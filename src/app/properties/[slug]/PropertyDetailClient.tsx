@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, MapPin, Star, ShieldCheck, Zap, Check,
   Building, Layers, TrendingUp, ChevronRight, Phone,
-  Calendar, Ruler, Home, Wind, Navigation, Train,
+  Calendar, Home, Wind, Navigation, Train,
   ShoppingBag, Stethoscope, UtensilsCrossed, GraduationCap,
   ExternalLink, Download, ChevronDown, ChevronUp,
   Building2, Landmark, Clock, BadgeCheck, ChevronLeft
@@ -148,7 +148,6 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
     : getFloorPlans(property.bhk, property.area, property.price);
   const floorPlans = rawFloorPlans;
   const relatedProperties = properties.filter(p => p.id !== property.id && p.type === property.type).slice(0, 2);
-  const pricePerSqft = Math.round(property.price / (parseInt(property.area.replace(/[^0-9]/g, "")) || 1));
 
   // Scroll to tab section
   const scrollToSection = (tab: string) => {
@@ -301,7 +300,6 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                       { label: "Project Name", value: property.title, icon: Building2 },
                       { label: "Builder Name", value: property.architect, icon: Home },
                       { label: "RERA Number", value: property.reraNumber || `TS/01/Building/0${property.id.split("-")[1]}/2024`, icon: BadgeCheck },
-                      { label: "Price / Sq.Ft.", value: `₹${pricePerSqft.toLocaleString()}`, icon: Ruler },
                       { label: "Possession", value: property.possessionDate || (property.possession === "Ready" ? "Ready to Move" : "Under Construction"), icon: Calendar },
                       { label: "Location", value: property.location, icon: MapPin },
                       { label: "Property Type", value: property.type, icon: Landmark },
