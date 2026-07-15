@@ -106,7 +106,7 @@ function HeroSection() {
   return (
     <section className="relative">
       {/* ── Desktop hero — fills the viewport below the header, console included ── */}
-      <div className="hidden lg:block relative h-[calc(100vh-132px)] min-h-[560px] max-h-[820px] overflow-hidden bg-[#efeae1]">
+      <div className="hidden lg:block relative h-[calc(100vh-132px)] min-h-[560px] max-h-[820px] bg-[#efeae1] z-20">
         {HERO_SLIDES.map((s, i) => (
           <div
             key={s.src}
