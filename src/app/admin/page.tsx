@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { fetchAllProperties, saveProperty, deleteProperty, fetchLeads, updateLeadStatus, fetchAiCrmLeads, saveSiteVisit } from "@/lib/db";
+import { fetchAllProperties, saveProperty, deleteProperty, fetchLeads, updateLeadStatus, fetchAiCrmLeads, saveSiteVisit, fetchAllBlogPosts, saveBlogPost, deleteBlogPost, fetchAllBuilderLogos, saveBuilderLogo, deleteBuilderLogo } from "@/lib/db";
 import { Property, FloorPlan } from "@/data/properties";
 import {
   LayoutDashboard, List, Plus, LogOut, Eye, EyeOff,
@@ -11,7 +11,7 @@ import {
   Package, Save, ArrowLeft, ArrowRight, Building2, Moon, Sun,
   Layers, Ruler, Calendar, ShieldCheck, Mail, Phone, ExternalLink, Clock,
   ChevronUp, Grid3X3, Image as ImageIcon, Sparkles, SlidersHorizontal,
-  Database, RefreshCw, BrainCircuit
+  Database, RefreshCw, BrainCircuit, BookOpen
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import { formatINR, DEFAULT_SYSTEM_PROMPT } from "@/lib/chatService";
@@ -128,7 +128,7 @@ const EMPTY_FORM = {
   }
 };
 
-type View = "dashboard" | "listings" | "add" | "edit" | "leads" | "ai_crm" | "ai_brain";
+type View = "dashboard" | "listings" | "add" | "edit" | "leads" | "ai_crm" | "ai_brain" | "blog" | "builders";
 interface Toast { message: string; type: "success" | "error"; }
 
 export default function AdminPage() {
@@ -140,6 +140,25 @@ export default function AdminPage() {
   const [listings, setListings] = useState<Property[]>([]);
   const [leads, setLeads] = useState<any[]>([]);
   const [editingProperty, setEditingProperty] = useState<any | null>(null);
+
+  // Blog Management States
+  const [blogsList, setBlogsList] = useState<any[]>([]);
+  const [isBlogsLoading, setIsBlogsLoading] = useState(false);
+  const [isWritingBlog, setIsWritingBlog] = useState(false);
+  const [blogForm, setBlogForm] = useState<any>({
+    id: undefined,
+    title: "",
+    slug: "",
+    summary: "",
+    content: "",
+    cover_image_url: "",
+    published: false
+  });
+
+  // Builder Logos States
+  const [builderLogosList, setBuilderLogosList] = useState<any[]>([]);
+  const [isBuildersLoading, setIsBuildersLoading] = useState(false);
+  const [builderLogoForm, setBuilderLogoForm] = useState({ id: "", name: "", logo_url: "", website_url: "", display_order: 0, active: true });
 
   // AI CRM States
   const [aiLeads, setAiLeads] = useState<any[]>([]);
@@ -334,6 +353,13 @@ export default function AdminPage() {
       }
       
       fetchHealthMetrics();
+
+      try {
+        const blogs = await fetchAllBlogPosts();
+        setBlogsList(blogs);
+      } catch (e) {
+        console.warn("Error loading blogs in loadData:", e);
+      }
       
       const { error } = await supabase.from("properties").select("id").limit(1);
       if (error) {
@@ -367,6 +393,44 @@ export default function AdminPage() {
           error: e.message || String(e)
         });
       }
+    }
+  }
+
+  // Load blogs on view === "blog"
+  useEffect(() => {
+    if (view === "blog" && isLoggedIn) {
+      loadBlogs();
+    }
+  }, [view, isLoggedIn]);
+
+  async function loadBlogs() {
+    setIsBlogsLoading(true);
+    try {
+      const blogs = await fetchAllBlogPosts();
+      setBlogsList(blogs);
+    } catch (e) {
+      console.error("Error refreshing blogs:", e);
+    } finally {
+      setIsBlogsLoading(false);
+    }
+  }
+
+  // Load builders on view === "builders"
+  useEffect(() => {
+    if (view === "builders" && isLoggedIn) {
+      loadBuilders();
+    }
+  }, [view, isLoggedIn]);
+
+  async function loadBuilders() {
+    setIsBuildersLoading(true);
+    try {
+      const logos = await fetchAllBuilderLogos();
+      setBuilderLogosList(logos);
+    } catch (e) {
+      console.error("Error loading builder logos:", e);
+    } finally {
+      setIsBuildersLoading(false);
     }
   }
 
@@ -711,7 +775,9 @@ export default function AdminPage() {
             { id: "listings", label: "All Properties", icon: List },
             { id: "leads", label: "Inquiries & Leads", icon: Mail, badge: leads.filter(l => l.status === "new").length },
             { id: "ai_crm", label: "AI Advisor CRM", icon: BrainCircuit },
-            { id: "ai_brain", label: "AI Brain Config", icon: Sparkles }
+            { id: "ai_brain", label: "AI Brain Config", icon: Sparkles },
+            { id: "blog", label: "Manage Blog", icon: BookOpen },
+            { id: "builders", label: "Partner Builders", icon: Building }
           ].map(item => {
             const Icon = item.icon;
             const active = view === item.id || (item.id === "listings" && (view === "add" || view === "edit"));
@@ -757,6 +823,8 @@ export default function AdminPage() {
             {view === "leads" && "Acquisition Inquiries"}
             {view === "ai_crm" && "AI Advisor CRM"}
             {view === "ai_brain" && "AI Brain Configuration"}
+            {view === "blog" && "Manage Blog Posts"}
+            {view === "builders" && "Partner Builder Logos"}
           </h2>
           <div className="flex items-center gap-4">
             {isDebugMode && (
@@ -1882,6 +1950,44 @@ export default function AdminPage() {
           {/* VIEW: LEADS */}
           {view === "leads" && (
             <div className="space-y-6">
+              {/* Header with export */}
+              <div className="flex items-center justify-between flex-wrap gap-3 bg-white rounded-2xl border px-6 py-4 shadow-sm">
+                <div>
+                  <h3 className="text-sm font-extrabold text-brand-black uppercase tracking-wider">Acquisition Inquiries</h3>
+                  <p className="text-xs text-gray-400 font-medium mt-0.5">{leads.length} total leads captured</p>
+                </div>
+                <button
+                  onClick={() => {
+                    // Build CSV from leads data
+                    const headers = ["Name", "Email", "Phone", "Property", "Lead Type", "Notes", "Status", "Date"];
+                    const rows = leads.map(l => [
+                      l.name || "",
+                      l.email || "",
+                      l.phone || "",
+                      l.properties?.title || "General Query",
+                      l.lead_type || "",
+                      (l.notes || "").replace(/,/g, ";"),
+                      l.status || "",
+                      l.created_at ? new Date(l.created_at).toLocaleDateString("en-IN") : ""
+                    ]);
+                    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(",")).join("\n");
+                    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `nexhouz_leads_${new Date().toISOString().slice(0,10)}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    showToast("Leads exported to CSV successfully!", "success");
+                  }}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold uppercase tracking-wider rounded-xl cursor-pointer transition-colors shadow-sm"
+                >
+                  <Save size={13} /> Export to CSV
+                </button>
+              </div>
+
               <div className="bg-white border rounded-2xl overflow-hidden shadow-sm">
                 <table className="w-full text-left">
                   <thead>
@@ -2440,6 +2546,441 @@ CREATE POLICY "Allow public update on site_visits" ON site_visits FOR UPDATE USI
                     Close Profile Panel
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: BLOG MANAGEMENT */}
+          {view === "blog" && (
+            <div className="space-y-6">
+              {isWritingBlog ? (
+                <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+                  <div className="px-6 py-5 border-b border-gray-150 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-extrabold text-brand-black uppercase tracking-wider">
+                        {blogForm.id ? "Edit Blog Post" : "Write New Blog Post"}
+                      </h3>
+                      <p className="text-xs text-gray-400 font-medium mt-1">Compose SEO-optimised content and configure status.</p>
+                    </div>
+                    <button
+                      onClick={() => setIsWritingBlog(false)}
+                      className="px-4 py-2 border hover:bg-gray-50 text-gray-500 text-xs font-bold uppercase rounded-xl transition-all cursor-pointer"
+                    >
+                      Back to list
+                    </button>
+                  </div>
+
+                  <div className="p-6 space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Post Title</label>
+                        <input
+                          type="text" className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red"
+                          placeholder="e.g. The Rise of Architectural Minimalism"
+                          value={blogForm.title || ""}
+                          onChange={e => {
+                            const newTitle = e.target.value;
+                            setBlogForm((prev: any) => ({
+                              ...prev,
+                              title: newTitle,
+                              slug: prev.id ? prev.slug : newTitle.toLowerCase().replace(/[^\w ]+/g, "").replace(/ +/g, "-")
+                            }));
+                          }}
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold uppercase tracking-widest text-gray-400">URL Slug</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text" className="flex-1 bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red"
+                            placeholder="e.g. rise-of-architectural-minimalism"
+                            value={blogForm.slug || ""}
+                            onChange={e => setBlogForm((prev: any) => ({ ...prev, slug: e.target.value }))}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setBlogForm((prev: any) => ({ ...prev, slug: prev.title.toLowerCase().replace(/[^\w ]+/g, "").replace(/ +/g, "-") }))}
+                            className="px-3 border hover:bg-gray-50 text-xs font-extrabold uppercase rounded-xl cursor-pointer"
+                          >
+                            Auto
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Cover Image URL</label>
+                        <input
+                          type="text" className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red"
+                          placeholder="e.g. /images/hero_modernist_villa.png"
+                          value={blogForm.cover_image_url || ""}
+                          onChange={e => setBlogForm((prev: any) => ({ ...prev, cover_image_url: e.target.value }))}
+                        />
+                      </div>
+                      <div className="flex items-center pt-5">
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <input
+                            type="checkbox" className="w-4 h-4 rounded border-gray-300 text-brand-red focus:ring-brand-red"
+                            checked={!!blogForm.published}
+                            onChange={e => setBlogForm((prev: any) => ({ ...prev, published: e.target.checked }))}
+                          />
+                          <span className="text-xs font-extrabold uppercase tracking-wider text-brand-black">Publish Instantly (Visible on live site)</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold uppercase tracking-widest text-gray-400">SEO Excerpt / Summary</label>
+                      <textarea
+                        className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red min-h-[80px] resize-y"
+                        placeholder="Provide a concise 1-2 sentence meta summary of the post for Google search results."
+                        value={blogForm.summary || ""}
+                        maxLength={250}
+                        onChange={e => setBlogForm((prev: any) => ({ ...prev, summary: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Blog Content (Markdown Supported)</label>
+                        <span className="text-[10px] text-gray-400 font-bold">Use standard headings, bold text, lists, etc.</span>
+                      </div>
+                      <textarea
+                        className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-mono outline-none focus:border-brand-red min-h-[400px] resize-y"
+                        placeholder="# Write your markdown content here..."
+                        value={blogForm.content || ""}
+                        onChange={e => setBlogForm((prev: any) => ({ ...prev, content: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="px-6 py-4 border-t bg-gray-50 flex items-center justify-between">
+                    <button
+                      onClick={() => setIsWritingBlog(false)}
+                      className="px-5 py-2.5 border hover:bg-gray-100 text-gray-500 text-xs font-extrabold uppercase rounded-xl cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!blogForm.title || !blogForm.slug || !blogForm.content) {
+                          showToast("Please fill in title, slug, and content!", "error");
+                          return;
+                        }
+                        const res = await saveBlogPost(blogForm);
+                        if (res.success) {
+                          showToast("Blog post saved successfully!", "success");
+                          setIsWritingBlog(false);
+                          loadBlogs();
+                        } else {
+                          showToast(res.error || "Failed to save blog post.", "error");
+                        }
+                      }}
+                      className="px-6 py-2.5 bg-brand-red hover:bg-[#b0161f] text-white text-xs font-extrabold uppercase rounded-xl transition-all cursor-pointer"
+                    >
+                      Save & Publish
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+                  <div className="px-6 py-5 border-b border-gray-150 flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                      <h3 className="text-sm font-extrabold text-brand-black uppercase tracking-wider">All Blog Posts</h3>
+                      <p className="text-xs text-gray-400 font-medium mt-1">SEO articles that drive traffic and build domain authority.</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setBlogForm({
+                          id: undefined,
+                          title: "",
+                          slug: "",
+                          summary: "",
+                          content: "",
+                          cover_image_url: "/images/hero_modernist_villa.png",
+                          published: true
+                        });
+                        setIsWritingBlog(true);
+                      }}
+                      className="px-4 py-2.5 bg-brand-red hover:bg-[#b0161f] text-white text-xs font-extrabold uppercase rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Plus size={14} /> Write Blog Post
+                    </button>
+                  </div>
+
+                  {isBlogsLoading ? (
+                    <div className="py-20 flex justify-center items-center">
+                      <div className="w-8 h-8 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  ) : blogsList.length === 0 ? (
+                    <div className="text-center py-20 bg-gray-50/50">
+                      <BookOpen size={36} className="text-gray-300 mx-auto mb-3" />
+                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">No blog posts found</h4>
+                      <p className="text-xs text-gray-450 mt-1">Click the button above to write your first traffic-driving post.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left">
+                        <thead>
+                          <tr className="bg-gray-50 border-b border-gray-150 text-[10px] font-black uppercase tracking-wider text-gray-400">
+                            <th className="px-6 py-3.5 w-16">Cover</th>
+                            <th className="px-6 py-3.5">Title & URL Slug</th>
+                            <th className="px-6 py-3.5 w-28">Status</th>
+                            <th className="px-6 py-3.5 w-36">Published Date</th>
+                            <th className="px-6 py-3.5 w-24 text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 text-xs font-semibold text-brand-black">
+                          {blogsList.map(post => (
+                            <tr key={post.id} className="hover:bg-gray-50/50 transition-colors">
+                              <td className="px-6 py-4">
+                                <img
+                                  src={post.cover_image_url || "/images/hero_modernist_villa.png"}
+                                  alt="Cover"
+                                  className="w-12 h-8 object-cover rounded-md border"
+                                />
+                              </td>
+                              <td className="px-6 py-4 space-y-1">
+                                <p className="font-extrabold text-sm text-gray-900 leading-tight">{post.title}</p>
+                                <p className="text-[10px] text-gray-450 font-mono">/blog/{post.slug}</p>
+                              </td>
+                              <td className="px-6 py-4">
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                                  post.published
+                                    ? "bg-green-50 text-green-700 border border-green-200"
+                                    : "bg-gray-100 text-gray-600 border border-gray-200"
+                                }`}>
+                                  {post.published ? "Published" : "Draft"}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-gray-400 font-medium">
+                                {post.published_at ? new Date(post.published_at).toLocaleDateString("en-IN", {
+                                  day: "numeric",
+                                  month: "short",
+                                  year: "numeric"
+                                }) : "—"}
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    onClick={() => {
+                                      setBlogForm(post);
+                                      setIsWritingBlog(true);
+                                    }}
+                                    className="w-8 h-8 rounded-lg border hover:bg-gray-50 flex items-center justify-center text-gray-500 cursor-pointer"
+                                    title="Edit"
+                                  >
+                                    <Pencil size={13} />
+                                  </button>
+                                  <button
+                                    onClick={async () => {
+                                      if (confirm(`Are you sure you want to delete '${post.title}'?`)) {
+                                        const ok = await deleteBlogPost(post.id);
+                                        if (ok) {
+                                          showToast("Blog post deleted successfully.", "success");
+                                          loadBlogs();
+                                        } else {
+                                          showToast("Failed to delete blog post.", "error");
+                                        }
+                                      }
+                                    }}
+                                    className="w-8 h-8 rounded-lg border border-red-150 hover:bg-red-50 flex items-center justify-center text-red-600 cursor-pointer"
+                                    title="Delete"
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* VIEW: PARTNER BUILDER LOGOS */}
+          {view === "builders" && (
+            <div className="space-y-6">
+              {/* Add/Edit Form */}
+              <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 space-y-4">
+                <h3 className="text-sm font-extrabold text-brand-black uppercase tracking-wider">
+                  {builderLogoForm.id ? "Edit Builder Logo" : "Add New Builder Logo"}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Builder Name *</label>
+                    <input type="text" className="w-full bg-gray-50 border rounded-xl px-3 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
+                      placeholder="e.g. Hallmark Developers"
+                      value={builderLogoForm.name}
+                      onChange={e => setBuilderLogoForm(p => ({ ...p, name: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Logo Image URL</label>
+                    <input type="text" className="w-full bg-gray-50 border rounded-xl px-3 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
+                      placeholder="https://... or leave empty for initials"
+                      value={builderLogoForm.logo_url}
+                      onChange={e => setBuilderLogoForm(p => ({ ...p, logo_url: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Website URL</label>
+                    <input type="text" className="w-full bg-gray-50 border rounded-xl px-3 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
+                      placeholder="https://..."
+                      value={builderLogoForm.website_url}
+                      onChange={e => setBuilderLogoForm(p => ({ ...p, website_url: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Display Order</label>
+                    <input type="number" className="w-full bg-gray-50 border rounded-xl px-3 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
+                      placeholder="1, 2, 3..."
+                      value={builderLogoForm.display_order || ""}
+                      onChange={e => setBuilderLogoForm(p => ({ ...p, display_order: parseInt(e.target.value) || 0 }))}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 pt-2">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" className="w-4 h-4 rounded text-brand-red"
+                      checked={builderLogoForm.active}
+                      onChange={e => setBuilderLogoForm(p => ({ ...p, active: e.target.checked }))}
+                    />
+                    <span className="text-xs font-bold text-brand-black">Show on homepage</span>
+                  </label>
+                  <div className="flex-1" />
+                  {builderLogoForm.id && (
+                    <button
+                      onClick={() => setBuilderLogoForm({ id: "", name: "", logo_url: "", website_url: "", display_order: 0, active: true })}
+                      className="px-4 py-2 border text-gray-500 text-xs font-bold uppercase rounded-xl cursor-pointer hover:bg-gray-50"
+                    >
+                      Clear
+                    </button>
+                  )}
+                  <button
+                    onClick={async () => {
+                      if (!builderLogoForm.name.trim()) {
+                        showToast("Builder name is required!", "error");
+                        return;
+                      }
+                      const res = await saveBuilderLogo(builderLogoForm);
+                      if (res.success) {
+                        showToast(builderLogoForm.id ? "Builder logo updated!" : "Builder logo added!", "success");
+                        setBuilderLogoForm({ id: "", name: "", logo_url: "", website_url: "", display_order: 0, active: true });
+                        loadBuilders();
+                      } else {
+                        showToast(res.error || "Failed to save builder logo.", "error");
+                      }
+                    }}
+                    className="px-5 py-2 bg-brand-red hover:bg-[#b0161f] text-white text-xs font-extrabold uppercase rounded-xl cursor-pointer transition-colors"
+                  >
+                    {builderLogoForm.id ? "Update Logo" : "Add Logo"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Logos List */}
+              <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-150">
+                  <h3 className="text-sm font-extrabold text-brand-black uppercase tracking-wider">All Builder Logos</h3>
+                  <p className="text-xs text-gray-400 font-medium mt-0.5">These appear in the scrolling partner banner on the homepage.</p>
+                </div>
+
+                {isBuildersLoading ? (
+                  <div className="py-16 flex justify-center">
+                    <div className="w-8 h-8 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : builderLogosList.length === 0 ? (
+                  <div className="text-center py-16">
+                    <Building size={32} className="text-gray-300 mx-auto mb-3" />
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">No builder logos added yet.</p>
+                    <p className="text-xs text-gray-400 mt-1">Use the form above to add your first partner builder. Remember to first create the <code className="bg-gray-100 px-1 rounded">builder_logos</code> table in Supabase.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="bg-gray-50 border-b border-gray-150 text-[10px] font-black uppercase tracking-wider text-gray-400">
+                          <th className="px-6 py-3.5 w-16">Logo</th>
+                          <th className="px-6 py-3.5">Builder Name</th>
+                          <th className="px-6 py-3.5">Website</th>
+                          <th className="px-6 py-3.5 w-20">Order</th>
+                          <th className="px-6 py-3.5 w-24">Status</th>
+                          <th className="px-6 py-3.5 w-24 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 text-xs font-semibold text-brand-black">
+                        {builderLogosList.map(logo => (
+                          <tr key={logo.id} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-6 py-4">
+                              {logo.logo_url ? (
+                                <img src={logo.logo_url} alt={logo.name} className="h-8 w-auto object-contain rounded border" />
+                              ) : (
+                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-red to-red-800 flex items-center justify-center text-white font-black text-xs">
+                                  {logo.name.split(" ").slice(0,2).map((w: string) => w[0]).join("").toUpperCase()}
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 font-extrabold text-gray-900">{logo.name}</td>
+                            <td className="px-6 py-4 text-gray-400 font-medium">
+                              {logo.website_url ? (
+                                <a href={logo.website_url} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline text-[10px]">{logo.website_url}</a>
+                              ) : "—"}
+                            </td>
+                            <td className="px-6 py-4 text-gray-400">{logo.display_order || 0}</td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                                logo.active
+                                  ? "bg-green-50 text-green-700 border border-green-200"
+                                  : "bg-gray-100 text-gray-500 border border-gray-200"
+                              }`}>
+                                {logo.active ? "Visible" : "Hidden"}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => setBuilderLogoForm({
+                                    id: logo.id || "",
+                                    name: logo.name || "",
+                                    logo_url: logo.logo_url || "",
+                                    website_url: logo.website_url || "",
+                                    display_order: logo.display_order || 0,
+                                    active: logo.active !== false
+                                  })}
+                                  className="w-8 h-8 rounded-lg border hover:bg-gray-50 flex items-center justify-center text-gray-500 cursor-pointer"
+                                >
+                                  <Pencil size={13} />
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    if (confirm(`Delete '${logo.name}'?`)) {
+                                      const ok = await deleteBuilderLogo(logo.id);
+                                      if (ok) {
+                                        showToast("Builder logo removed.", "success");
+                                        loadBuilders();
+                                      } else {
+                                        showToast("Failed to delete.", "error");
+                                      }
+                                    }
+                                  }}
+                                  className="w-8 h-8 rounded-lg border border-red-150 hover:bg-red-50 flex items-center justify-center text-red-600 cursor-pointer"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           )}

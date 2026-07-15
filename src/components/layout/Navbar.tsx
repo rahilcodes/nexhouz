@@ -41,6 +41,7 @@ export const menus = [
     items: [
       { icon: Info, label: "About Us", desc: "Our story, mission and audit philosophy", href: "/about" },
       { icon: Briefcase, label: "Careers", desc: "Join Hyderabad's most trusted property firm", href: "/careers" },
+      { icon: Globe, label: "Real Estate Blog", desc: "SEO insights and Hyderabad property news", href: "/blog" },
     ]
   }
 ];
@@ -185,6 +186,17 @@ export default function Navbar() {
                 </AnimatePresence>
               </div>
             ))}
+
+            {/* Contact Us — standalone visible link */}
+            <Link
+              href="/contact"
+              className={`flex items-center gap-1.5 px-3 xl:px-4 py-2.5 rounded-lg text-[15px] xl:text-base font-medium transition-colors ${
+                pathname === "/contact" ? "text-[#D31E28] bg-[#FAF7F1]" : "text-[#2b2823] hover:text-[#D31E28]"
+              }`}
+            >
+              <Phone size={14} className="stroke-[1.8]" />
+              Contact Us
+            </Link>
           </nav>
 
           {/* Desktop CTA */}
@@ -274,6 +286,14 @@ export default function Navbar() {
                 </div>
               ))}
               <div className="pt-5 space-y-3">
+                {/* Contact Us — direct link */}
+                <Link
+                  href="/contact"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center justify-center gap-2 border-[1.5px] border-[#D31E28] text-[#D31E28] text-base font-semibold py-4 rounded-xl hover:bg-[#D31E28] hover:text-white transition-colors"
+                >
+                  <Phone size={15} /> Contact Us
+                </Link>
                 <a
                   href={PHONE_TEL}
                   className="flex items-center justify-center gap-2 border-[1.5px] border-[#d8d2c6] text-[#0A0A0A] text-base font-semibold py-4 rounded-xl"

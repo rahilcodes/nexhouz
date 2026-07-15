@@ -1,180 +1,155 @@
+import React from "react";
 import Link from "next/link";
-import { ArrowLeft, Clock, Calendar, Tag, ArrowRight, ShieldCheck } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { blogPosts } from "@/data/blog";
-import { properties } from "@/data/properties";
+import { fetchBlogPostBySlug, fetchPublishedBlogPosts } from "@/lib/db";
+import { Calendar, ArrowLeft, BookOpen, Clock, Phone, Check } from "lucide-react";
+import { notFound } from "next/navigation";
+import { Metadata } from "next";
 
-interface BlogPostPageProps {
-  params: Promise<{ slug: string }>;
+export const revalidate = 60; // Revalidate pages every 60 seconds
+
+export async function generateStaticParams() {
+  const posts = await fetchPublishedBlogPosts();
+  return posts.map((post) => ({
+    slug: post.slug,
+  }));
 }
 
-const CONTAINER = "max-w-[1400px] mx-auto w-full";
-const SECTION_X = "px-4 md:px-6 xl:px-[60px]";
-
-export default async function BlogPostPage({ params }: BlogPostPageProps) {
-  const resolvedParams = await params;
-  const slug = resolvedParams.slug;
-  const post = blogPosts.find((p) => p.slug === slug);
-
-  // Fallback if post not found
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const post = await fetchBlogPostBySlug(params.slug);
   if (!post) {
-    return (
-      <div className="font-archivo bg-white">
-        <Navbar />
-        <main className={`${SECTION_X} py-24 lg:py-32 flex flex-col items-center justify-center text-center`}>
-          <h2 className="font-display font-semibold text-[32px] text-[#0A0A0A] mb-4">Essay not found</h2>
-          <p className="text-[15px] text-[#57534a] leading-relaxed max-w-sm mb-8">
-            The article you&apos;re looking for could not be found. It may have been moved or archived.
-          </p>
-          <Link
-            href="/blog"
-            className="px-7 py-4 bg-[#0A0A0A] hover:bg-[#D31E28] text-white text-sm font-semibold rounded-lg transition-colors"
-          >
-            Return to the journal
-          </Link>
-        </main>
-        <Footer />
-      </div>
-    );
+    return {
+      title: "Article Not Found | NexHouz",
+    };
+  }
+  return {
+    title: `${post.title} | NexHouz Insight`,
+    description: post.summary,
+    openGraph: {
+      title: post.title,
+      description: post.summary,
+      url: `https://nexhouz.com/blog/${post.slug}`,
+      type: "article",
+      images: [{ url: post.cover_image_url || "/images/hero_modernist_villa.png" }]
+    }
+  };
+}
+
+export default async function BlogPostDetailPage({ params }: { params: { slug: string } }) {
+  const post = await fetchBlogPostBySlug(params.slug);
+  if (!post || !post.published) {
+    notFound();
   }
 
-  // Showcase a matching property on the sidebar for high conversion
-  const featuredProp = properties[0];
-  const priceCr = featuredProp.price >= 10000000
-    ? `₹${parseFloat((featuredProp.price / 10000000).toFixed(2))} Cr`
-    : `₹${parseFloat((featuredProp.price / 100000).toFixed(2))} Lakhs`;
+  // Calculate reading time
+  const wordCount = post.content.split(/\s+/).length;
+  const readTime = Math.ceil(wordCount / 225); // average reading speed is 225 wpm
 
   return (
-    <div className="font-archivo bg-white">
+    <div className="min-h-screen bg-[#FAF7F1] flex flex-col font-archivo text-[#0A0A0A]">
       <Navbar />
 
-      <main className={`${SECTION_X} py-12 lg:py-16`}>
-        <div className={CONTAINER}>
-          {/* Back link */}
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 text-[13px] tracking-wide font-semibold text-[#57534a] hover:text-[#D31E28] uppercase mb-8 lg:mb-12 group"
-          >
-            <ArrowLeft size={14} className="transition-transform duration-300 group-hover:-translate-x-0.5" />
-            Back to the journal
-          </Link>
+      <main className="flex-1 py-12 md:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Back button */}
+          <div className="mb-8">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-[#D31E28] transition-colors"
+            >
+              <ArrowLeft size={14} /> Back to publications
+            </Link>
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
-            {/* Main article */}
-            <article className="lg:col-span-8">
-              <div className="flex items-center gap-4 text-[11px] tracking-[0.14em] font-bold uppercase text-[#948d7c]">
-                <span className="flex items-center gap-1.5 text-[#8A6D2F]">
-                  <Tag size={11} className="text-[#D31E28]" />
-                  {post.category}
-                </span>
-                <span className="text-[#e0d9cb]">•</span>
-                <span className="flex items-center gap-1.5">
-                  <Clock size={11} />
-                  {post.readTime}
-                </span>
-              </div>
-
-              <h1 className="font-display font-semibold text-[32px] md:text-[48px] lg:text-[56px] text-[#0A0A0A] leading-[1.1] mt-4 text-balance">
-                {post.title}
-              </h1>
-
-              <p className="text-[16px] md:text-[18px] text-[#57534a] leading-relaxed italic border-l-2 border-[#D31E28] pl-4 mt-5">
-                {post.excerpt}
-              </p>
-
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-10 items-start">
+            
+            {/* ─── LEFT COLUMN: ARTICLE CONTENT ─── */}
+            <article className="bg-white rounded-3xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] overflow-hidden">
+              
               {/* Cover image */}
-              <div className="aspect-[16/9] overflow-hidden bg-[#efeae1] border border-[#EEE9E0] rounded-2xl mt-8">
-                <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+              <div className="relative aspect-[16/9] w-full bg-gray-100 border-b border-[#EEE9E0]">
+                <img
+                  src={post.cover_image_url || "/images/hero_modernist_villa.png"}
+                  alt={post.title}
+                  className="w-full h-full object-cover"
+                />
               </div>
 
-              {/* Author row */}
-              <div className="flex items-center justify-between py-5 border-y border-[#EEE9E0] mt-8">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center font-semibold text-sm">
-                    {post.author.split(" ").map((n) => n[0]).join("")}
-                  </div>
-                  <div>
-                    <h4 className="text-[14px] font-semibold text-[#0A0A0A]">{post.author}</h4>
-                    <p className="text-[11px] text-[#948d7c] font-bold uppercase tracking-wider">{post.authorRole}</p>
-                  </div>
+              {/* Title & Meta Info */}
+              <div className="px-6 sm:px-10 pt-8 pb-6 border-b border-[#f0ebe1]">
+                <div className="flex flex-wrap items-center gap-4 text-xs font-bold uppercase tracking-wider text-gray-400 mb-4">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#faf0f0] border border-[#f3c9cb] text-[#D31E28]">
+                    <BookOpen size={11} /> Insight Report
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar size={12} className="text-[#D31E28]" />
+                    {post.published_at ? new Date(post.published_at).toLocaleDateString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric"
+                    }) : ""}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock size={12} className="text-[#D31E28]" />
+                    {readTime} Min Read
+                  </span>
                 </div>
-                <div className="flex items-center gap-1.5 text-[13px] text-[#57534a] font-semibold uppercase">
-                  <Calendar size={13} className="text-[#D31E28]" />
-                  {post.date}
-                </div>
+
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight leading-tight">
+                  {post.title}
+                </h1>
+                
+                <p className="text-gray-400 text-xs font-extrabold uppercase tracking-widest mt-4">
+                  BY NEXHOUZ ADVISORY BOARD · AUTHORIZED FOR PUBLIC DISTRIBUTION
+                </p>
               </div>
 
-              {/* Prose content */}
-              <div
-                className="prose prose-neutral max-w-none text-[#44403a] text-[16px] leading-[1.8] mt-8
-                  prose-headings:font-display prose-headings:font-semibold prose-headings:text-[#0A0A0A]
-                  prose-h2:text-[26px] prose-h2:md:text-[32px] prose-h2:pt-8 prose-h2:mt-8 prose-h2:border-t prose-h2:border-[#EEE9E0]
-                  prose-a:text-[#D31E28] prose-a:no-underline hover:prose-a:underline
-                  prose-blockquote:border-l-4 prose-blockquote:border-[#D31E28] prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-[#2b2823] prose-blockquote:font-normal prose-blockquote:text-lg prose-blockquote:my-8
-                  prose-ul:list-disc prose-ul:pl-6 prose-ul:space-y-2
-                  prose-strong:font-semibold prose-strong:text-[#0A0A0A]"
-                dangerouslySetInnerHTML={{ __html: post.content }}
-              />
+              {/* Rich Body */}
+              <div className="px-6 sm:px-10 py-8 leading-relaxed">
+                {renderMarkdown(post.content)}
+              </div>
             </article>
 
-            {/* Sidebar */}
-            <aside className="lg:col-span-4 lg:sticky lg:top-6 space-y-6">
-              <div className="bg-[#FAF7F1] border border-[#EEE9E0] rounded-2xl p-6">
-                <div className="text-[11px] tracking-[0.18em] text-[#8A6D2F] font-semibold uppercase">Featured residence</div>
-                <h4 className="font-display font-semibold text-[22px] text-[#0A0A0A] mt-1">A home worth touring.</h4>
-
-                <div className="bg-white border border-[#EEE9E0] rounded-xl overflow-hidden group mt-5">
-                  <Link href="/properties" className="relative block aspect-[4/3] overflow-hidden bg-[#efeae1]">
-                    <img
-                      src={featuredProp.image}
-                      alt={featuredProp.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <span className="absolute left-3 top-3 bg-emerald-500 text-white rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
-                      <ShieldCheck size={10} /> Legal Clear
-                    </span>
-                  </Link>
-                  <div className="p-5">
-                    <span className="text-[11px] text-[#948d7c] font-bold uppercase tracking-[0.18em]">
-                      {featuredProp.location.split(",")[0]}
-                    </span>
-                    <Link
-                      href="/properties"
-                      className="block font-display font-semibold text-[19px] text-[#D31E28] hover:text-[#B8171F] transition-colors mt-1.5"
-                    >
-                      {featuredProp.title}
-                    </Link>
-                    <div className="flex justify-between items-center pt-3.5 mt-3.5 border-t border-[#EEE9E0] text-[12px] text-[#948d7c] uppercase font-bold tracking-wide">
-                      <span>{featuredProp.bhk} BHK · {featuredProp.area}</span>
-                      <span className="text-[#D31E28]">{priceCr}</span>
-                    </div>
-                    <Link
-                      href="/properties"
-                      className="w-full mt-4 py-3 bg-[#0A0A0A] hover:bg-[#D31E28] text-white text-[11px] tracking-widest font-bold uppercase text-center block rounded-full transition-colors"
-                    >
-                      View property
-                    </Link>
-                  </div>
+            {/* ─── RIGHT COLUMN: CALL TO ACTION SIDEBAR ─── */}
+            <aside className="space-y-6">
+              
+              {/* Advisor Card */}
+              <div className="bg-[#0A0A0A] text-white rounded-3xl p-6 border border-gray-800 shadow-[0_4px_20px_rgba(0,0,0,0.15)] space-y-5">
+                <div className="w-12 h-12 bg-red-50 border border-brand-red/10 rounded-2xl flex items-center justify-center">
+                  <Phone size={20} className="text-[#D31E28]" />
                 </div>
-              </div>
-
-              {/* CTA */}
-              <div className="bg-[#0A0A0A] text-white rounded-2xl p-6">
-                <div className="text-[11px] tracking-[0.18em] text-[#D31E28] font-semibold uppercase">Free Expert Session</div>
-                <h4 className="font-display font-semibold text-[22px] text-white mt-1.5">Talk to a certified advisor.</h4>
-                <p className="text-[14px] text-white/60 leading-relaxed mt-2">
-                  Verified shortlists, 47-point audits, and zero brokerage — buyer-side only.
-                </p>
+                <div className="space-y-2">
+                  <h3 className="text-base font-extrabold uppercase tracking-wide">Developer Neutral Advisory</h3>
+                  <p className="text-xs text-gray-400 font-medium leading-relaxed">
+                    Need professional representation or neutral analysis for a property transaction in Hyderabad? Get in touch with our experts.
+                  </p>
+                </div>
+                <div className="space-y-2.5 pt-2">
+                  {["100% Verified Properties Only", "No Commission bias", "Legal & RERA compliance audits"].map(t => (
+                    <div key={t} className="flex items-center gap-2 text-xs font-semibold text-gray-300">
+                      <Check size={13} className="text-[#D31E28]" strokeWidth={3} /> {t}
+                    </div>
+                  ))}
+                </div>
                 <Link
                   href="/contact"
-                  className="flex items-center justify-between text-[12px] tracking-widest font-bold uppercase text-white bg-[#D31E28] hover:bg-[#B8171F] px-4 py-3.5 mt-4 rounded-lg transition-colors group"
+                  className="block text-center w-full bg-[#D31E28] hover:bg-[#b0161f] text-white text-xs font-extrabold uppercase tracking-wider py-3.5 rounded-full transition-colors mt-4"
                 >
-                  <span>Book free session</span>
-                  <ArrowRight size={13} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                  Book Private Advisory
                 </Link>
               </div>
+
+              {/* Legal Notice */}
+              <div className="bg-white rounded-3xl border border-[#EEE9E0] p-6 shadow-[0_1px_3px_rgba(30,25,15,0.04)] space-y-3">
+                <h4 className="text-xs font-black uppercase tracking-widest text-[#D31E28]">Disclaimer & Policy</h4>
+                <p className="text-[11px] text-gray-500 font-medium leading-relaxed">
+                  Publications compiled by NexHouz represent neutral audit reports based on GHMC approvals and public records. Market projections are approximate and subject to local micro-market volatility.
+                </p>
+              </div>
             </aside>
+
           </div>
         </div>
       </main>
@@ -184,8 +159,84 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   );
 }
 
-export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
-    slug: post.slug,
-  }));
+// ─── Zero-Dependency Markdown Renderer ───
+function renderMarkdown(content: string) {
+  const lines = content.split("\n");
+  const elements: React.JSX.Element[] = [];
+  const listItems: string[] = [];
+
+  const flushList = (keyIndex: number) => {
+    if (listItems.length > 0) {
+      elements.push(
+        <ul key={`list-${keyIndex}`} className="list-disc pl-6 space-y-2 text-gray-700 my-4 text-sm sm:text-base leading-relaxed">
+          {listItems.map((item, idx) => (
+            <li key={idx} dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(item) }} />
+          ))}
+        </ul>
+      );
+      listItems.length = 0;
+    }
+  };
+
+  lines.forEach((line, index) => {
+    const trimmed = line.trim();
+
+    // Headings
+    if (trimmed.startsWith("# ")) {
+      flushList(index);
+      elements.push(
+        <h1 key={index} className="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-8 mb-4 tracking-tight leading-tight">
+          {trimmed.slice(2)}
+        </h1>
+      );
+    } else if (trimmed.startsWith("## ")) {
+      flushList(index);
+      elements.push(
+        <h2 key={index} className="text-xl sm:text-2xl font-bold text-gray-900 mt-8 mb-4 tracking-tight leading-tight border-b pb-2">
+          {trimmed.slice(3)}
+        </h2>
+      );
+    } else if (trimmed.startsWith("### ")) {
+      flushList(index);
+      elements.push(
+        <h3 key={index} className="text-lg sm:text-xl font-bold text-gray-900 mt-6 mb-3 tracking-tight">
+          {trimmed.slice(4)}
+        </h3>
+      );
+    }
+    // Lists
+    else if (trimmed.startsWith("* ") || trimmed.startsWith("- ")) {
+      listItems.push(trimmed.slice(2));
+    } else if (/^\d+\.\s/.test(trimmed)) {
+      listItems.push(trimmed.replace(/^\d+\.\s/, ""));
+    }
+    // Empty Line
+    else if (trimmed === "") {
+      flushList(index);
+    }
+    // Paragraph
+    else {
+      flushList(index);
+      elements.push(
+        <p
+          key={index}
+          className="text-gray-750 my-4 text-sm sm:text-base leading-relaxed font-medium"
+          dangerouslySetInnerHTML={{ __html: parseInlineMarkdown(trimmed) }}
+        />
+      );
+    }
+  });
+
+  flushList(lines.length);
+  return elements;
+}
+
+function parseInlineMarkdown(text: string): string {
+  return text
+    // Bold
+    .replace(/\*\*(.*?)\*\*/g, "<strong class='font-extrabold text-gray-900'>$1</strong>")
+    // Italic
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    // Code
+    .replace(/`(.*?)`/g, "<code class='bg-gray-100 px-1.5 py-0.5 rounded text-[#D31E28] font-mono text-[90%]'>$1</code>");
 }

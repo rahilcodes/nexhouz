@@ -879,3 +879,184 @@ export async function fetchAiCrmLeads(): Promise<any[] | null> {
   }
 }
 
+export interface BlogPost {
+  id?: string;
+  title: string;
+  slug: string;
+  summary: string;
+  content: string;
+  cover_image_url?: string;
+  published: boolean;
+  published_at?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export async function fetchPublishedBlogPosts(): Promise<BlogPost[]> {
+  try {
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("published", true)
+      .order("published_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching published blog posts:", error.message);
+      return [];
+    }
+    return data || [];
+  } catch (e) {
+    console.error("Connection error fetching published blog posts:", e);
+    return [];
+  }
+}
+
+export async function fetchBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+  try {
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("slug", slug)
+      .single();
+
+    if (error) {
+      console.error(`Error fetching blog post by slug ${slug}:`, error.message);
+      return null;
+    }
+    return data;
+  } catch (e) {
+    console.error(`Connection error fetching blog post by slug ${slug}:`, e);
+    return null;
+  }
+}
+
+export async function fetchAllBlogPosts(): Promise<BlogPost[]> {
+  try {
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching all blog posts:", error.message);
+      return [];
+    }
+    return data || [];
+  } catch (e) {
+    console.error("Connection error fetching all blog posts:", e);
+    return [];
+  }
+}
+
+export async function saveBlogPost(post: Partial<BlogPost>): Promise<{ success: boolean; error?: string }> {
+  try {
+    const postToSave = {
+      ...post,
+      updated_at: new Date().toISOString()
+    };
+    if (post.published && !post.published_at) {
+      postToSave.published_at = new Date().toISOString();
+    }
+
+    const { error } = await supabase
+      .from("blog_posts")
+      .upsert(postToSave, { onConflict: "slug" });
+
+    if (error) {
+      console.error("Error saving blog post:", error.message);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (e: any) {
+    console.error("Connection error saving blog post:", e);
+    return { success: false, error: e.message || "Unknown network error" };
+  }
+}
+
+export async function deleteBlogPost(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("blog_posts")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("Error deleting blog post:", error.message);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error("Connection error deleting blog post:", e);
+    return false;
+  }
+}
+
+// ─── Builder / Partner Logos ───────────────────────────────────────────────────
+export interface BuilderLogo {
+  id?: string;
+  name: string;
+  logo_url: string;
+  website_url?: string;
+  display_order?: number;
+  active?: boolean;
+}
+
+export async function fetchBuilderLogos(): Promise<BuilderLogo[]> {
+  try {
+    const { data, error } = await supabase
+      .from("builder_logos")
+      .select("*")
+      .eq("active", true)
+      .order("display_order", { ascending: true });
+    if (error) {
+      console.warn("Error fetching builder logos:", error.message);
+      return [];
+    }
+    return data || [];
+  } catch (e) {
+    console.warn("Connection error fetching builder logos:", e);
+    return [];
+  }
+}
+
+export async function fetchAllBuilderLogos(): Promise<BuilderLogo[]> {
+  try {
+    const { data, error } = await supabase
+      .from("builder_logos")
+      .select("*")
+      .order("display_order", { ascending: true });
+    if (error) {
+      console.warn("Error fetching all builder logos:", error.message);
+      return [];
+    }
+    return data || [];
+  } catch (e) {
+    console.warn("Connection error fetching all builder logos:", e);
+    return [];
+  }
+}
+
+export async function saveBuilderLogo(logo: Partial<BuilderLogo>): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase
+      .from("builder_logos")
+      .upsert({ ...logo, active: logo.active !== false }, { onConflict: "id" });
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  } catch (e: any) {
+    return { success: false, error: e.message || "Unknown error" };
+  }
+}
+
+export async function deleteBuilderLogo(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("builder_logos")
+      .delete()
+      .eq("id", id);
+    if (error) return false;
+    return true;
+  } catch (e) {
+    return false;
+  }
+}

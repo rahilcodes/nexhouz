@@ -36,10 +36,44 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://nexhouz.com"),
-  title: "NexHouz | Luxury Real Estate Proptech Intelligence",
-  description: "Discover globally elite properties. NexHouz is a premium real estate intelligence platform built for modern buyers, pairing modernist architectural design with sophisticated fintech analytics.",
-  keywords: ["Luxury Real Estate", "PropTech", "Modernist Architecture", "Real Estate Intelligence", "Investment Properties"],
-  authors: [{ name: "NexHouz Elite Group" }],
+  title: {
+    default: "NexHouz | Buy Luxury Apartments & Villas in Hyderabad | RERA Verified",
+    template: "%s | NexHouz Hyderabad"
+  },
+  description: "NexHouz is Hyderabad's #1 developer-neutral luxury real estate advisory. Find RERA-verified 3 & 4 BHK apartments, gated community villas, and investment plots in Kokapet, Kondapur, Gachibowli & Narsingi. Zero brokerage. Expert advisory. 47-point builder audit.",
+  keywords: [
+    "luxury apartments Hyderabad", "buy property Hyderabad", "RERA verified flats Hyderabad",
+    "Kokapet apartments", "Kondapur 3BHK", "Gachibowli villas", "luxury villas Hyderabad",
+    "real estate advisor Hyderabad", "zero brokerage Hyderabad", "new launches Hyderabad 2025",
+    "gated community Hyderabad", "investment property Hyderabad", "NexHouz"
+  ],
+  authors: [{ name: "NexHouz Advisory Board" }],
+  creator: "NexHouz",
+  publisher: "NexHouz Real Estate Advisory",
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.png", type: "image/png", sizes: "512x512" }
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/favicon.png"
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_IN",
+    url: "https://nexhouz.com",
+    siteName: "NexHouz",
+    title: "NexHouz | Buy Luxury Apartments & Villas in Hyderabad",
+    description: "Hyderabad's developer-neutral luxury real estate platform. RERA-verified properties in Kokapet, Kondapur, Gachibowli. Zero brokerage. Expert advisory.",
+    images: [{ url: "/images/hero_modernist_villa.png", width: 1200, height: 630, alt: "NexHouz Hyderabad Luxury Properties" }]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NexHouz | Luxury Real Estate Hyderabad",
+    description: "Buy RERA-verified luxury apartments & villas in Hyderabad. Expert advisory, zero brokerage.",
+    images: ["/images/hero_modernist_villa.png"]
+  }
 };
 
 

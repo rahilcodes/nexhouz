@@ -24,7 +24,7 @@ import {
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { CONTAINER, Reveal, Eyebrow, PHONE_DISPLAY, PHONE_TEL } from "@/components/ui/theme";
-import { fetchAllProperties, submitLead } from "@/lib/db";
+import { fetchAllProperties, submitLead, fetchBuilderLogos } from "@/lib/db";
 import { properties as defaultProperties, Property } from "@/data/properties";
 import { supabase } from "@/lib/supabaseClient";
 
@@ -933,6 +933,105 @@ function JourneySection() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// PARTNER LOGOS SLIDER — infinite CSS marquee with live DB data
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Default logos for when DB is unavailable / table not yet set up
+const DEFAULT_BUILDER_LOGOS = [
+  { id: "d1", name: "Hallmark Developers",   logo_url: "", website_url: "#" },
+  { id: "d2", name: "Aparna Constructions",  logo_url: "", website_url: "#" },
+  { id: "d3", name: "Prestige Group",        logo_url: "", website_url: "#" },
+  { id: "d4", name: "Ramky Estates",         logo_url: "", website_url: "#" },
+  { id: "d5", name: "My Home Constructions", logo_url: "", website_url: "#" },
+  { id: "d6", name: "INCOR Infrastructure",  logo_url: "", website_url: "#" },
+  { id: "d7", name: "Aliens Space Station",  logo_url: "", website_url: "#" },
+  { id: "d8", name: "Vertex Homes",          logo_url: "", website_url: "#" },
+];
+
+function BuilderLogoCard({ logo }: { logo: typeof DEFAULT_BUILDER_LOGOS[0] }) {
+  // Generate a beautiful SVG lettermark logo if no image URL
+  const initials = logo.name.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase();
+  const colors: [string, string][] = [
+    ["#D31E28", "#8B0000"], ["#1e3a8a", "#1e40af"], ["#92400e", "#78350f"],
+    ["#065f46", "#064e3b"], ["#312e81", "#1e1b4b"], ["#0f766e", "#0d9488"],
+    ["#7c3aed", "#6d28d9"], ["#b45309", "#92400e"]
+  ];
+  const idx = (logo.id?.charCodeAt(logo.id.length - 1) || 0) % colors.length;
+  const [c1, c2] = colors[idx];
+
+  return (
+    <a
+      href={logo.website_url || "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex flex-col items-center justify-center gap-2.5 mx-4 lg:mx-6 group cursor-pointer flex-shrink-0"
+      style={{ minWidth: "100px" }}
+    >
+      {logo.logo_url ? (
+        <img
+          src={logo.logo_url}
+          alt={logo.name}
+          className="h-10 w-auto max-w-[100px] object-contain opacity-60 group-hover:opacity-100 transition-opacity duration-300 grayscale group-hover:grayscale-0"
+        />
+      ) : (
+        <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-sm shadow-sm group-hover:scale-110 transition-transform duration-300"
+          style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}
+        >
+          {initials}
+        </div>
+      )}
+      <span className="text-[10px] font-bold uppercase tracking-wider text-[#8B7355] group-hover:text-[#D31E28] transition-colors text-center leading-tight whitespace-nowrap">
+        {logo.name}
+      </span>
+    </a>
+  );
+}
+
+function PartnerLogosSlider({ logos }: { logos: typeof DEFAULT_BUILDER_LOGOS }) {
+  // Duplicate for infinite loop
+  const doubled = [...logos, ...logos];
+
+  return (
+    <section className="py-10 lg:py-14 bg-[#FAF7F1] border-y border-[#EEE9E0] overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 mb-8 text-center">
+        <Eyebrow>Trusted Builder Partners</Eyebrow>
+        <p className="text-[13px] lg:text-sm text-[#8B7355] font-medium mt-2">
+          We partner with Hyderabad's most reputed developers — thoroughly audited, RERA compliant.
+        </p>
+      </div>
+
+      {/* Marquee wrapper */}
+      <div className="relative">
+        {/* Fade gradients */}
+        <div className="absolute left-0 top-0 h-full w-20 lg:w-32 z-10 pointer-events-none" style={{ background: "linear-gradient(to right, #FAF7F1, transparent)" }} />
+        <div className="absolute right-0 top-0 h-full w-20 lg:w-32 z-10 pointer-events-none" style={{ background: "linear-gradient(to left, #FAF7F1, transparent)" }} />
+
+        {/* Track */}
+        <div
+          className="flex items-center"
+          style={{
+            animation: "nexhouz-marquee 28s linear infinite",
+            willChange: "transform"
+          }}
+        >
+          {doubled.map((logo, i) => (
+            <BuilderLogoCard key={`${logo.id}-${i}`} logo={logo} />
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes nexhouz-marquee {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // SOCIAL PROOF — testimonials + stat tiles
 // ─────────────────────────────────────────────────────────────────────────────
 function SocialProof() {
@@ -1188,6 +1287,7 @@ export default function HomePage() {
 
   const [callbackForm, setCallbackForm] = useState({ name: "", phone: "", location: "Kokapet" });
   const [isCallbackSubmitted, setIsCallbackSubmitted] = useState(false);
+  const [builderLogos, setBuilderLogos] = useState<typeof DEFAULT_BUILDER_LOGOS>(DEFAULT_BUILDER_LOGOS);
 
   useEffect(() => {
     const isDev = process.env.NODE_ENV === "development";
@@ -1225,6 +1325,11 @@ export default function HomePage() {
       }
     }
     loadProperties();
+
+    // Load builder logos
+    fetchBuilderLogos().then(logos => {
+      if (logos && logos.length > 0) setBuilderLogos(logos as any);
+    }).catch(() => {/* use defaults */});
   }, []);
 
   const toggleFavorite = (id: string, e: React.MouseEvent) => {
@@ -1301,6 +1406,7 @@ export default function HomePage() {
           dbError={dbError}
         />
         <MicroMarkets />
+        <PartnerLogosSlider logos={builderLogos} />
         <JourneySection />
         <SocialProof />
         <NriDesk />

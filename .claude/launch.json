@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "nexhouz-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "nexhouz-static",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["-y", "http-server", "out", "-p", "8799", "-c-1"],
+      "port": 8799
+    }
+  ]
+}

@@ -1,125 +1,110 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { Clock, Tag } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { CONTAINER, SECTION_X, Eyebrow } from "@/components/ui/theme";
-import { blogPosts } from "@/data/blog";
+import { fetchPublishedBlogPosts } from "@/lib/db";
+import { BookOpen, Calendar, ArrowRight } from "lucide-react";
+import { Metadata } from "next";
 
-export default function BlogIndexPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+export const metadata: Metadata = {
+  title: "Hyderabad Luxury Real Estate Blog & Market Forecasts | NexHouz",
+  description: "Stay ahead with developer-neutral audits, investment forecasts, architecture trends, and property growth corridors in Hyderabad's premier locations.",
+  keywords: ["Hyderabad real estate blog", "Kokapet apartments investment", "luxury villas Gachibowli", "property news Hyderabad"],
+  openGraph: {
+    title: "Hyderabad Luxury Real Estate Blog & Market Forecasts | NexHouz",
+    description: "Stay ahead with developer-neutral audits, investment forecasts, architecture trends, and property growth corridors in Hyderabad's premier locations.",
+    type: "website",
+    url: "https://nexhouz.com/blog",
+    images: [{ url: "/images/hero_modernist_villa.png", width: 1200, height: 630 }]
+  }
+};
 
-  const categories = ["All", "Design & Architecture", "PropTech & Finance", "Sustainability"];
+export const revalidate = 60; // Revalidate pages every 60 seconds
 
-  const filteredPosts = blogPosts.filter((post) => {
-    return selectedCategory === "All" || post.category === selectedCategory;
-  });
+export default async function BlogPage() {
+  const posts = await fetchPublishedBlogPosts();
 
   return (
-    <div className="font-archivo bg-white">
+    <div className="min-h-screen bg-[#FAF7F1] flex flex-col font-archivo text-[#0A0A0A]">
       <Navbar />
 
-      {/* Header band */}
-      <section className={`${SECTION_X} pt-12 pb-12 lg:pt-16 lg:pb-16 bg-[#FAF7F1] border-b border-[#EEE9E0]`}>
-        <div className={`${CONTAINER} max-w-[760px]`}>
-          <Eyebrow>Essays &amp; Perspectives</Eyebrow>
-          <h1 className="font-display font-semibold text-[32px] md:text-[44px] lg:text-[52px] leading-[1.12] text-[#0A0A0A] mt-3 text-balance">
-            The NexHouz journal.
-          </h1>
-          <p className="text-[16px] lg:text-lg leading-[1.7] text-[#57534a] mt-4 max-w-[560px]">
-            Readings on modern architecture, Hyderabad real-estate economics, and the micro-markets shaping the city.
-          </p>
-        </div>
-      </section>
-
-      <section className={`${SECTION_X} py-14 lg:py-20 bg-white`}>
-        <div className={CONTAINER}>
-          {/* Category filter chips */}
-          <div className="flex flex-wrap items-center gap-2.5 mb-8 lg:mb-10">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2.5 text-[13px] font-semibold tracking-wide transition-colors rounded-full border ${
-                  selectedCategory === cat
-                    ? "bg-[#0A0A0A] border-[#0A0A0A] text-white"
-                    : "bg-transparent border-[#d8d2c6] hover:border-[#0A0A0A] text-[#57534a] hover:text-[#0A0A0A]"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+      <main className="flex-1 py-12 md:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Header */}
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#faf0f0] border border-[#f3c9cb] text-xs font-bold uppercase tracking-wider text-[#D31E28]">
+              <BookOpen size={12} /> NexHouz Publications
+            </span>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-gray-900 leading-tight">
+              Real Estate Intelligence & <span className="text-[#D31E28]">Market Forecasts</span>
+            </h1>
+            <p className="text-sm sm:text-base text-gray-500 font-medium leading-relaxed">
+              Developer-neutral analyses, architectural studies, and financial audits designed to protect and grow your family's sovereign physical portfolios in Hyderabad.
+            </p>
           </div>
 
-          {/* Blog grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
-            <AnimatePresence mode="popLayout">
-              {filteredPosts.map((post) => (
-                <motion.div
-                  layout
+          {/* Grid Layout */}
+          {posts.length === 0 ? (
+            <div className="text-center py-20 bg-white border border-[#EEE9E0] rounded-3xl shadow-[0_1px_3px_rgba(30,25,15,0.04)] max-w-xl mx-auto px-6">
+              <BookOpen size={40} className="text-gray-300 mx-auto mb-4" />
+              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-widest">No articles published yet</h3>
+              <p className="text-xs text-gray-450 mt-1">Our advisory board is compiling technical data-sheets. Check back shortly.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {posts.map((post) => (
+                <article
                   key={post.id}
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="bg-white rounded-3xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] overflow-hidden flex flex-col group hover:shadow-[0_12px_30px_rgba(30,25,15,0.06)] transition-all duration-300 hover:-translate-y-1"
                 >
-                  <Link
-                    href={`/blog/${post.slug}`}
-                    className="group flex flex-col h-full bg-white border border-[#EEE9E0] rounded-2xl overflow-hidden hover:shadow-[0_10px_30px_rgba(30,25,15,0.08)] transition-shadow"
-                  >
-                    <div className="aspect-[16/10] overflow-hidden bg-[#efeae1] relative">
-                      <img
-                        src={post.image}
-                        alt={post.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      {post.featured && (
-                        <div className="absolute top-3.5 left-3.5 bg-[#D31E28] text-white px-3 py-1 text-[11px] tracking-wider font-bold uppercase rounded-full">
-                          Featured Essay
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-6 flex-grow flex flex-col justify-between gap-5">
-                      <div>
-                        <div className="flex items-center justify-between text-[11px] tracking-[0.14em] font-bold uppercase text-[#948d7c]">
-                          <span className="flex items-center gap-1.5 text-[#8A6D2F]">
-                            <Tag size={11} className="text-[#D31E28]" />
-                            {post.category}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Clock size={11} />
-                            {post.readTime}
-                          </span>
-                        </div>
-
-                        <h3 className="font-display font-semibold text-[22px] leading-snug text-[#0A0A0A] group-hover:text-[#D31E28] transition-colors mt-3">
+                  <div className="relative aspect-[16/10] overflow-hidden bg-gray-100">
+                    <img
+                      src={post.cover_image_url || "/images/hero_modernist_villa.png"}
+                      alt={post.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  
+                  <div className="p-6 flex-1 flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                        <Calendar size={12} className="text-[#D31E28]" />
+                        <span>
+                          {post.published_at ? new Date(post.published_at).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric"
+                          }) : ""}
+                        </span>
+                      </div>
+                      
+                      <h2 className="text-lg font-bold text-gray-900 leading-snug group-hover:text-[#D31E28] transition-colors">
+                        <Link href={`/blog/${post.slug}`}>
                           {post.title}
-                        </h3>
-
-                        <p className="text-[14px] text-[#57534a] leading-relaxed line-clamp-3 mt-2.5">
-                          {post.excerpt}
-                        </p>
-                      </div>
-
-                      <div className="pt-5 border-t border-[#EEE9E0] flex items-center justify-between text-[13px] text-[#57534a]">
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-[#2b2823]">By {post.author}</span>
-                          <span className="text-[11px] text-[#948d7c] font-bold uppercase mt-0.5">{post.authorRole.split(" ")[0]}</span>
-                        </div>
-                        <span>{post.date}</span>
-                      </div>
+                        </Link>
+                      </h2>
+                      
+                      <p className="text-xs sm:text-sm text-gray-500 font-medium leading-relaxed line-clamp-3">
+                        {post.summary}
+                      </p>
                     </div>
-                  </Link>
-                </motion.div>
+
+                    <div className="pt-6 mt-6 border-t border-[#f0ebe1] flex items-center justify-between">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">By NexHouz Editorial</span>
+                      <Link
+                        href={`/blog/${post.slug}`}
+                        className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#D31E28] hover:text-[#b0161f] transition-colors"
+                      >
+                        Read Article <ArrowRight size={12} className="transition-transform group-hover:translate-x-1" />
+                      </Link>
+                    </div>
+                  </div>
+                </article>
               ))}
-            </AnimatePresence>
-          </div>
+            </div>
+          )}
         </div>
-      </section>
+      </main>
 
       <Footer />
     </div>
