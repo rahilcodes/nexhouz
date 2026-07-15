@@ -1,6 +1,6 @@
 1:"$Sreact.fragment"
-2:I[64489,["/_next/static/chunks/0cyjebx9-~smu.js","/_next/static/chunks/0d3shmwh5_nmn.js","/_next/static/chunks/0wbvczp-gbzb7.js","/_next/static/chunks/14yfwj8ro3otv.js","/_next/static/chunks/0a_gof0kkshg..js","/_next/static/chunks/0_jzr7yj-2cf~.js"],"default"]
+2:I[64489,["/_next/static/chunks/0cyjebx9-~smu.js","/_next/static/chunks/0d3shmwh5_nmn.js","/_next/static/chunks/0wbvczp-gbzb7.js","/_next/static/chunks/14yfwj8ro3otv.js","/_next/static/chunks/09l~9su3zmwmv.js","/_next/static/chunks/0_jzr7yj-2cf~.js"],"default"]
 3:I[97367,["/_next/static/chunks/0cyjebx9-~smu.js","/_next/static/chunks/0d3shmwh5_nmn.js","/_next/static/chunks/0wbvczp-gbzb7.js","/_next/static/chunks/14yfwj8ro3otv.js"],"OutletBoundary"]
 4:"$Sreact.suspense"
-0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"slug":"jubilee-hills-sovereign-estate"}],[["$","script","script-0",{"src":"/_next/static/chunks/0a_gof0kkshg..js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/0_jzr7yj-2cf~.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"Bc5taVqVzcI2h4crbh6gu"}
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{"slug":"jubilee-hills-sovereign-estate"}],[["$","script","script-0",{"src":"/_next/static/chunks/09l~9su3zmwmv.js","async":true}],["$","script","script-1",{"src":"/_next/static/chunks/0_jzr7yj-2cf~.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"XsCHi1nC3G80WNIFA22pk"}
 5:null

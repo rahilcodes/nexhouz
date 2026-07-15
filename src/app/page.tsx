@@ -54,7 +54,7 @@ const possessionLabel = (p: Property) =>
 // ─────────────────────────────────────────────────────────────────────────────
 // HERO — crossfade slider + search console (desktop) / search CTA (mobile)
 // ─────────────────────────────────────────────────────────────────────────────
-function HeroSection() {
+function HeroSection({ properties }: { properties: Property[] }) {
   const [slide, setSlide] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -86,12 +86,21 @@ function HeroSection() {
     return () => window.removeEventListener("click", close);
   }, []);
 
-  const suggestedDestinations = [
-    { name: "Kokapet & Financial District", desc: "High-growth commercial expansion node", icon: Building },
-    { name: "Jubilee & Banjara Hills", desc: "Timeless prime premium residential hills", icon: Compass },
-    { name: "Narsingi & Tellapur", desc: "Green suburbs popular with tech families", icon: MapPin },
-    { name: "Osman & Himayat Sagar's", desc: "Quiet lakeside villa enclaves", icon: Building },
-  ];
+  const activeProps = properties.length > 0 ? properties : defaultProperties;
+  const suggestedDestinations: { name: string; desc: string }[] = [];
+  const seenNames = new Set<string>();
+
+  activeProps.forEach((p) => {
+    if (!p.location) return;
+    const name = p.location.split(",")[0].trim();
+    if (!seenNames.has(name)) {
+      seenNames.add(name);
+      suggestedDestinations.push({
+        name,
+        desc: p.location,
+      });
+    }
+  });
 
   const searchHref =
     activeTab === "New Launch"
@@ -1245,7 +1254,7 @@ export default function HomePage() {
       <Navbar />
 
       <main>
-        <HeroSection />
+        <HeroSection properties={liveProperties} />
         <StatsBar />
         <WhySection />
         <TrustBand />

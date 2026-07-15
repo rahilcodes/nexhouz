@@ -162,6 +162,8 @@ export default function AdminPage() {
   // Shopify-Style Wizard Steps State
   const [wizardStep, setWizardStep] = useState(1);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [isCustomLocation, setIsCustomLocation] = useState(false);
+  const [customLocationText, setCustomLocationText] = useState("");
   const [imageInput, setImageInput] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -439,6 +441,8 @@ export default function AdminPage() {
       loadData();
       setView("listings");
       setForm(EMPTY_FORM);
+      setIsCustomLocation(false);
+      setCustomLocationText("");
     } else {
       showToast(`Database synchronization failed: ${result.error || "Unknown Error"}`, "error");
     }
@@ -485,6 +489,8 @@ export default function AdminPage() {
       ...p,
       recommendationReport: p.recommendationReport || { ...EMPTY_FORM.recommendationReport }
     });
+    setIsCustomLocation(false);
+    setCustomLocationText("");
     setEditingProperty(p);
     setWizardStep(1);
     setView("edit");
@@ -492,6 +498,8 @@ export default function AdminPage() {
 
   const startAdd = () => {
     setForm(EMPTY_FORM);
+    setIsCustomLocation(false);
+    setCustomLocationText("");
     setEditingProperty(null);
     setWizardStep(1);
     setView("add");
@@ -600,6 +608,19 @@ export default function AdminPage() {
       </div>
     );
   }
+
+  const existingLocations = Array.from(new Set([
+    ...listings.map(l => l.location),
+    "Kokapet, Hyderabad",
+    "Kondapur, Hyderabad",
+    "Tellapur, Hyderabad",
+    "Gachibowli, Hyderabad",
+    "Jubilee Hills, Hyderabad",
+    "Narsingi, Hyderabad",
+    "Osman Nagar, Hyderabad",
+    "Nanakramguda, Hyderabad",
+    "Manikonda, Hyderabad"
+  ].filter(Boolean)));
 
   return (
     <div className="min-h-screen flex font-sans" style={{ background: theme.page, color: theme.text }}>
@@ -969,11 +990,49 @@ export default function AdminPage() {
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Location (Neighborhood, City)</label>
-                        <input
-                          type="text" className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red"
-                          placeholder="e.g. Kokapet, Hyderabad" value={form.location}
-                          onChange={e => setField("location", e.target.value)}
-                        />
+                        {isCustomLocation ? (
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#D31E28]"
+                              placeholder="e.g. Manikonda, Hyderabad"
+                              value={customLocationText}
+                              onChange={e => {
+                                setCustomLocationText(e.target.value);
+                                setField("location", e.target.value);
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsCustomLocation(false);
+                                setField("location", existingLocations[0] || "Kokapet, Hyderabad");
+                              }}
+                              className="px-4 py-3 bg-gray-200 hover:bg-gray-300 rounded-xl text-xs font-bold text-gray-700 transition-colors cursor-pointer"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <select
+                            className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#D31E28]"
+                            value={form.location}
+                            onChange={e => {
+                              if (e.target.value === "CUSTOM") {
+                                setIsCustomLocation(true);
+                                setCustomLocationText("");
+                                setField("location", "");
+                              } else {
+                                setField("location", e.target.value);
+                              }
+                            }}
+                          >
+                            {existingLocations.map(loc => (
+                              <option key={loc} value={loc}>{loc}</option>
+                            ))}
+                            <option value="CUSTOM">+ Add Custom Location...</option>
+                          </select>
+                        )}
                       </div>
                     </div>
 
