@@ -157,9 +157,11 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
   const rawFloorPlans = property.floorPlans && property.floorPlans.length > 0
     ? property.floorPlans.map((fp: any) => ({
         ...fp,
-        priceLabel: fp.price >= 10000000
-          ? `₹${parseFloat((fp.price / 10000000).toFixed(2))} Cr`
-          : `₹${parseFloat((fp.price / 100000).toFixed(2))} Lakhs`,
+        priceLabel: !fp.price
+          ? "Contact to know pricing"
+          : fp.price >= 10000000
+            ? `₹${parseFloat((fp.price / 10000000).toFixed(2))} Cr`
+            : `₹${parseFloat((fp.price / 100000).toFixed(2))} Lakhs`,
       }))
     : getFloorPlans(property.bhk, property.area, property.price);
   const floorPlans = rawFloorPlans;

@@ -1727,11 +1727,12 @@ export default function AdminPage() {
                             <option value="N/A">N/A</option>
                           </select>
                           <input
-                            type="number" className="bg-white border rounded-lg px-3 py-1.5 text-xs font-bold flex-1 outline-none text-brand-red"
-                            placeholder="Price (INR)" value={fp.price}
+                            type="number" className="bg-white border rounded-lg px-3 py-1.5 text-xs font-bold flex-1 outline-none text-[#D31E28]"
+                            placeholder="Price (INR) - Left blank/0 becomes 'Contact NexHouz'"
+                            value={fp.price || ""}
                             onChange={e => {
                               const list = [...form.floorPlans];
-                              list[idx] = { ...fp, price: parseInt(e.target.value) || 0 };
+                              list[idx] = { ...fp, price: e.target.value === "" ? 0 : (parseInt(e.target.value) || 0) };
                               setField("floorPlans", list);
                             }}
                           />
