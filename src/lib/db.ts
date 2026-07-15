@@ -67,6 +67,18 @@ export function normalizeProperty(dbProp: any): Property {
     }
   }
 
+  // Extract custom property specs (like areaUnit, plotSize, plotSizeUnit)
+  const customSpecsMatch = cleanDescription.match(/<!-- PROPERTY_SPECS:([\s\S]*?)-->/);
+  let customSpecs: any = {};
+  if (customSpecsMatch) {
+    try {
+      customSpecs = JSON.parse(customSpecsMatch[1].trim());
+      cleanDescription = cleanDescription.replace(/<!-- PROPERTY_SPECS:[\s\S]*?-->/g, "").trim();
+    } catch (e) {
+      console.error("Error parsing custom property specs:", e);
+    }
+  }
+
   const nearby: NearbyAmenities = {
     ...(dbProp.nearby_hospitals !== null && dbProp.nearby_hospitals !== undefined ? { hospitals: dbProp.nearby_hospitals } : {}),
     ...(dbProp.nearby_malls !== null && dbProp.nearby_malls !== undefined ? { malls: dbProp.nearby_malls } : {}),
@@ -102,7 +114,12 @@ export function normalizeProperty(dbProp: any): Property {
     price: Number(dbProp.price),
     type: dbProp.property_type,
     bhk: dbProp.bhk,
-    area: `${Number(dbProp.area_sqft).toLocaleString()} sq ft`,
+    area: dbProp.property_type === "Plot"
+      ? `${(customSpecs.plotSize || Number(dbProp.area_sqft)).toLocaleString()} ${customSpecs.plotSizeUnit || "sq yds"}`
+      : `${Number(dbProp.area_sqft).toLocaleString()} ${customSpecs.areaUnit || "sq ft"}`,
+    areaUnit: customSpecs.areaUnit || "sq ft",
+    plotSize: customSpecs.plotSize !== undefined ? Number(customSpecs.plotSize) : undefined,
+    plotSizeUnit: customSpecs.plotSizeUnit || "sq yds",
     possession: dbProp.possession_status,
     investmentType: dbProp.investment_type,
     description: cleanDescription,
@@ -522,11 +539,25 @@ export async function saveProperty(form: any): Promise<{ success: boolean; error
       });
     }
 
-    let descriptionClean = (form.description || "").replace(/\n\n<!-- CONNECTIVITY_STATS:[\s\S]*?-->/g, "").trim();
-    let descriptionPayload = descriptionClean;
+    let descriptionClean = (form.description || "")
+      .replace(/<!-- CONNECTIVITY_STATS:[\s\S]*?-->/g, "")
+      .replace(/<!-- PROPERTY_SPECS:[\s\S]*?-->/g, "")
+      .trim();
+
+    const customSpecs = {
+      areaUnit: form.areaUnit || "sq ft",
+      plotSize: form.plotSize ? Number(form.plotSize) : undefined,
+      plotSizeUnit: form.plotSizeUnit || "sq yds"
+    };
+
+    let suffixComments = "";
     if (Object.keys(customStats).length > 0) {
-      descriptionPayload = `${descriptionClean}\n\n<!-- CONNECTIVITY_STATS:${JSON.stringify(customStats)} -->`;
+      suffixComments += `\n\n<!-- CONNECTIVITY_STATS:${JSON.stringify(customStats)} -->`;
     }
+    if (customSpecs.areaUnit !== "sq ft" || customSpecs.plotSize !== undefined) {
+      suffixComments += `\n\n<!-- PROPERTY_SPECS:${JSON.stringify(customSpecs)} -->`;
+    }
+    let descriptionPayload = `${descriptionClean}${suffixComments}`;
 
     const propertyPayload = {
       project_id: projectId,

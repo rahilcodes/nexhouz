@@ -73,6 +73,9 @@ export interface Property {
   recommendationReport?: RecommendationReport;
   udsPerAcre?: number;
   brochureUrl?: string;
+  areaUnit?: string;
+  plotSize?: number;
+  plotSizeUnit?: string;
 }
 
 

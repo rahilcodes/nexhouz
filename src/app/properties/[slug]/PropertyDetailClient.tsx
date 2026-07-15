@@ -361,7 +361,8 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                       { label: "Possession", value: property.possessionDate || (property.possession === "Ready" ? "Ready to Move" : "Under Construction"), icon: Calendar },
                       { label: "Location", value: property.location, icon: MapPin },
                       { label: "Property Type", value: property.type, icon: Landmark },
-                      { label: "Configurations", value: `${property.bhk} BHK${property.bhk > 2 ? `, ${property.bhk - 1} BHK, ${property.bhk - 2 > 0 ? `${property.bhk - 2} BHK` : "Studio"}` : ""}`, icon: Layers },
+                      ...(property.type !== "Plot" ? [{ label: "Configurations", value: `${property.bhk} BHK${property.bhk > 2 ? `, ${property.bhk - 1} BHK, ${property.bhk - 2 > 0 ? `${property.bhk - 2} BHK` : "Studio"}` : ""}`, icon: Layers }] : []),
+                      ...(property.plotSize ? [{ label: "Plot Size", value: `${property.plotSize} ${property.plotSizeUnit || "sq yds"}`, icon: Landmark }] : [])
                     ].map(({ label, value, icon: Icon }) => (
                       <div key={label} className="flex items-center gap-4 px-6 py-3.5 hover:bg-[#FAF7F1] transition-colors">
                         <div className="w-8 h-8 rounded-lg bg-[#faf0f0] flex items-center justify-center shrink-0">
@@ -377,11 +378,16 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                 </div>
 
                 {/* Quick stats bar */}
-                <div className="grid grid-cols-3 gap-4 mt-4">
+                <div className={`grid gap-4 mt-4 ${property.type === "Villa" && property.plotSize ? "grid-cols-2 md:grid-cols-4" : "grid-cols-3"}`}>
                   {[
                     { label: "Starting Price", value: formatPrice(property.price), red: true },
                     { label: "Property Type", value: property.type, red: false },
-                    { label: "Super Built-up", value: property.area, red: false },
+                    ...(property.type === "Plot"
+                      ? [{ label: "Plot Size", value: property.area, red: false }]
+                      : [
+                          { label: "Super Built-up", value: property.area, red: false },
+                          ...(property.plotSize ? [{ label: "Plot Size", value: `${property.plotSize} ${property.plotSizeUnit || "sq yds"}`, red: false }] : [])
+                        ])
                   ].map(s => (
                     <div key={s.label} className="bg-white rounded-2xl border border-[#EEE9E0] p-4 text-center shadow-[0_1px_3px_rgba(30,25,15,0.04)]">
                       <p className={`text-base md:text-lg font-bold ${s.red ? "text-[#D31E28]" : "text-[#0A0A0A]"}`}>{s.value}</p>

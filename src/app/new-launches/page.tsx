@@ -242,11 +242,31 @@ export default function NewLaunchesPage() {
                         </p>
                         <div className="mt-auto pt-4">
                           <div className="border-t border-[#EEE9E0] pt-3.5 flex items-center justify-between text-[11.5px] lg:text-xs font-bold uppercase tracking-widest text-[#948d7c]">
-                            <span>{property.bhk} BHK</span>
-                            <span className="text-[#e0d9cb]">|</span>
-                            <span>{property.area}</span>
-                            <span className="text-[#e0d9cb]">|</span>
-                            <span>{property.type === "Apartment" ? `${property.udsPerAcre ?? 100} Flats/Acre` : "Under Constr."}</span>
+                            {property.type === "Plot" ? (
+                              <>
+                                <span>{property.plotSize ? `${property.plotSize} ${property.plotSizeUnit || "Sq Yds"}` : property.area}</span>
+                                <span className="text-[#e0d9cb]">|</span>
+                                <span>Plot / Land</span>
+                                <span className="text-[#e0d9cb]">|</span>
+                                <span>Under Dev.</span>
+                              </>
+                            ) : property.type === "Villa" ? (
+                              <>
+                                <span>{property.bhk} BHK</span>
+                                <span className="text-[#e0d9cb]">|</span>
+                                <span>{property.area}</span>
+                                <span className="text-[#e0d9cb]">|</span>
+                                <span>{property.plotSize ? `${property.plotSize} ${property.plotSizeUnit || "Sq Yds"} Plot` : "Under Constr."}</span>
+                              </>
+                            ) : (
+                              <>
+                                <span>{property.bhk} BHK</span>
+                                <span className="text-[#e0d9cb]">|</span>
+                                <span>{property.area}</span>
+                                <span className="text-[#e0d9cb]">|</span>
+                                <span>{property.type === "Apartment" ? `${property.udsPerAcre ?? 100} Flats/Acre` : "Under Constr."}</span>
+                              </>
+                            )}
                           </div>
                           <Link
                             href={`/properties/${property.slug}`}

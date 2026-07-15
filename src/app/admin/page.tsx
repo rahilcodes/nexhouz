@@ -99,7 +99,7 @@ const EMPTY_FORM = {
   id: "" as string | undefined,
   title: "", slug: "", location: "Kokapet, Hyderabad", price: 15000000,
   projectName: "",
-  type: "Apartment" as const, bhk: 3, area: "2,000 sq ft", possession: "Ready" as const,
+  type: "Apartment" as "Apartment" | "Villa" | "Plot" | "Commercial", bhk: 3, area: "2,000 sq ft", possession: "Ready" as "Ready" | "Under Construction",
   investmentType: "Capital Appreciation" as const, description: "",
   architect: "", amenities: [] as string[], image: "/images/hero_modernist_villa.png",
   images: ["/images/hero_modernist_villa.png"] as string[],
@@ -113,6 +113,9 @@ const EMPTY_FORM = {
   aqi: { ...DEFAULT_AQI },
   floorPlans: [] as FloorPlan[],
   showRecommendationReport: true,
+  areaUnit: "sq ft",
+  plotSize: "" as string | number,
+  plotSizeUnit: "sq yds",
   recommendationReport: {
     investmentPotential: 8,
     familyFriendliness: 8,
@@ -550,7 +553,10 @@ export default function AdminPage() {
       ...EMPTY_FORM,
       ...p,
       showRecommendationReport: !!p.recommendationReport,
-      recommendationReport: p.recommendationReport || { ...EMPTY_FORM.recommendationReport }
+      recommendationReport: p.recommendationReport || { ...EMPTY_FORM.recommendationReport },
+      areaUnit: p.areaUnit || "sq ft",
+      plotSize: p.plotSize !== undefined ? p.plotSize : "",
+      plotSizeUnit: p.plotSizeUnit || "sq yds"
     });
     setIsCustomLocation(false);
     setCustomLocationText("");
@@ -1261,24 +1267,9 @@ export default function AdminPage() {
                           value={form.price} onChange={e => setField("price", parseInt(e.target.value) || 0)}
                         />
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-400">BHK Configuration</label>
-                        <input
-                          type="number" min={1} className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red"
-                          value={form.bhk} onChange={e => setField("bhk", parseInt(e.target.value) || 0)}
-                        />
-                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Super Built-up Area (Sq Ft)</label>
-                        <input
-                          type="text" className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red"
-                          placeholder="e.g. 5,400 sq ft" value={form.area}
-                          onChange={e => setField("area", e.target.value)}
-                        />
-                      </div>
                       <div className="space-y-1">
                         <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Property Type</label>
                         <select
@@ -1287,10 +1278,21 @@ export default function AdminPage() {
                         >
                           <option value="Apartment">Apartment</option>
                           <option value="Villa">Villa</option>
-                          <option value="Plot">Plot</option>
+                          <option value="Plot">Plot (Land)</option>
                           <option value="Commercial">Commercial</option>
                         </select>
                       </div>
+
+                      {form.type !== "Plot" && (
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">BHK Configuration</label>
+                          <input
+                            type="number" min={1} className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red"
+                            value={form.bhk} onChange={e => setField("bhk", parseInt(e.target.value) || 0)}
+                          />
+                        </div>
+                      )}
+
                       <div className="space-y-1">
                         <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Possession Status</label>
                         <select
@@ -1301,6 +1303,60 @@ export default function AdminPage() {
                           <option value="Under Construction">Under Construction</option>
                         </select>
                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {form.type !== "Plot" && (
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Super Built-up Area</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="number" className="flex-1 bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red"
+                              placeholder="e.g. 5400"
+                              value={parseInt(form.area?.toString().replace(/[^0-9]/g, "") || "") || ""}
+                              onChange={e => {
+                                const val = parseInt(e.target.value) || 0;
+                                setField("area", val ? `${val} ${form.areaUnit || "sq ft"}` : "");
+                              }}
+                            />
+                            <select
+                              className="bg-gray-50 border rounded-xl px-3 py-3 text-xs font-semibold outline-none focus:border-brand-red"
+                              value={form.areaUnit || "sq ft"}
+                              onChange={e => {
+                                const unit = e.target.value;
+                                setField("areaUnit", unit);
+                                const num = parseInt(form.area?.toString().replace(/[^0-9]/g, "") || "0");
+                                setField("area", num ? `${num} ${unit}` : "");
+                              }}
+                            >
+                              <option value="sq ft">Sq Ft</option>
+                              <option value="sq yds">Sq Yds</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
+
+                      {(form.type === "Villa" || form.type === "Plot") && (
+                        <div className="space-y-1">
+                          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Plot Size</label>
+                          <div className="flex gap-2">
+                            <input
+                              type="number" className="flex-1 bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#D31E28]"
+                              placeholder="e.g. 350"
+                              value={form.plotSize || ""}
+                              onChange={e => setField("plotSize", parseInt(e.target.value) || "")}
+                            />
+                            <select
+                              className="bg-gray-50 border rounded-xl px-3 py-3 text-xs font-semibold outline-none focus:border-[#D31E28]"
+                              value={form.plotSizeUnit || "sq yds"}
+                              onChange={e => setField("plotSizeUnit", e.target.value)}
+                            >
+                              <option value="sq ft">Sq Ft</option>
+                              <option value="sq yds">Sq Yds</option>
+                            </select>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -689,11 +689,31 @@ function PropertiesExplorerContent() {
                               <div className="mt-auto pt-4">
                                 <div className="border-t border-[#EEE9E0] pt-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                   <div className="flex items-center gap-3 lg:gap-4 text-[11.5px] lg:text-xs font-bold uppercase tracking-widest text-[#948d7c]">
-                                    <span>{property.bhk} BHK</span>
-                                    <span className="text-[#e0d9cb]">|</span>
-                                    <span>{property.area}</span>
-                                    <span className="text-[#e0d9cb]">|</span>
-                                    <span>{property.type === "Apartment" ? `${property.udsPerAcre ?? 100} Flats/Acre` : possessionShort(property)}</span>
+                                    {property.type === "Plot" ? (
+                                      <>
+                                        <span>{property.plotSize ? `${property.plotSize} ${property.plotSizeUnit || "Sq Yds"}` : property.area}</span>
+                                        <span className="text-[#e0d9cb]">|</span>
+                                        <span>Plot / Land</span>
+                                        <span className="text-[#e0d9cb]">|</span>
+                                        <span>{possessionShort(property)}</span>
+                                      </>
+                                    ) : property.type === "Villa" ? (
+                                      <>
+                                        <span>{property.bhk} BHK</span>
+                                        <span className="text-[#e0d9cb]">|</span>
+                                        <span>{property.area}</span>
+                                        <span className="text-[#e0d9cb]">|</span>
+                                        <span>{property.plotSize ? `${property.plotSize} ${property.plotSizeUnit || "Sq Yds"} Plot` : possessionShort(property)}</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <span>{property.bhk} BHK</span>
+                                        <span className="text-[#e0d9cb]">|</span>
+                                        <span>{property.area}</span>
+                                        <span className="text-[#e0d9cb]">|</span>
+                                        <span>{property.type === "Apartment" ? `${property.udsPerAcre ?? 100} Flats/Acre` : possessionShort(property)}</span>
+                                      </>
+                                    )}
                                   </div>
                                   <button
                                     onClick={() => setSelectedProperty(property)}
@@ -773,11 +793,31 @@ function PropertiesExplorerContent() {
 
                               <div className="mt-auto pt-3.5">
                                 <div className="border-t border-[#EEE9E0] pt-3 flex items-center justify-between text-[10.5px] lg:text-[11px] font-bold uppercase tracking-widest text-[#948d7c]">
-                                  <span>{property.bhk} BHK</span>
-                                  <span className="text-[#e0d9cb]">|</span>
-                                  <span>{property.area.split(" ")[0]} Sq Ft</span>
-                                  <span className="text-[#e0d9cb]">|</span>
-                                  <span>{property.type === "Apartment" ? `${property.udsPerAcre ?? 100} Flats/Acre` : possessionShort(property)}</span>
+                                  {property.type === "Plot" ? (
+                                    <>
+                                      <span>{property.plotSize ? `${property.plotSize} ${property.plotSizeUnit || "Sq Yds"}` : property.area}</span>
+                                      <span className="text-[#e0d9cb]">|</span>
+                                      <span>Plot / Land</span>
+                                      <span className="text-[#e0d9cb]">|</span>
+                                      <span>{possessionShort(property)}</span>
+                                    </>
+                                  ) : property.type === "Villa" ? (
+                                    <>
+                                      <span>{property.bhk} BHK</span>
+                                      <span className="text-[#e0d9cb]">|</span>
+                                      <span>{property.area}</span>
+                                      <span className="text-[#e0d9cb]">|</span>
+                                      <span>{property.plotSize ? `${property.plotSize} ${property.plotSizeUnit || "Sq Yds"} Plot` : possessionShort(property)}</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span>{property.bhk} BHK</span>
+                                      <span className="text-[#e0d9cb]">|</span>
+                                      <span>{property.area}</span>
+                                      <span className="text-[#e0d9cb]">|</span>
+                                      <span>{property.type === "Apartment" ? `${property.udsPerAcre ?? 100} Flats/Acre` : possessionShort(property)}</span>
+                                    </>
+                                  )}
                                 </div>
                                 <button
                                   onClick={() => setSelectedProperty(property)}
@@ -857,11 +897,31 @@ function PropertiesExplorerContent() {
                             </p>
                             <div className="mt-auto pt-4">
                               <div className="border-t border-[#EEE9E0] pt-3.5 flex items-center justify-between text-[11.5px] lg:text-xs font-bold uppercase tracking-widest text-[#948d7c]">
-                                <span>{property.bhk} BHK</span>
-                                <span className="text-[#e0d9cb]">|</span>
-                                <span>{property.area}</span>
-                                <span className="text-[#e0d9cb]">|</span>
-                                <span>{property.type === "Apartment" ? `${property.udsPerAcre ?? 100} Flats/Acre` : possessionShort(property)}</span>
+                                {property.type === "Plot" ? (
+                                  <>
+                                    <span>{property.plotSize ? `${property.plotSize} ${property.plotSizeUnit || "Sq Yds"}` : property.area}</span>
+                                    <span className="text-[#e0d9cb]">|</span>
+                                    <span>Plot / Land</span>
+                                    <span className="text-[#e0d9cb]">|</span>
+                                    <span>{possessionShort(property)}</span>
+                                  </>
+                                ) : property.type === "Villa" ? (
+                                  <>
+                                    <span>{property.bhk} BHK</span>
+                                    <span className="text-[#e0d9cb]">|</span>
+                                    <span>{property.area}</span>
+                                    <span className="text-[#e0d9cb]">|</span>
+                                    <span>{property.plotSize ? `${property.plotSize} ${property.plotSizeUnit || "Sq Yds"} Plot` : possessionShort(property)}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>{property.bhk} BHK</span>
+                                    <span className="text-[#e0d9cb]">|</span>
+                                    <span>{property.area}</span>
+                                    <span className="text-[#e0d9cb]">|</span>
+                                    <span>{property.type === "Apartment" ? `${property.udsPerAcre ?? 100} Flats/Acre` : possessionShort(property)}</span>
+                                  </>
+                                )}
                               </div>
                               <button
                                 onClick={() => setSelectedProperty(property)}
