@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Clock, Calendar, Tag, User, MessageSquare, ArrowRight, Star } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, Tag, ArrowRight, ShieldCheck } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { blogPosts } from "@/data/blog";
@@ -9,6 +9,9 @@ interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
 }
 
+const CONTAINER = "max-w-[1400px] mx-auto w-full";
+const SECTION_X = "px-4 md:px-6 xl:px-[60px]";
+
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const resolvedParams = await params;
   const slug = resolvedParams.slug;
@@ -17,177 +20,165 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   // Fallback if post not found
   if (!post) {
     return (
-      <>
+      <div className="font-archivo bg-white">
         <Navbar />
-        <main className="flex-grow bg-white min-h-screen pt-36 pb-32 flex flex-col items-center justify-center text-center px-6">
-          <h2 className="text-serif text-3xl font-light text-brand-black mb-4">Essay Not Located</h2>
-          <p className="text-xs text-brand-black/50 leading-relaxed font-sans max-w-sm mb-8">
-            The requested spatial publication could not be found inside the private registry. It may have been archived.
+        <main className={`${SECTION_X} py-24 lg:py-32 flex flex-col items-center justify-center text-center`}>
+          <h2 className="font-display font-semibold text-[32px] text-[#0A0A0A] mb-4">Essay not found</h2>
+          <p className="text-[15px] text-[#57534a] leading-relaxed max-w-sm mb-8">
+            The article you&apos;re looking for could not be found. It may have been moved or archived.
           </p>
           <Link
             href="/blog"
-            className="px-6 py-3 bg-brand-black text-white text-xs tracking-widest font-extrabold uppercase"
+            className="px-7 py-4 bg-[#0A0A0A] hover:bg-[#D31E28] text-white text-sm font-semibold rounded-lg transition-colors"
           >
-            Return to Insights
+            Return to the journal
           </Link>
         </main>
         <Footer />
-      </>
+      </div>
     );
   }
 
   // Showcase a matching property on the sidebar for high conversion
   const featuredProp = properties[0];
+  const priceCr = `₹${parseFloat((featuredProp.price / 10000000).toFixed(2))} Cr`;
 
   return (
-    <>
+    <div className="font-archivo bg-white">
       <Navbar />
 
-      <main className="flex-grow bg-white min-h-screen pt-36 pb-32">
-        <div className="max-w-7xl mx-auto px-6">
-          
-          {/* Back Nav Link */}
+      <main className={`${SECTION_X} py-12 lg:py-16`}>
+        <div className={CONTAINER}>
+          {/* Back link */}
           <Link
             href="/blog"
-            className="inline-flex items-center space-x-2 text-xs tracking-widest font-extrabold text-brand-black/60 hover:text-brand-black uppercase mb-12 group"
+            className="inline-flex items-center gap-2 text-[13px] tracking-wide font-semibold text-[#57534a] hover:text-[#D31E28] uppercase mb-8 lg:mb-12 group"
           >
-            <ArrowLeft size={12} className="transform transition-transform duration-300 group-hover:-translate-x-0.5" />
-            <span>Back to Insights</span>
+            <ArrowLeft size={14} className="transition-transform duration-300 group-hover:-translate-x-0.5" />
+            Back to the journal
           </Link>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-            
-            {/* ========================================== */}
-            {/* MAIN ARTICLE BODY                          */}
-            {/* ========================================== */}
-            <article className="lg:col-span-8 space-y-10">
-              
-              {/* Meta Tags */}
-              <div className="space-y-6">
-                <div className="flex items-center space-x-4 text-xs tracking-widest font-bold uppercase text-brand-black/40">
-                  <span className="flex items-center space-x-1">
-                    <Tag size={10} className="text-brand-red" />
-                    <span>{post.category}</span>
-                  </span>
-                  <span>•</span>
-                  <span className="flex items-center space-x-1">
-                    <Clock size={10} />
-                    <span>{post.readTime}</span>
-                  </span>
-                </div>
-
-                <h1 className="text-serif text-4xl md:text-6xl font-light text-brand-black tracking-tight leading-[1.1]">
-                  {post.title}
-                </h1>
-
-                <p className="text-sm md:text-base font-light text-brand-black/50 leading-relaxed font-sans italic border-l-2 border-brand-red pl-4">
-                  {post.excerpt}
-                </p>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+            {/* Main article */}
+            <article className="lg:col-span-8">
+              <div className="flex items-center gap-4 text-[11px] tracking-[0.14em] font-bold uppercase text-[#948d7c]">
+                <span className="flex items-center gap-1.5 text-[#8A6D2F]">
+                  <Tag size={11} className="text-[#D31E28]" />
+                  {post.category}
+                </span>
+                <span className="text-[#e0d9cb]">•</span>
+                <span className="flex items-center gap-1.5">
+                  <Clock size={11} />
+                  {post.readTime}
+                </span>
               </div>
 
-              {/* Cover Image */}
-              <div className="aspect-[16/9] overflow-hidden bg-brand-gray border border-black/5 shadow-luxury">
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  className="w-full h-full object-cover"
-                />
+              <h1 className="font-display font-semibold text-[32px] md:text-[48px] lg:text-[56px] text-[#0A0A0A] leading-[1.1] mt-4 text-balance">
+                {post.title}
+              </h1>
+
+              <p className="text-[16px] md:text-[18px] text-[#57534a] leading-relaxed italic border-l-2 border-[#D31E28] pl-4 mt-5">
+                {post.excerpt}
+              </p>
+
+              {/* Cover image */}
+              <div className="aspect-[16/9] overflow-hidden bg-[#efeae1] border border-[#EEE9E0] rounded-2xl mt-8">
+                <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
               </div>
 
-              {/* Author Row */}
-              <div className="flex items-center justify-between py-6 border-y border-brand-gray-dark">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-full bg-brand-black text-white flex items-center justify-center font-bold text-sm">
-                    {post.author.split(" ").map(n => n[0]).join("")}
+              {/* Author row */}
+              <div className="flex items-center justify-between py-5 border-y border-[#EEE9E0] mt-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#0A0A0A] text-white flex items-center justify-center font-semibold text-sm">
+                    {post.author.split(" ").map((n) => n[0]).join("")}
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-brand-black">{post.author}</h4>
-                    <p className="text-xs text-brand-black/40 font-bold uppercase tracking-wider">{post.authorRole}</p>
+                    <h4 className="text-[14px] font-semibold text-[#0A0A0A]">{post.author}</h4>
+                    <p className="text-[11px] text-[#948d7c] font-bold uppercase tracking-wider">{post.authorRole}</p>
                   </div>
                 </div>
-                <div className="flex items-center space-x-1.5 text-xs text-brand-black/50 font-semibold uppercase">
-                  <Calendar size={12} className="text-brand-red" />
-                  <span>{post.date}</span>
+                <div className="flex items-center gap-1.5 text-[13px] text-[#57534a] font-semibold uppercase">
+                  <Calendar size={13} className="text-[#D31E28]" />
+                  {post.date}
                 </div>
               </div>
 
-              {/* Prose Content */}
-              <div 
-                className="prose prose-neutral max-w-none text-brand-black/80 font-sans text-sm md:text-base leading-relaxed space-y-6
-                  prose-headings:text-serif prose-headings:font-light prose-headings:text-brand-black prose-headings:tracking-tight
-                  prose-h2:text-2xl prose-h2:md:text-3xl prose-h2:pt-8 prose-h2:border-t prose-h2:border-brand-gray-dark
-                  prose-blockquote:border-l-4 prose-blockquote:border-brand-red prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-brand-black/70 prose-blockquote:font-light prose-blockquote:text-lg prose-blockquote:my-8
+              {/* Prose content */}
+              <div
+                className="prose prose-neutral max-w-none text-[#44403a] text-[16px] leading-[1.8] mt-8
+                  prose-headings:font-display prose-headings:font-semibold prose-headings:text-[#0A0A0A]
+                  prose-h2:text-[26px] prose-h2:md:text-[32px] prose-h2:pt-8 prose-h2:mt-8 prose-h2:border-t prose-h2:border-[#EEE9E0]
+                  prose-a:text-[#D31E28] prose-a:no-underline hover:prose-a:underline
+                  prose-blockquote:border-l-4 prose-blockquote:border-[#D31E28] prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-[#2b2823] prose-blockquote:font-normal prose-blockquote:text-lg prose-blockquote:my-8
                   prose-ul:list-disc prose-ul:pl-6 prose-ul:space-y-2
-                  prose-strong:font-bold prose-strong:text-brand-black"
+                  prose-strong:font-semibold prose-strong:text-[#0A0A0A]"
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
-
             </article>
 
-            {/* ========================================== */}
-            {/* HIGH-CONVERSION SIDEBAR                   */}
-            {/* ========================================== */}
-            <aside className="lg:col-span-4 lg:sticky lg:top-28 space-y-8">
-              
-              <div className="glass-panel p-6 shadow-luxury space-y-6 bg-brand-gray/10">
-                <div className="space-y-1">
-                  <span className="text-xs tracking-widest text-brand-black/40 font-bold uppercase">Spatial Connection</span>
-                  <h4 className="text-serif text-xl font-light text-brand-black">Corresponding Estatement</h4>
-                </div>
+            {/* Sidebar */}
+            <aside className="lg:col-span-4 lg:sticky lg:top-6 space-y-6">
+              <div className="bg-[#FAF7F1] border border-[#EEE9E0] rounded-2xl p-6">
+                <div className="text-[11px] tracking-[0.18em] text-[#8A6D2F] font-semibold uppercase">Featured residence</div>
+                <h4 className="font-display font-semibold text-[22px] text-[#0A0A0A] mt-1">A home worth touring.</h4>
 
-                <div className="bg-white border border-black/5 overflow-hidden group shadow-luxury">
-                  <div className="aspect-[4/3] overflow-hidden bg-brand-gray relative">
-                    <img src={featuredProp.image} alt={featuredProp.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" />
-                    <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2 py-0.5 flex items-center space-x-1 border border-black/5">
-                      <Star size={8} className="text-brand-red fill-brand-red" />
-                      <span className="text-xs font-bold text-brand-black">{featuredProp.scores.architecturalIntegrity} AQ</span>
-                    </div>
-                  </div>
-                  <div className="p-5 space-y-4">
-                    <div className="space-y-1">
-                      <span className="text-xs text-brand-black/40 font-bold uppercase tracking-wider">{featuredProp.location}</span>
-                      <h5 className="text-serif text-lg font-light text-brand-black">{featuredProp.title}</h5>
-                    </div>
-                    <div className="flex justify-between items-center pt-3 border-t border-brand-gray-dark text-xs text-brand-black/50 uppercase font-bold">
-                      <span>{featuredProp.bhk} BHK • {featuredProp.area}</span>
-                      <span className="text-xs font-semibold text-brand-black">${(featuredProp.price / 1000000).toFixed(1)}M</span>
+                <div className="bg-white border border-[#EEE9E0] rounded-xl overflow-hidden group mt-5">
+                  <Link href="/properties" className="relative block aspect-[4/3] overflow-hidden bg-[#efeae1]">
+                    <img
+                      src={featuredProp.image}
+                      alt={featuredProp.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <span className="absolute left-3 top-3 bg-emerald-500 text-white rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                      <ShieldCheck size={10} /> Legal Clear
+                    </span>
+                  </Link>
+                  <div className="p-5">
+                    <span className="text-[11px] text-[#948d7c] font-bold uppercase tracking-[0.18em]">
+                      {featuredProp.location.split(",")[0]}
+                    </span>
+                    <Link
+                      href="/properties"
+                      className="block font-display font-semibold text-[19px] text-[#D31E28] hover:text-[#B8171F] transition-colors mt-1.5"
+                    >
+                      {featuredProp.title}
+                    </Link>
+                    <div className="flex justify-between items-center pt-3.5 mt-3.5 border-t border-[#EEE9E0] text-[12px] text-[#948d7c] uppercase font-bold tracking-wide">
+                      <span>{featuredProp.bhk} BHK · {featuredProp.area}</span>
+                      <span className="text-[#D31E28]">{priceCr}</span>
                     </div>
                     <Link
-                      href={`/properties`}
-                      className="w-full py-3 bg-brand-black hover:bg-brand-red text-white text-xs tracking-widest font-extrabold uppercase text-center block transition-all duration-300"
+                      href="/properties"
+                      className="w-full mt-4 py-3 bg-[#0A0A0A] hover:bg-[#D31E28] text-white text-[11px] tracking-widest font-bold uppercase text-center block rounded-full transition-colors"
                     >
-                      Acquire Intelligence
+                      View property
                     </Link>
                   </div>
                 </div>
               </div>
 
-              {/* Call to Register Briefing */}
-              <div className="bg-brand-black text-white p-6 shadow-luxury space-y-4 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-5 architectural-grid pointer-events-none" />
-                <span className="text-xs tracking-widest text-white/40 font-bold uppercase block relative z-10">Private Briefing</span>
-                <h4 className="text-serif text-xl font-light text-white relative z-10">Subscribe to Curation Reports</h4>
-                <p className="text-sm font-light text-white/60 leading-relaxed relative z-10">
-                  Receive full structural dossiers and off-market asset disclosures direct to your private inbox.
+              {/* CTA */}
+              <div className="bg-[#0A0A0A] text-white rounded-2xl p-6">
+                <div className="text-[11px] tracking-[0.18em] text-[#D31E28] font-semibold uppercase">Free Expert Session</div>
+                <h4 className="font-display font-semibold text-[22px] text-white mt-1.5">Talk to a certified advisor.</h4>
+                <p className="text-[14px] text-white/60 leading-relaxed mt-2">
+                  Verified shortlists, 47-point audits, and zero brokerage — buyer-side only.
                 </p>
                 <Link
-                  href="/dashboard"
-                  className="flex items-center justify-between text-xs tracking-widest font-bold uppercase text-white bg-brand-red hover:bg-white hover:text-brand-black px-4 py-3 relative z-10 transition-colors duration-300 group"
+                  href="/contact"
+                  className="flex items-center justify-between text-[12px] tracking-widest font-bold uppercase text-white bg-[#D31E28] hover:bg-[#B8171F] px-4 py-3.5 mt-4 rounded-lg transition-colors group"
                 >
-                  <span>Register KYC Portal</span>
-                  <ArrowRight size={12} className="transform transition-transform duration-300 group-hover:translate-x-0.5" />
+                  <span>Book free session</span>
+                  <ArrowRight size={13} className="transition-transform duration-300 group-hover:translate-x-0.5" />
                 </Link>
               </div>
-
             </aside>
-
           </div>
-
         </div>
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 }
 

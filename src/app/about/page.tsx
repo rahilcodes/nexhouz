@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  ShieldCheck, Target, Eye, Handshake, ArrowRight, Check,
-  Building, Users, Star, TrendingUp, Award, Heart, Zap,
-  FileText, MapPin, Clock, BadgeCheck, Globe, ChevronRight
+  ShieldCheck, Handshake, ArrowRight, Check, Star, Heart, Zap,
+  FileText, BadgeCheck, Globe,
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { CONTAINER, Reveal, Eyebrow } from "@/components/ui/theme";
 
 const milestones = [
   { year: "2025", title: "NexHouz Founded", desc: "Started with a single mission: make Hyderabad property buying transparent, safe, and human." },
@@ -35,6 +35,17 @@ const stats = [
   { value: "12", label: "Countries Served (NRI)" },
 ];
 
+const comparison: [string, boolean, boolean][] = [
+  ["RERA & Legal Audit", true, false],
+  ["Commission-Free Advice", true, false],
+  ["Builder Track Record Check", true, false],
+  ["AI-Powered Property Matching", true, false],
+  ["Written Due Diligence Report", true, false],
+  ["Post-Purchase Support", true, false],
+  ["NRI Remote Buying Facility", true, false],
+  ["Unbiased Second Opinion", true, false],
+];
+
 export default function AboutPage() {
   const [activeTab, setActiveTab] = useState<"vision" | "mission" | "story">("story");
 
@@ -54,244 +65,186 @@ export default function AboutPage() {
   };
 
   return (
-    <>
+    <div className="font-archivo bg-white">
       <Navbar />
-      <main className="bg-white min-h-screen">
+      <main>
 
         {/* ================================================================ */}
-        {/* HERO — Full-bleed dark with property image                        */}
+        {/* HERO — warm split layout                                          */}
         {/* ================================================================ */}
-        <section className="relative h-screen overflow-hidden bg-brand-black">
-          {/* Background image */}
-          <img
-            src="/images/hero_modernist_villa.png"
-            alt="NexHouz Story"
-            className="absolute inset-0 w-full h-full object-cover opacity-25"
-          />
-          {/* Grid overlay */}
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-          {/* Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-b from-brand-black/60 via-transparent to-brand-black/80" />
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-black via-brand-black/40 to-transparent" />
-
-          {/* Content */}
-          <div className="relative z-10 h-full flex flex-col justify-center max-w-7xl mx-auto px-6 lg:px-10 pt-20 pb-10">
-            <div className="max-w-2xl space-y-5">
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="inline-flex items-center gap-2 px-2.5 py-1 bg-white/10 border border-white/20 rounded-full"
-              >
-                <BadgeCheck size={10} className="text-brand-red" />
-                <span className="text-xs md:text-xs font-extrabold tracking-[0.2em] uppercase text-white/80">
-                  Hyderabad's Most Trusted Property Firm
-                </span>
-              </motion.div>
-
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.08 }}
-                className="font-extrabold text-white leading-[1.08] tracking-tight"
-                style={{ fontSize: "clamp(1.8rem, 4vw, 3.25rem)" }}
-              >
-                We don't just find you a house.<br />
-                We find you a <span className="text-brand-red">home you can trust.</span>
-              </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.16 }}
-                className="text-xs md:text-sm text-white/55 font-medium leading-relaxed max-w-lg"
-              >
-                NexHouz was founded by people who got burned by the broken Hyderabad property market — and decided to fix it. In just 2 years, we've helped 130+ families buy homes with complete legal clarity and zero regret.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.24 }}
-                className="flex flex-col sm:flex-row gap-3 pt-2"
-              >
+        <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-[#FAF7F1]">
+          <div className={`${CONTAINER} grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-16 items-center`}>
+            <Reveal>
+              <div className="inline-flex items-center gap-2.5 bg-white border border-[#eadfd0] rounded-lg px-4 py-2.5 text-[13px] md:text-[14px] font-semibold text-[#8A6D2F] shadow-[0_2px_8px_rgba(30,25,15,0.06)]">
+                <BadgeCheck size={14} className="text-[#8A6D2F]" />
+                Hyderabad&apos;s Most Trusted Property Firm
+              </div>
+              <h1 className="font-display font-semibold text-[34px] md:text-[46px] lg:text-[54px] leading-[1.15] lg:leading-[1.1] text-[#0A0A0A] mt-5 text-balance">
+                We don&apos;t just find you a house. We find you a{" "}
+                <span className="text-[#D31E28]">home you can trust.</span>
+              </h1>
+              <p className="text-[15.5px] lg:text-[17px] leading-[1.7] text-[#57534a] mt-4 lg:mt-5 max-w-[540px]">
+                NexHouz was founded by people who got burned by the broken Hyderabad property market — and decided to
+                fix it. In just 2 years, we&apos;ve helped 130+ families buy homes with complete legal clarity and zero
+                regret.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3.5 mt-7">
                 <Link
                   href="/contact"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-brand-red hover:bg-brand-red/90 text-white text-xs font-extrabold uppercase tracking-wider rounded-full transition-all hover:scale-105 shadow-lg shadow-brand-red/20"
+                  className="inline-flex items-center justify-center gap-2 bg-[#D31E28] hover:bg-[#B8171F] text-white text-base font-semibold rounded-lg px-7 py-4 shadow-[0_4px_14px_rgba(211,30,40,0.25)] transition-colors"
                 >
-                  Talk to Our Team <ArrowRight size={13} />
+                  Talk to Our Team <ArrowRight size={15} />
                 </Link>
                 <Link
                   href="/properties"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/10 hover:bg-white/15 text-white text-xs font-bold uppercase tracking-wider rounded-full transition-all border border-white/20"
+                  className="inline-flex items-center justify-center border-[1.5px] border-[#d8d2c6] text-[#0A0A0A] hover:border-[#0A0A0A] text-base font-semibold rounded-lg px-6 py-4 transition-colors"
                 >
                   Browse Verified Properties
                 </Link>
-              </motion.div>
-            </div>
+              </div>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <div className="rounded-[20px] overflow-hidden h-[260px] md:h-[340px] lg:h-[460px]">
+                <img
+                  src="/images/hero_modernist_villa.png"
+                  alt="NexHouz Story — luxury villa in Hyderabad"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </Reveal>
           </div>
-
-          {/* Scroll hint */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
-          >
-            <span className="text-xs font-bold uppercase tracking-widest text-white/30">Our Story</span>
-            <motion.div animate={{ y: [0, 4, 0] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-px h-8 bg-gradient-to-b from-white/30 to-transparent" />
-          </motion.div>
         </section>
 
         {/* ================================================================ */}
         {/* STATS BAR                                                         */}
         {/* ================================================================ */}
-        <section className="bg-brand-black border-t border-white/5 py-10">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-3 lg:grid-cols-6 gap-6">
-              {stats.map((stat, i) => (
-                <motion.div
-                  key={stat.label}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: i * 0.07 }}
-                  className="text-center space-y-1"
-                >
-                  <p className="text-3xl font-extrabold text-white">{stat.value}</p>
-                  <p className="text-xs font-bold uppercase tracking-widest text-white/35">{stat.label}</p>
-                </motion.div>
-              ))}
-            </div>
+        <section className="border-b border-[#EEE9E0] bg-white px-4 md:px-6 xl:px-[60px]">
+          <div className={`${CONTAINER} grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6`}>
+            {stats.map((stat, i) => (
+              <Reveal key={stat.label} delay={i * 0.05}>
+                <div className="text-center py-6 lg:py-8 px-3">
+                  <div className="text-[26px] lg:text-[30px] leading-none font-semibold text-[#0A0A0A]">{stat.value}</div>
+                  <div className="text-[13px] lg:text-sm text-[#6b6659] mt-2">{stat.label}</div>
+                </div>
+              </Reveal>
+            ))}
           </div>
         </section>
 
         {/* ================================================================ */}
         {/* STORY / VISION / MISSION TABS                                     */}
         {/* ================================================================ */}
-        <section className="py-24 bg-white border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              {/* Left: image */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="relative rounded-3xl overflow-hidden aspect-[4/3] shadow-xl"
-              >
+        <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-white">
+          <div className={`${CONTAINER} grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center`}>
+            {/* Left: image */}
+            <Reveal>
+              <div className="relative rounded-[20px] overflow-hidden aspect-[4/3]">
                 <img
                   src="/images/obsidian_pavilion.png"
                   alt="NexHouz Office"
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-black/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/50 to-transparent" />
                 {/* Floating badge */}
-                <div className="absolute bottom-6 left-6 right-6">
-                  <div className="bg-white/90 backdrop-blur-md rounded-2xl px-5 py-4 flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-brand-red flex items-center justify-center shrink-0">
-                      <ShieldCheck size={16} className="text-white" />
+                <div className="absolute bottom-4 left-4 right-4 lg:bottom-6 lg:left-6 lg:right-6">
+                  <div className="bg-white/95 backdrop-blur-md border border-[#EEE9E0] rounded-2xl px-5 py-4 flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-full bg-[#D31E28] flex items-center justify-center shrink-0">
+                      <ShieldCheck size={17} className="text-white" />
                     </div>
                     <div>
-                      <p className="text-xs font-extrabold text-brand-black">100% Commission-Free Advisory</p>
-                      <p className="text-xs text-gray-500 font-medium">Our advisors earn salaries, not commissions on your deal</p>
+                      <p className="text-[14.5px] font-semibold text-[#0A0A0A]">100% Commission-Free Advisory</p>
+                      <p className="text-[13px] text-[#6b6659] mt-0.5">Our advisors earn salaries, not commissions on your deal</p>
                     </div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
+            </Reveal>
 
-              {/* Right: tab content */}
+            {/* Right: tab content */}
+            <Reveal delay={0.1}>
+              <Eyebrow>Who We Are</Eyebrow>
+
+              {/* Tab switcher */}
+              <div className="flex items-center gap-1 p-1 bg-[#FAF7F1] border border-[#EEE9E0] rounded-full w-fit mt-5">
+                {(["story", "vision", "mission"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-4 md:px-5 py-2.5 text-[12.5px] font-semibold uppercase tracking-[0.14em] rounded-full transition-colors cursor-pointer ${
+                      activeTab === tab ? "bg-[#0A0A0A] text-white" : "text-[#948d7c] hover:text-[#0A0A0A]"
+                    }`}
+                  >
+                    {tab === "story" ? "Our Story" : tab === "vision" ? "Vision" : "Mission"}
+                  </button>
+                ))}
+              </div>
+
               <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="space-y-8"
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mt-6"
               >
-                {/* Tab switcher */}
-                <div className="flex items-center gap-1 p-1 bg-gray-50 border border-gray-100 rounded-full w-fit">
-                  {(["story", "vision", "mission"] as const).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`px-4 py-2 text-xs font-extrabold uppercase tracking-widest rounded-full transition-all cursor-pointer ${activeTab === tab ? "bg-brand-black text-white shadow-sm" : "text-gray-400 hover:text-gray-700"}`}
-                    >
-                      {tab === "story" ? "Our Story" : tab === "vision" ? "Vision" : "Mission"}
-                    </button>
-                  ))}
-                </div>
-
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-5"
-                >
-                  <h2 className="text-4xl font-extrabold text-brand-black leading-tight">
-                    {tabContent[activeTab].heading}
-                  </h2>
-                  <p className="text-sm text-gray-500 leading-relaxed font-medium">
-                    {tabContent[activeTab].body}
-                  </p>
-                </motion.div>
-
-                <div className="grid grid-cols-2 gap-4 pt-2">
-                  {[
-                    { icon: BadgeCheck, text: "RERA Certified Advisors" },
-                    { icon: ShieldCheck, text: "14-Point Legal Audit" },
-                    { icon: Heart, text: "Zero Pressure Culture" },
-                    { icon: Star, text: "4.9★ Client Rating" },
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <div key={item.text} className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-brand-red/8 flex items-center justify-center shrink-0">
-                          <Icon size={13} className="text-brand-red" />
-                        </div>
-                        <span className="text-xs font-bold text-brand-black">{item.text}</span>
-                      </div>
-                    );
-                  })}
-                </div>
+                <h2 className="font-display font-semibold text-[28px] md:text-[36px] lg:text-[40px] leading-[1.15] text-[#0A0A0A]">
+                  {tabContent[activeTab].heading}
+                </h2>
+                <p className="text-[15px] lg:text-base leading-[1.7] text-[#57534a] mt-4">
+                  {tabContent[activeTab].body}
+                </p>
               </motion.div>
-            </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-7">
+                {[
+                  { icon: BadgeCheck, text: "RERA Certified Advisors" },
+                  { icon: ShieldCheck, text: "14-Point Legal Audit" },
+                  { icon: Heart, text: "Zero Pressure Culture" },
+                  { icon: Star, text: "4.9★ Client Rating" },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={item.text} className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-[#faf0f0] flex items-center justify-center shrink-0">
+                        <Icon size={15} className="text-[#D31E28]" />
+                      </div>
+                      <span className="text-[14.5px] font-semibold text-[#0A0A0A]">{item.text}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </Reveal>
           </div>
         </section>
 
         {/* ================================================================ */}
         {/* CORE VALUES                                                        */}
         {/* ================================================================ */}
-        <section className="py-24 bg-gray-50/50 border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-16 space-y-3">
-              <p className="text-xs font-extrabold uppercase tracking-[0.3em] text-brand-red">What We Stand For</p>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-brand-black tracking-tight">
+        <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-[#FAF7F1]">
+          <div className={CONTAINER}>
+            <Reveal className="text-center max-w-[760px] mx-auto mb-6 lg:mb-12">
+              <Eyebrow>What We Stand For</Eyebrow>
+              <h2 className="font-display font-semibold text-[28px] md:text-[40px] lg:text-[44px] leading-[1.2] lg:leading-[1.15] text-[#0A0A0A] mt-3 lg:mt-4 text-balance">
                 Six principles we never compromise on.
               </h2>
-              <p className="text-sm text-gray-500 font-medium max-w-xl mx-auto leading-relaxed">
-                These are not marketing words. These are the standards we hold every team member, every listing, and every client conversation to.
+              <p className="text-[15px] lg:text-base leading-[1.7] text-[#57534a] mt-4 max-w-[600px] mx-auto">
+                These are not marketing words. These are the standards we hold every team member, every listing, and
+                every client conversation to.
               </p>
-            </div>
+            </Reveal>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 lg:gap-6">
               {values.map((val, idx) => {
                 const Icon = val.icon;
                 return (
-                  <motion.div
-                    key={val.title}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: idx * 0.08 }}
-                    className="bg-white border border-gray-100 rounded-3xl p-8 space-y-4 shadow-sm hover:shadow-lg hover:border-brand-red/20 transition-all group"
-                  >
-                    <div className="w-12 h-12 rounded-2xl bg-brand-red/5 flex items-center justify-center text-brand-red group-hover:bg-brand-red group-hover:text-white transition-all">
-                      <Icon size={20} className="stroke-[1.8]" />
+                  <Reveal key={val.title} delay={(idx % 3) * 0.08}>
+                    <div className="bg-white border border-[#EEE9E0] rounded-2xl p-6 lg:p-8 h-full shadow-[0_1px_3px_rgba(30,25,15,0.04)]">
+                      <div className="w-12 h-12 rounded-[14px] bg-[#faf0f0] flex items-center justify-center text-[#D31E28]">
+                        <Icon size={20} className="stroke-[1.8]" />
+                      </div>
+                      <h3 className="text-[18px] lg:text-[20px] font-semibold text-[#0A0A0A] mt-5">{val.title}</h3>
+                      <p className="text-[14.5px] lg:text-[15px] leading-[1.65] text-[#57534a] mt-2.5">{val.desc}</p>
                     </div>
-                    <h3 className="text-lg font-extrabold text-brand-black">{val.title}</h3>
-                    <p className="text-xs text-gray-500 leading-relaxed font-medium">{val.desc}</p>
-                  </motion.div>
+                  </Reveal>
                 );
               })}
             </div>
@@ -301,51 +254,53 @@ export default function AboutPage() {
         {/* ================================================================ */}
         {/* TIMELINE — Company milestones                                     */}
         {/* ================================================================ */}
-        <section className="py-24 bg-white border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-              {/* Left heading */}
-              <div className="space-y-5 lg:sticky lg:top-28">
-                <p className="text-xs font-extrabold uppercase tracking-[0.3em] text-brand-red">Our Journey</p>
-                <h2 className="text-4xl md:text-5xl font-extrabold text-brand-black leading-tight">
-                  Two years of building trust, one verified listing at a time.
-                </h2>
-                <p className="text-sm text-gray-500 font-medium leading-relaxed">
-                  From a small team with a simple idea to Hyderabad's most verified property firm — every milestone here represents real families who found their right home.
-                </p>
-                <Link href="/contact" className="inline-flex items-center gap-2 px-6 py-3 border border-brand-red text-brand-red text-xs font-extrabold uppercase tracking-wider rounded-full hover:bg-brand-red hover:text-white transition-all">
-                  Be Part of Our Story <ArrowRight size={12} />
-                </Link>
-              </div>
+        <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-white">
+          <div className={`${CONTAINER} grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start`}>
+            {/* Left heading */}
+            <Reveal className="lg:sticky lg:top-10">
+              <Eyebrow>Our Journey</Eyebrow>
+              <h2 className="font-display font-semibold text-[28px] md:text-[40px] lg:text-[44px] leading-[1.2] lg:leading-[1.15] text-[#0A0A0A] mt-3 lg:mt-4 text-balance">
+                Two years of building trust, one verified listing at a time.
+              </h2>
+              <p className="text-[15px] lg:text-base leading-[1.7] text-[#57534a] mt-4 max-w-[480px]">
+                From a small team with a simple idea to Hyderabad&apos;s most verified property firm — every milestone
+                here represents real families who found their right home.
+              </p>
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-2 border-[1.5px] border-[#d8d2c6] text-[#0A0A0A] hover:border-[#0A0A0A] text-[15px] font-semibold rounded-lg px-6 py-4 mt-6 transition-colors"
+              >
+                Be Part of Our Story <ArrowRight size={14} />
+              </Link>
+            </Reveal>
 
-              {/* Right timeline */}
-              <div className="relative pl-8">
-                {/* Vertical line */}
-                <div className="absolute left-0 top-2 bottom-2 w-px bg-gradient-to-b from-brand-red via-gray-200 to-gray-100" />
+            {/* Right timeline */}
+            <div className="relative pl-8">
+              {/* Vertical line */}
+              <div className="absolute left-0 top-2 bottom-2 w-px bg-gradient-to-b from-[#D31E28] via-[#EEE9E0] to-[#EEE9E0]" />
 
-                <div className="space-y-10">
-                  {milestones.map((m, idx) => (
-                    <motion.div
-                      key={m.year}
-                      initial={{ opacity: 0, x: 20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.4, delay: idx * 0.07 }}
-                      className="relative"
-                    >
+              <div className="space-y-10">
+                {milestones.map((m, idx) => (
+                  <Reveal key={m.title} delay={idx * 0.07}>
+                    <div className="relative">
                       {/* Dot */}
-                      <div className={`absolute -left-10 top-1.5 w-4 h-4 rounded-full border-2 ${idx === 0 ? "bg-brand-red border-brand-red" : "bg-white border-gray-300"} `} />
-
-                      <div className="space-y-1.5 pl-2">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs font-extrabold text-brand-red bg-brand-red/8 border border-brand-red/15 px-2.5 py-0.5 rounded-full">{m.year}</span>
-                          <h3 className="text-sm font-extrabold text-brand-black">{m.title}</h3>
+                      <div
+                        className={`absolute -left-10 top-1 w-4 h-4 rounded-full border-2 ${
+                          idx === 0 ? "bg-[#D31E28] border-[#D31E28]" : "bg-white border-[#d8d2c6]"
+                        }`}
+                      />
+                      <div className="pl-2">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="text-[12.5px] font-bold text-[#D31E28] bg-[#faf0f0] border border-[#D31E28]/15 px-3 py-1 rounded-full">
+                            {m.year}
+                          </span>
+                          <h3 className="text-[16.5px] font-semibold text-[#0A0A0A]">{m.title}</h3>
                         </div>
-                        <p className="text-xs text-gray-500 leading-relaxed font-medium">{m.desc}</p>
+                        <p className="text-[14.5px] leading-[1.65] text-[#57534a] mt-2">{m.desc}</p>
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
+                    </div>
+                  </Reveal>
+                ))}
               </div>
             </div>
           </div>
@@ -354,124 +309,139 @@ export default function AboutPage() {
         {/* ================================================================ */}
         {/* WHAT MAKES US DIFFERENT — split comparison                        */}
         {/* ================================================================ */}
-        <section className="py-24 bg-gray-50/40 border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-16 space-y-3">
-              <p className="text-xs font-extrabold uppercase tracking-[0.3em] text-brand-red">The Difference</p>
-              <h2 className="text-4xl font-extrabold text-brand-black">NexHouz vs. Traditional Brokers</h2>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr>
-                    <th className="text-left py-4 pr-8 w-1/3"><span className="text-xs font-extrabold uppercase tracking-widest text-gray-400">Factor</span></th>
-                    <th className="py-4 px-6 text-center bg-brand-black rounded-t-2xl">
-                      <span className="text-xs font-extrabold uppercase tracking-widest text-white">NexHouz</span>
-                    </th>
-                    <th className="py-4 px-6 text-center">
-                      <span className="text-xs font-extrabold uppercase tracking-widest text-gray-400">Traditional Broker</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    ["RERA & Legal Audit", true, false],
-                    ["Commission-Free Advice", true, false],
-                    ["Builder Track Record Check", true, false],
-                    ["AI-Powered Property Matching", true, false],
-                    ["Written Due Diligence Report", true, false],
-                    ["Post-Purchase Support", true, false],
-                    ["NRI Remote Buying Facility", true, false],
-                    ["Unbiased Second Opinion", true, false],
-                  ].map(([label, nexhouz, broker], i) => (
-                    <tr key={String(label)} className={`${i % 2 === 0 ? "bg-white" : "bg-gray-50/40"}`}>
-                      <td className="py-4 pr-8 text-sm font-semibold text-brand-black">{label as string}</td>
-                      <td className="py-4 px-6 text-center bg-brand-black/3">
-                        {nexhouz ? <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center mx-auto"><Check size={13} className="text-white" /></div> : <span className="text-gray-300 text-lg">—</span>}
-                      </td>
-                      <td className="py-4 px-6 text-center">
-                        {broker ? <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center mx-auto"><Check size={13} className="text-white" /></div> : <span className="text-gray-300 text-lg font-bold">✕</span>}
-                      </td>
+        <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-[#FAF7F1]">
+          <div className={CONTAINER}>
+            <Reveal className="text-center max-w-[720px] mx-auto mb-6 lg:mb-12">
+              <Eyebrow>The Difference</Eyebrow>
+              <h2 className="font-display font-semibold text-[28px] md:text-[40px] lg:text-[44px] leading-[1.2] lg:leading-[1.15] text-[#0A0A0A] mt-3 lg:mt-4">
+                NexHouz vs. Traditional Brokers
+              </h2>
+            </Reveal>
+            <Reveal>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[640px]">
+                  <thead>
+                    <tr>
+                      <th className="text-left py-4 pr-8 w-1/3">
+                        <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#948d7c]">Factor</span>
+                      </th>
+                      <th className="py-4 px-6 text-center bg-[#0A0A0A] rounded-t-2xl">
+                        <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-white">NexHouz</span>
+                      </th>
+                      <th className="py-4 px-6 text-center">
+                        <span className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#948d7c]">Traditional Broker</span>
+                      </th>
                     </tr>
-                  ))}
-                  <tr>
-                    <td className="py-4" />
-                    <td className="pt-4 pb-6 px-6 rounded-b-2xl bg-brand-black/3 text-center">
-                      <Link href="/contact" className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-black hover:bg-brand-red text-white text-xs font-extrabold uppercase tracking-wide rounded-full transition-all">
-                        Start with NexHouz <ArrowRight size={11} />
-                      </Link>
-                    </td>
-                    <td />
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {comparison.map(([label, nexhouz, broker], i) => (
+                      <tr key={label} className={i % 2 === 0 ? "bg-white" : ""}>
+                        <td className="py-4 pr-8 pl-4 text-[15px] font-semibold text-[#0A0A0A]">{label}</td>
+                        <td className="py-4 px-6 text-center bg-[#0A0A0A]/[0.03]">
+                          {nexhouz ? (
+                            <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center mx-auto">
+                              <Check size={13} className="text-white" />
+                            </div>
+                          ) : (
+                            <span className="text-[#c9c2b4] text-lg">—</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6 text-center">
+                          {broker ? (
+                            <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center mx-auto">
+                              <Check size={13} className="text-white" />
+                            </div>
+                          ) : (
+                            <span className="text-[#c9c2b4] text-lg font-bold">✕</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr>
+                      <td className="py-4" />
+                      <td className="pt-5 pb-6 px-6 rounded-b-2xl bg-[#0A0A0A]/[0.03] text-center">
+                        <Link
+                          href="/contact"
+                          className="inline-flex items-center gap-2 bg-[#0A0A0A] hover:bg-[#D31E28] text-white text-sm font-semibold rounded-lg px-6 py-3.5 transition-colors"
+                        >
+                          Start with NexHouz <ArrowRight size={13} />
+                        </Link>
+                      </td>
+                      <td />
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </Reveal>
           </div>
         </section>
 
         {/* ================================================================ */}
-        {/* TESTIMONIAL + TEAM TEASER                                         */}
+        {/* TESTIMONIAL                                                       */}
         {/* ================================================================ */}
-        <section className="py-24 bg-white border-b border-gray-100">
-          <div className="max-w-4xl mx-auto px-6">
-            {/* Testimonial */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="bg-brand-black rounded-3xl p-10 md:p-12 flex flex-col justify-between min-h-[300px] relative overflow-hidden text-center items-center"
-            >
-              <div className="absolute top-0 right-0 w-48 h-48 bg-brand-red/10 rounded-full blur-3xl" />
-              <div className="relative space-y-6 max-w-2xl">
-                <div className="flex items-center gap-0.5 justify-center">
-                  {[...Array(5)].map((_, i) => <Star key={i} size={16} className="fill-brand-red text-brand-red" />)}
-                </div>
-                <blockquote className="text-xl md:text-2xl font-light text-white leading-relaxed italic">
-                  "I had been misled by two different brokers before NexHouz. Their team personally audited the property I wanted, found a pending litigation, and saved me from a catastrophic mistake. I can't recommend them enough."
-                </blockquote>
+        <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-white">
+          <div className={CONTAINER}>
+            <Reveal className="max-w-[880px] mx-auto text-center">
+              <div className="flex items-center gap-1 justify-center">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={16} className="fill-[#8A6D2F] text-[#8A6D2F]" />
+                ))}
               </div>
-              <div className="relative pt-8 border-t border-white/10 w-full max-w-md mt-6">
-                <p className="text-xs font-extrabold uppercase tracking-widest text-white">Karthik Mehta</p>
-                <p className="text-xs text-white/40 font-medium mt-0.5">Software Architect, Gachibowli — bought a villa in Narsingi</p>
+              <blockquote className="font-display italic font-medium text-[22px] md:text-[28px] lg:text-[34px] leading-[1.45] text-[#0A0A0A] mt-5 lg:mt-6">
+                &ldquo;I had been misled by two different brokers before NexHouz. Their team personally audited the
+                property I wanted, found a pending litigation, and saved me from a catastrophic mistake. I can&apos;t
+                recommend them enough.&rdquo;
+              </blockquote>
+              <div className="text-[15px] font-semibold text-[#0A0A0A] tracking-wide mt-6">KARTHIK MEHTA</div>
+              <div className="text-sm text-[#6b6659] mt-1.5">
+                Software Architect, Gachibowli — bought a villa in Narsingi
               </div>
-            </motion.div>
+            </Reveal>
           </div>
         </section>
 
         {/* ================================================================ */}
-        {/* FINAL CTA                                                          */}
+        {/* FINAL CTA — dark band                                             */}
         {/* ================================================================ */}
-        <section className="py-24 bg-brand-black overflow-hidden relative">
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 30% 50%, #D31E28, transparent 60%), radial-gradient(circle at 80% 30%, #D31E28, transparent 50%)" }} />
-          <div className="absolute inset-0" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-          <div className="relative max-w-4xl mx-auto px-6 text-center space-y-7">
-            <h2 className="font-extrabold text-white leading-tight tracking-tight" style={{ fontSize: "clamp(2rem, 4vw, 3.5rem)" }}>
-              Ready to find a home you can trust completely?
-            </h2>
-            <p className="text-sm text-white/55 font-medium leading-relaxed max-w-xl mx-auto">
-              Start with a free 45-minute strategy call. No spam, no broker pressure — just an honest conversation about what's right for you.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/contact" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-brand-red hover:bg-brand-red/90 text-white text-sm font-extrabold uppercase tracking-wider rounded-full transition-all shadow-lg shadow-brand-red/20 hover:scale-105">
-                Book Free Consultation <ArrowRight size={14} />
-              </Link>
-              <Link href="/properties" className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/15 text-white text-sm font-bold uppercase tracking-wider rounded-full transition-all border border-white/20">
-                Browse Verified Properties
-              </Link>
-            </div>
-            <div className="flex flex-wrap justify-center gap-6 pt-4">
-              {["Zero broker pressure", "100% legal clear listings", "Hyderabad's most trusted team"].map(badge => (
-                <div key={badge} className="flex items-center gap-2 text-xs font-bold text-white/40 uppercase tracking-wider">
-                  <Check size={11} className="text-brand-red" />{badge}
-                </div>
-              ))}
-            </div>
+        <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-[#0A0A0A]">
+          <div className={CONTAINER}>
+            <Reveal className="max-w-[880px] mx-auto text-center">
+              <Eyebrow light>Start Your Journey</Eyebrow>
+              <h2 className="font-display font-semibold text-[28px] md:text-[42px] lg:text-[48px] leading-[1.2] lg:leading-[1.15] text-white mt-3 lg:mt-4 text-balance">
+                Ready to find a home you can trust completely?
+              </h2>
+              <p className="text-[15px] lg:text-[17px] leading-[1.7] text-white/65 mt-4 lg:mt-5 max-w-[560px] mx-auto">
+                Start with a free 45-minute strategy call. No spam, no broker pressure — just an honest conversation
+                about what&apos;s right for you.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3.5 justify-center mt-7 lg:mt-9">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center justify-center gap-2 bg-[#D31E28] hover:bg-[#B8171F] text-white text-base font-semibold rounded-lg px-7 py-4 shadow-[0_4px_14px_rgba(211,30,40,0.25)] transition-colors"
+                >
+                  Book Free Consultation <ArrowRight size={15} />
+                </Link>
+                <Link
+                  href="/properties"
+                  className="inline-flex items-center justify-center border-[1.5px] border-white/25 hover:border-white text-white text-base font-semibold rounded-lg px-6 py-4 transition-colors"
+                >
+                  Browse Verified Properties
+                </Link>
+              </div>
+              <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 mt-8">
+                {["Zero broker pressure", "100% legal clear listings", "Hyderabad's most trusted team"].map((badge) => (
+                  <div key={badge} className="flex items-center gap-2 text-[13.5px] font-medium text-white/60">
+                    <Check size={13} className="text-[#D31E28]" strokeWidth={3} />
+                    {badge}
+                  </div>
+                ))}
+              </div>
+            </Reveal>
           </div>
         </section>
 
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

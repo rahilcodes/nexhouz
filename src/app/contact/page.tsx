@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Phone, Mail, Check, Info, Send, Landmark, ShieldAlert } from "lucide-react";
+import { MapPin, Phone, Mail, Check, Clock, ShieldCheck } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { CONTAINER, SECTION_X, Reveal, Eyebrow, PHONE_TEL } from "@/components/ui/theme";
 import { submitLead } from "@/lib/db";
 
 export default function ContactPage() {
@@ -22,7 +23,7 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agree) return;
-    
+
     setIsSubmitting(true);
     const success = await submitLead({
       name: `${form.firstName} ${form.lastName}`,
@@ -42,249 +43,248 @@ export default function ContactPage() {
     }
   };
 
+  const channels = [
+    {
+      icon: MapPin,
+      label: "Corporate Address",
+      value: (
+        <>
+          B 609, 6th Floor, B-Block Asian Sun City,<br />
+          Behind AMB Mall, Kothaguda X Road,<br />
+          Kondapur, Hyderabad, Telangana 500084
+        </>
+      ),
+    },
+    {
+      icon: Phone,
+      label: "Direct Lines",
+      value: (
+        <span className="flex flex-col gap-1">
+          <a href="tel:+918585854853" className="hover:text-[#f3c9cb] transition-colors">+91 85858 54853</a>
+          <a href="tel:+919966998665" className="hover:text-[#f3c9cb] transition-colors">+91 99669 98665</a>
+        </span>
+      ),
+    },
+    {
+      icon: Mail,
+      label: "Email",
+      value: (
+        <a href="mailto:Info@nexhouz.com" className="hover:text-[#f3c9cb] transition-colors">Info@nexhouz.com</a>
+      ),
+    },
+    {
+      icon: Clock,
+      label: "Hours",
+      value: "Mon–Sun · 9 AM – 8 PM",
+    },
+  ];
+
+  const inputClass =
+    "w-full border-[1.5px] border-[#e0d9cb] rounded-[10px] px-[18px] py-4 text-base text-[#0A0A0A] placeholder-[#948d7c] focus:outline-none focus:border-[#D31E28] transition-colors bg-white";
+  const labelClass = "text-[13px] font-semibold tracking-[0.1em] uppercase text-[#948d7c] mb-1.5 block";
+
   return (
-    <>
+    <div className="font-archivo bg-white">
       <Navbar />
 
-      <main className="flex-grow bg-white min-h-screen pt-36 pb-32">
-        <div className="max-w-7xl mx-auto px-6">
-          
-          {/* Header */}
-          <div className="max-w-2xl space-y-4 mb-16 border-b border-brand-gray-dark pb-10">
-            <span className="text-xs tracking-[0.3em] font-bold text-brand-red uppercase">Corporate Touchpoints</span>
-            <h1 className="text-serif text-4xl md:text-5xl font-light tracking-tight text-brand-black">
-              Get in Touch
-            </h1>
-            <p className="text-xs font-light text-brand-black/50 leading-relaxed font-sans max-w-lg">
-              Whether you have an investment query, need spatial guidance, or are ready to take the next step in Hyderabad, our team is here to support you.
+      {/* Header band */}
+      <section className={`${SECTION_X} pt-12 pb-12 lg:pt-16 lg:pb-16 bg-[#FAF7F1] border-b border-[#EEE9E0]`}>
+        <div className={`${CONTAINER} max-w-[760px]`}>
+          <Eyebrow>Contact NexHouz</Eyebrow>
+          <h1 className="font-display font-semibold text-[32px] md:text-[44px] lg:text-[52px] leading-[1.12] text-[#0A0A0A] mt-3 text-balance">
+            Let&apos;s find your home together.
+          </h1>
+          <p className="text-[16px] lg:text-lg leading-[1.7] text-[#57534a] mt-4 max-w-[560px]">
+            An investment query, spatial guidance, or ready to take the next step in Hyderabad — a certified regional
+            advisor responds within 4 hours. No spam, no pressure.
+          </p>
+        </div>
+      </section>
+
+      {/* Dark band: contact channels + form */}
+      <section className={`${SECTION_X} py-14 lg:py-20 bg-[#0A0A0A]`}>
+        <div className={`${CONTAINER} grid grid-cols-1 lg:grid-cols-[1fr_560px] gap-10 lg:gap-[70px] items-start`}>
+          <Reveal>
+            <Eyebrow light>Talk to a certified advisor</Eyebrow>
+            <h2 className="font-display font-semibold text-[28px] md:text-[40px] lg:text-[44px] leading-[1.15] text-white mt-3 text-balance">
+              Every conversation is buyer-side only.
+            </h2>
+            <p className="text-base lg:text-lg leading-[1.7] text-white/65 mt-4 max-w-[480px]">
+              Reach us on any channel below, or send the briefing and we&apos;ll call you back with a verified shortlist.
             </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
-            
-            {/* ========================================== */}
-            {/* LEFT COLUMN: HYDERABAD CONTACT INFO        */}
-            {/* ========================================== */}
-            <div className="lg:col-span-5 space-y-8">
-              
-              <div className="glass-panel p-8 md:p-10 shadow-luxury space-y-8 bg-brand-gray/10">
-                <span className="text-xs tracking-widest text-brand-black/40 font-bold uppercase block">Headquarters Node</span>
-                
-                {/* Office Address */}
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-white border border-black/5 flex items-center justify-center text-brand-red shadow-luxury flex-shrink-0">
-                    <MapPin size={18} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-8">
+              {channels.map((c) => {
+                const Icon = c.icon;
+                return (
+                  <div key={c.label} className="border border-white/[0.14] rounded-[14px] p-5">
+                    <div className="w-10 h-10 rounded-[10px] bg-[#D31E28]/15 text-[#D31E28] flex items-center justify-center">
+                      <Icon size={17} />
+                    </div>
+                    <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-white/45 mt-3">{c.label}</div>
+                    <div className="text-[14.5px] leading-[1.55] text-white/85 mt-1.5">{c.value}</div>
                   </div>
-                  <div className="space-y-1 text-xs">
-                    <span className="font-bold text-xs uppercase text-brand-black/40 block">Corporate Address</span>
-                    <p className="font-light text-brand-black/70 leading-relaxed font-sans">
-                      B 609, 6th Floor, B-BLOCK Asian Sun City,<br />
-                      Behind AMB Mall, Forest Dept Colony,<br />
-                      Kothaguda X Road, Kondapur,<br />
-                      Hyderabad, Telangana 500084
-                    </p>
-                  </div>
-                </div>
-
-                {/* Direct Telephone Lines */}
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-white border border-black/5 flex items-center justify-center text-brand-red shadow-luxury flex-shrink-0">
-                    <Phone size={18} />
-                  </div>
-                  <div className="space-y-1 text-xs">
-                    <span className="font-bold text-xs uppercase text-brand-black/40 block">Active Phone Channels</span>
-                    <p className="font-semibold text-brand-black space-y-1">
-                      <a href="tel:+918585854853" className="block hover:text-brand-red transition-all duration-300">
-                        +91 8585854853
-                      </a>
-                      <a href="tel:+919966998665" className="block hover:text-brand-red transition-all duration-300">
-                        +91 9966998665
-                      </a>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Email Sourcing */}
-                <div className="flex items-start space-x-4">
-                  <div className="w-10 h-10 bg-white border border-black/5 flex items-center justify-center text-brand-red shadow-luxury flex-shrink-0">
-                    <Mail size={18} />
-                  </div>
-                  <div className="space-y-1 text-xs">
-                    <span className="font-bold text-xs uppercase text-brand-black/40 block">Digital Sourcing Inbox</span>
-                    <a href="mailto:Info@nexhouz.com" className="font-semibold text-brand-black hover:text-brand-red transition-all duration-300">
-                      Info@nexhouz.com
-                    </a>
-                  </div>
-                </div>
-
-              </div>
-
-              {/* GOOGLE MAPS EMBED */}
-              <div className="border border-black/5 bg-brand-gray/10 shadow-luxury overflow-hidden p-6 space-y-4">
-                <span className="text-xs tracking-widest text-brand-black/40 font-bold uppercase block">Corporate Location Map</span>
-                <div className="w-full h-64 bg-white border border-black/5 relative overflow-hidden">
-                  <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.024320935778!2d78.3630342!3d17.45855!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x83caa45fc340abd9%3A0xee9b39daa6d27739!2sNexdesk%20Coworking%20spaces!5e0!3m2!1sen!2sin!4v1781446910793!5m2!1sen!2sin" 
-                    width="100%" 
-                    height="100%" 
-                    style={{ border: 0 }} 
-                    allowFullScreen={true} 
-                    loading="lazy" 
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                </div>
-              </div>
-
+                );
+              })}
             </div>
+            <div className="flex flex-wrap gap-5 mt-8 text-[15px] font-medium text-white/75">
+              <span className="flex items-center gap-2">
+                <ShieldCheck size={15} className="text-[#D31E28]" /> Response within 4 hours
+              </span>
+              <span className="flex items-center gap-2">
+                <Check size={15} className="text-[#D31E28]" strokeWidth={3} /> ₹0 fees, always
+              </span>
+            </div>
+          </Reveal>
 
-            {/* ========================================== */}
-            {/* RIGHT COLUMN: CONTACT FORM BRIEFING        */}
-            {/* ========================================== */}
-            <div className="lg:col-span-7 bg-white border border-black/5 p-8 md:p-12 shadow-luxury space-y-8">
-              
-              <div className="space-y-2">
-                <span className="text-xs tracking-widest text-brand-black/40 font-bold uppercase block">Acquisition Protocol</span>
-                <h2 className="text-serif text-3xl font-light text-brand-black">Register Curation Query</h2>
-                <p className="text-sm font-light text-brand-black/50 font-sans leading-relaxed">
-                  Provide your active contact coordinates and spatial parameters. A certified regional advisor will respond within 4 hours.
-                </p>
-              </div>
-
+          <Reveal delay={0.1}>
+            <div className="bg-white rounded-[18px] p-6 lg:p-[34px] lg:px-8">
               <AnimatePresence mode="wait">
                 {!submitted ? (
                   <motion.form
                     key="form"
                     onSubmit={handleSubmit}
-                    className="space-y-6 text-xs font-sans"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                   >
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Field: First Name */}
-                      <div className="space-y-1">
-                        <label className="text-xs tracking-[0.2em] uppercase font-bold text-brand-black/50">First Name*</label>
+                    <div className="text-[20px] lg:text-[22px] font-semibold leading-[1.3] text-[#0A0A0A]">
+                      Register your query
+                    </div>
+                    <p className="text-[14px] text-[#948d7c] mt-1.5">
+                      Share your parameters — a certified advisor responds within 4 hours.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 mt-5">
+                      <div>
+                        <label className={labelClass}>First name</label>
                         <input
                           type="text"
                           required
                           value={form.firstName}
                           onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                          className="w-full bg-brand-gray border border-black/5 px-4 py-3 text-xs font-light focus:outline-none focus:border-brand-red text-brand-black"
-                          placeholder="Sterling"
+                          className={inputClass}
+                          placeholder="Siddharth"
                         />
                       </div>
-
-                      {/* Field: Last Name */}
-                      <div className="space-y-1">
-                        <label className="text-xs tracking-[0.2em] uppercase font-bold text-brand-black/50">Last Name*</label>
+                      <div>
+                        <label className={labelClass}>Last name</label>
                         <input
                           type="text"
                           required
                           value={form.lastName}
                           onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                          className="w-full bg-brand-gray border border-black/5 px-4 py-3 text-xs font-light focus:outline-none focus:border-brand-red text-brand-black"
-                          placeholder="Kemp"
+                          className={inputClass}
+                          placeholder="Reddy"
                         />
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Field: Email */}
-                      <div className="space-y-1">
-                        <label className="text-xs tracking-[0.2em] uppercase font-bold text-brand-black/50">Email Address*</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 mt-3.5">
+                      <div>
+                        <label className={labelClass}>Email address</label>
                         <input
                           type="email"
                           required
                           value={form.email}
                           onChange={(e) => setForm({ ...form, email: e.target.value })}
-                          className="w-full bg-brand-gray border border-black/5 px-4 py-3 text-xs font-light focus:outline-none focus:border-brand-red text-brand-black"
-                          placeholder="info@nexhouz.com"
+                          className={inputClass}
+                          placeholder="you@email.com"
                         />
                       </div>
-
-                      {/* Field: Mobile */}
-                      <div className="space-y-1">
-                        <label className="text-xs tracking-[0.2em] uppercase font-bold text-brand-black/50">Mobile Number*</label>
+                      <div>
+                        <label className={labelClass}>Mobile number</label>
                         <input
                           type="tel"
                           required
                           value={form.mobile}
                           onChange={(e) => setForm({ ...form, mobile: e.target.value })}
-                          className="w-full bg-brand-gray border border-black/5 px-4 py-3 text-xs font-light focus:outline-none focus:border-brand-red text-brand-black"
-                          placeholder="+91 8585854853"
+                          className={inputClass}
+                          placeholder="+91 98765 43210"
                         />
                       </div>
                     </div>
-
-                    {/* Field: Message */}
-                    <div className="space-y-1">
-                      <label className="text-xs tracking-[0.2em] uppercase font-bold text-brand-black/50">Message Query</label>
+                    <div className="mt-3.5">
+                      <label className={labelClass}>Your message</label>
                       <textarea
                         rows={4}
                         required
                         value={form.message}
                         onChange={(e) => setForm({ ...form, message: e.target.value })}
-                        className="w-full bg-brand-gray border border-black/5 px-4 py-3 text-xs font-light focus:outline-none focus:border-brand-red text-brand-black resize-none"
-                        placeholder="State your property timeline, budget limits, or dynamic location parameters in Hyderabad under consideration."
+                        className={`${inputClass} resize-none`}
+                        placeholder="Your property timeline, budget, or preferred Hyderabad locations."
                       />
                     </div>
-
-                    {/* Checkbox Agreement */}
-                    <div className="flex items-start space-x-3 pt-2">
+                    <div className="flex items-start gap-3 mt-4">
                       <input
                         type="checkbox"
                         required
                         id="privacy-agree"
                         checked={agree}
                         onChange={(e) => setAgree(e.target.checked)}
-                        className="mt-0.5 cursor-pointer accent-brand-red"
+                        className="mt-1 cursor-pointer accent-[#D31E28] w-4 h-4"
                       />
-                      <label htmlFor="privacy-agree" className="text-xs leading-relaxed text-brand-black/50 cursor-pointer select-none">
-                        I understand that by submitting my details, I may receive promotional emails. I can opt out whenever I choose, and my information will remain private and never be sold.
+                      <label htmlFor="privacy-agree" className="text-[13px] leading-relaxed text-[#948d7c] cursor-pointer select-none">
+                        I agree to be contacted about my query. My information stays private and is never sold.
                       </label>
                     </div>
-
                     <button
                       type="submit"
                       disabled={isSubmitting || !agree}
-                      className="w-full py-4 bg-brand-black hover:bg-brand-red disabled:bg-brand-black/35 text-white text-xs tracking-[0.3em] font-extrabold uppercase transition-all duration-300 flex items-center justify-center space-x-2 shadow-luxury focus:outline-none"
+                      className="w-full bg-[#D31E28] hover:bg-[#B8171F] disabled:bg-[#D31E28]/40 text-white text-[17px] font-semibold py-[18px] rounded-[10px] cursor-pointer disabled:cursor-not-allowed shadow-[0_6px_18px_rgba(211,30,40,0.3)] transition-colors mt-5"
                     >
-                      {isSubmitting ? (
-                        <span>TRANSMITTING Briefing...</span>
-                      ) : (
-                        <>
-                          <span>Send Email</span>
-                          <Send size={12} />
-                        </>
-                      )}
+                      {isSubmitting ? "Sending…" : "Send my message"}
                     </button>
+                    <p className="text-[13.5px] text-[#948d7c] text-center mt-3">
+                      No spam. A certified advisor responds within 4 hours.
+                    </p>
                   </motion.form>
                 ) : (
                   <motion.div
                     key="success"
-                    className="p-8 border border-brand-red/20 bg-brand-red/5 flex flex-col items-center justify-center text-center space-y-4"
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    className="flex flex-col items-center justify-center py-12 text-center"
+                    initial={{ opacity: 0, scale: 0.96 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0 }}
                   >
-                    <div className="w-12 h-12 rounded-full bg-brand-red text-white flex items-center justify-center shadow-luxury">
-                      <Check size={20} />
+                    <div className="w-14 h-14 rounded-full bg-[#D31E28] flex items-center justify-center">
+                      <Check size={24} className="text-white" strokeWidth={3} />
                     </div>
-                    <h4 className="text-serif text-2xl font-light text-brand-black">Transmitted Successfully</h4>
-                    <p className="text-xs text-brand-black/60 leading-relaxed font-sans max-w-sm">
-                      Dossier briefing sent to info@nexhouz.com. Your security verification logs cleared. A trusted advisor will connect with you shortly.
+                    <div className="text-[22px] font-semibold text-[#0A0A0A] mt-4">Message sent</div>
+                    <p className="text-[15px] leading-relaxed text-[#57534a] mt-2 max-w-xs">
+                      Your briefing reached our advisory team. A trusted advisor will connect with you shortly.
                     </p>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-
-          </div>
-
+          </Reveal>
         </div>
-      </main>
+      </section>
+
+      {/* Map */}
+      <section className={`${SECTION_X} py-14 lg:py-20 bg-white`}>
+        <div className={CONTAINER}>
+          <Reveal>
+            <Eyebrow>Visit us</Eyebrow>
+            <h2 className="font-display font-semibold text-[28px] md:text-[40px] lg:text-[44px] leading-[1.15] text-[#0A0A0A] mt-3">
+              Our Hyderabad office.
+            </h2>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <div className="mt-6 lg:mt-8 rounded-2xl overflow-hidden border border-[#EEE9E0] h-[320px] lg:h-[420px]">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.024320935778!2d78.3630342!3d17.45855!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x83caa45fc340abd9%3A0xee9b39daa6d27739!2sNexdesk%20Coworking%20spaces!5e0!3m2!1sen!2sin!4v1781446910793!5m2!1sen!2sin"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={true}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+          </Reveal>
+        </div>
+      </section>
 
       <Footer />
-    </>
+    </div>
   );
 }

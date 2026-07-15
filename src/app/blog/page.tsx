@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, BookOpen, Clock, Tag } from "lucide-react";
+import { Clock, Tag } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { blogPosts, BlogPost } from "@/data/blog";
+import { CONTAINER, SECTION_X, Eyebrow } from "@/components/ui/theme";
+import { blogPosts } from "@/data/blog";
 
 export default function BlogIndexPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -18,33 +19,34 @@ export default function BlogIndexPage() {
   });
 
   return (
-    <>
+    <div className="font-archivo bg-white">
       <Navbar />
 
-      <main className="flex-grow bg-white min-h-screen pt-36 pb-32">
-        <div className="max-w-7xl mx-auto px-6">
-          
-          {/* Header */}
-          <div className="max-w-2xl space-y-4 mb-16 border-b border-brand-gray-dark pb-10">
-            <span className="text-xs tracking-[0.3em] font-bold text-brand-red uppercase">Essays & Perspectives</span>
-            <h1 className="text-serif text-4xl md:text-5xl font-light tracking-tight text-brand-black">
-              The Editorial Insights
-            </h1>
-            <p className="text-xs font-light text-brand-black/50 leading-relaxed font-sans max-w-lg">
-              Critical readings detailing modern modernist architecture, global real estate economics, and micro-climate enclaves.
-            </p>
-          </div>
+      {/* Header band */}
+      <section className={`${SECTION_X} pt-12 pb-12 lg:pt-16 lg:pb-16 bg-[#FAF7F1] border-b border-[#EEE9E0]`}>
+        <div className={`${CONTAINER} max-w-[760px]`}>
+          <Eyebrow>Essays &amp; Perspectives</Eyebrow>
+          <h1 className="font-display font-semibold text-[32px] md:text-[44px] lg:text-[52px] leading-[1.12] text-[#0A0A0A] mt-3 text-balance">
+            The NexHouz journal.
+          </h1>
+          <p className="text-[16px] lg:text-lg leading-[1.7] text-[#57534a] mt-4 max-w-[560px]">
+            Readings on modern architecture, Hyderabad real-estate economics, and the micro-markets shaping the city.
+          </p>
+        </div>
+      </section>
 
-          {/* Category Filter Chips */}
-          <div className="flex flex-wrap items-center gap-3 mb-12">
+      <section className={`${SECTION_X} py-14 lg:py-20 bg-white`}>
+        <div className={CONTAINER}>
+          {/* Category filter chips */}
+          <div className="flex flex-wrap items-center gap-2.5 mb-8 lg:mb-10">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 text-xs font-bold tracking-widest uppercase transition-all duration-300 rounded-none border ${
+                className={`px-4 py-2.5 text-[13px] font-semibold tracking-wide transition-colors rounded-full border ${
                   selectedCategory === cat
-                    ? "bg-brand-black border-brand-black text-white"
-                    : "bg-transparent border-black/10 hover:border-brand-black text-brand-black/60 hover:text-brand-black"
+                    ? "bg-[#0A0A0A] border-[#0A0A0A] text-white"
+                    : "bg-transparent border-[#d8d2c6] hover:border-[#0A0A0A] text-[#57534a] hover:text-[#0A0A0A]"
                 }`}
               >
                 {cat}
@@ -53,7 +55,7 @@ export default function BlogIndexPage() {
           </div>
 
           {/* Blog grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
             <AnimatePresence mode="popLayout">
               {filteredPosts.map((post) => (
                 <motion.div
@@ -66,50 +68,49 @@ export default function BlogIndexPage() {
                 >
                   <Link
                     href={`/blog/${post.slug}`}
-                    className="group flex flex-col h-full bg-brand-gray/5 border border-black/5 hover:border-brand-black/20 hover:shadow-luxury transition-all duration-300"
+                    className="group flex flex-col h-full bg-white border border-[#EEE9E0] rounded-2xl overflow-hidden hover:shadow-[0_10px_30px_rgba(30,25,15,0.08)] transition-shadow"
                   >
-                    <div className="aspect-[16/10] overflow-hidden bg-brand-gray relative">
+                    <div className="aspect-[16/10] overflow-hidden bg-[#efeae1] relative">
                       <img
                         src={post.image}
                         alt={post.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
-                      
                       {post.featured && (
-                        <div className="absolute top-4 left-4 bg-brand-red text-white px-2 py-0.5 text-xs tracking-widest font-extrabold uppercase">
+                        <div className="absolute top-3.5 left-3.5 bg-[#D31E28] text-white px-3 py-1 text-[11px] tracking-wider font-bold uppercase rounded-full">
                           Featured Essay
                         </div>
                       )}
                     </div>
-                    
-                    <div className="p-8 flex-grow flex flex-col justify-between space-y-6">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between text-xs tracking-widest font-bold uppercase text-brand-black/40">
-                          <span className="flex items-center space-x-1">
-                            <Tag size={10} className="text-brand-red" />
-                            <span>{post.category}</span>
+
+                    <div className="p-6 flex-grow flex flex-col justify-between gap-5">
+                      <div>
+                        <div className="flex items-center justify-between text-[11px] tracking-[0.14em] font-bold uppercase text-[#948d7c]">
+                          <span className="flex items-center gap-1.5 text-[#8A6D2F]">
+                            <Tag size={11} className="text-[#D31E28]" />
+                            {post.category}
                           </span>
-                          <span className="flex items-center space-x-1">
-                            <Clock size={10} />
-                            <span>{post.readTime}</span>
+                          <span className="flex items-center gap-1.5">
+                            <Clock size={11} />
+                            {post.readTime}
                           </span>
                         </div>
-                        
-                        <h3 className="text-serif text-xl font-light text-brand-black group-hover:text-brand-red transition-colors duration-300">
+
+                        <h3 className="font-display font-semibold text-[22px] leading-snug text-[#0A0A0A] group-hover:text-[#D31E28] transition-colors mt-3">
                           {post.title}
                         </h3>
-                        
-                        <p className="text-xs font-light text-brand-black/60 leading-relaxed font-sans line-clamp-3">
+
+                        <p className="text-[14px] text-[#57534a] leading-relaxed line-clamp-3 mt-2.5">
                           {post.excerpt}
                         </p>
                       </div>
 
-                      <div className="pt-6 border-t border-brand-gray-dark flex items-center justify-between text-xs tracking-wider text-brand-black/75">
+                      <div className="pt-5 border-t border-[#EEE9E0] flex items-center justify-between text-[13px] text-[#57534a]">
                         <div className="flex flex-col">
-                          <span className="font-semibold">By {post.author}</span>
-                          <span className="text-xs text-brand-black/40 font-bold uppercase mt-0.5">{post.authorRole.split(" ")[0]}</span>
+                          <span className="font-semibold text-[#2b2823]">By {post.author}</span>
+                          <span className="text-[11px] text-[#948d7c] font-bold uppercase mt-0.5">{post.authorRole.split(" ")[0]}</span>
                         </div>
-                        <span className="font-light">{post.date}</span>
+                        <span>{post.date}</span>
                       </div>
                     </div>
                   </Link>
@@ -117,11 +118,10 @@ export default function BlogIndexPage() {
               ))}
             </AnimatePresence>
           </div>
-
         </div>
-      </main>
+      </section>
 
       <Footer />
-    </>
+    </div>
   );
 }

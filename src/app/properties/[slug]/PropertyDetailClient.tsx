@@ -5,15 +5,16 @@ import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft, MapPin, Star, ShieldCheck, Zap, Check,
+  ArrowLeft, MapPin, ShieldCheck, Check,
   Building, Layers, TrendingUp, ChevronRight, Phone,
   Calendar, Home, Wind, Navigation, Train,
   ShoppingBag, Stethoscope, UtensilsCrossed, GraduationCap,
   ExternalLink, Download, ChevronDown, ChevronUp,
-  Building2, Landmark, Clock, BadgeCheck, ChevronLeft
+  Building2, Landmark, BadgeCheck, ChevronLeft
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { CONTAINER, SECTION_X } from "@/components/ui/theme";
 import { properties } from "@/data/properties";
 import { fetchPropertyBySlug, submitLead } from "@/lib/db";
 
@@ -52,6 +53,16 @@ function aqiColor(aqi: number) {
   if (aqi <= 150) return { bg: "#fed7aa", text: "#ea580c", label: "Unhealthy (Sensitive)" };
   if (aqi <= 200) return { bg: "#fecaca", text: "#dc2626", label: "Unhealthy" };
   return { bg: "#fde8d8", text: "#9a3412", label: "Hazardous" };
+}
+
+// ─── Shared card header (gold eyebrow + serif heading) ──────────────────────
+function CardHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <div>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8A6D2F] mb-1">{eyebrow}</p>
+      <h2 className="font-display font-semibold text-[22px] md:text-[24px] leading-[1.2] text-[#0A0A0A]">{title}</h2>
+    </div>
+  );
 }
 
 export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailClientProps) {
@@ -120,16 +131,16 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
   // Guard: show loading/not-found while property is null (async fetch pending)
   if (!property) {
     return (
-      <>
+      <div className="font-archivo bg-white">
         <Navbar />
-        <main className="flex-grow bg-white min-h-screen pt-36 pb-32 flex flex-col items-center justify-center text-center px-6">
-          <Building size={32} className="text-brand-black/20 mb-4" />
-          <h2 className="text-3xl font-extrabold text-brand-black mb-4">Loading Estate…</h2>
-          <p className="text-xs text-brand-black/50 leading-relaxed max-w-sm mb-8">Please wait while we retrieve this property.</p>
-          <div className="w-8 h-8 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
+        <main className="flex-grow bg-white min-h-screen py-28 flex flex-col items-center justify-center text-center px-6">
+          <Building size={32} className="text-[#0A0A0A]/20 mb-4" />
+          <h2 className="font-display font-semibold text-[32px] md:text-[40px] text-[#0A0A0A] mb-4">Loading Estate…</h2>
+          <p className="text-sm text-[#6b6659] leading-relaxed max-w-sm mb-8">Please wait while we retrieve this property.</p>
+          <div className="w-8 h-8 border-4 border-[#D31E28] border-t-transparent rounded-full animate-spin" />
         </main>
         <Footer />
-      </>
+      </div>
     );
   }
 
@@ -142,8 +153,8 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
     ? property.floorPlans.map((fp: any) => ({
         ...fp,
         priceLabel: fp.price >= 10000000
-          ? `\u20b9${(fp.price / 10000000).toFixed(1)} Cr`
-          : `\u20b9${(fp.price / 100000).toFixed(1)} L`,
+          ? `₹${(fp.price / 10000000).toFixed(1)} Cr`
+          : `₹${(fp.price / 100000).toFixed(1)} L`,
       }))
     : getFloorPlans(property.bhk, property.area, property.price);
   const floorPlans = rawFloorPlans;
@@ -154,7 +165,7 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
     setActiveTab(tab);
     const el = sectionRefs.current[tab];
     if (el) {
-      const offset = 130;
+      const offset = 64;
       const top = el.getBoundingClientRect().top + window.scrollY - offset;
       window.scrollTo({ top, behavior: "smooth" });
     }
@@ -177,7 +188,7 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
   };
 
   return (
-    <>
+    <div className="font-archivo bg-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -214,25 +225,25 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
 
 
       {/* ── HERO IMAGE ─────────────────────────────────────────────────── */}
-      <div className="w-full h-[340px] md:h-[460px] relative overflow-hidden mt-[72px] group">
+      <div className="w-full h-[340px] md:h-[460px] relative overflow-hidden bg-[#efeae1] group">
         {property.images && property.images.length > 0 ? (
           <>
             <img src={property.images[currentImageIdx]} alt={property.title} className="w-full h-full object-cover transition-all duration-500" />
-            
+
             {property.images.length > 1 && (
               <>
                 {/* Navigation Arrows */}
-                <button onClick={() => setCurrentImageIdx(prev => (prev === 0 ? property.images.length - 1 : prev - 1))} className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 cursor-pointer z-10">
-                  <ChevronLeft size={16} />
+                <button onClick={() => setCurrentImageIdx(prev => (prev === 0 ? property.images.length - 1 : prev - 1))} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white text-[#0A0A0A] hover:bg-[#D31E28] hover:text-white flex items-center justify-center shadow-[0_4px_14px_rgba(30,25,15,0.18)] transition-colors opacity-0 group-hover:opacity-100 cursor-pointer z-10">
+                  <ChevronLeft size={17} />
                 </button>
-                <button onClick={() => setCurrentImageIdx(prev => (prev === property.images.length - 1 ? 0 : prev + 1))} className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 cursor-pointer z-10">
-                  <ChevronRight size={16} />
+                <button onClick={() => setCurrentImageIdx(prev => (prev === property.images.length - 1 ? 0 : prev + 1))} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white text-[#0A0A0A] hover:bg-[#D31E28] hover:text-white flex items-center justify-center shadow-[0_4px_14px_rgba(30,25,15,0.18)] transition-colors opacity-0 group-hover:opacity-100 cursor-pointer z-10">
+                  <ChevronRight size={17} />
                 </button>
-                
+
                 {/* Dots indicator */}
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-10 bg-black/30 px-3 py-1.5 rounded-full backdrop-blur-sm">
                   {property.images.map((_: any, idx: number) => (
-                    <button key={idx} onClick={() => setCurrentImageIdx(idx)} className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${currentImageIdx === idx ? "bg-brand-red w-3" : "bg-white/50 hover:bg-white"}`} />
+                    <button key={idx} onClick={() => setCurrentImageIdx(idx)} className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${currentImageIdx === idx ? "bg-[#D31E28] w-3" : "bg-white/50 hover:bg-white"}`} />
                   ))}
                 </div>
               </>
@@ -241,48 +252,50 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
         ) : (
           <img src={property.image} alt={property.title} className="w-full h-full object-cover" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-transparent pointer-events-none" />
         {/* breadcrumb */}
-        <div className="absolute top-5 left-6">
-          <Link href="/properties" className="flex items-center gap-1.5 text-white/70 hover:text-white text-xs font-semibold transition-colors">
-            <ArrowLeft size={13} /> All Properties
-          </Link>
+        <div className={`absolute top-5 left-0 right-0 ${SECTION_X}`}>
+          <div className={CONTAINER}>
+            <Link href="/properties" className="inline-flex items-center gap-1.5 text-white/75 hover:text-white text-[13px] font-semibold transition-colors">
+              <ArrowLeft size={13} /> All Properties
+            </Link>
+          </div>
         </div>
         {/* title block */}
-        <div className="absolute bottom-0 left-0 right-0 px-6 pb-8 md:px-12">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-brand-red text-white">
+        <div className={`absolute bottom-0 left-0 right-0 ${SECTION_X} pb-8`}>
+          <div className={CONTAINER}>
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="bg-[#D31E28] text-white rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider">
                 {property.possession === "Ready" ? "Ready to Move" : `Possession: ${property.possession === "Under Construction" ? "Under Construction" : property.possession}`}
               </span>
-              <span className="text-xs font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-white border border-white/20 flex items-center gap-1">
-                <BadgeCheck size={10} /> RERA Verified
+              <span className="bg-emerald-500 text-white rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <ShieldCheck size={11} /> RERA Verified
               </span>
             </div>
-            <h1 className="text-2xl md:text-4xl font-extrabold text-white mb-1 tracking-tight">{property.title}</h1>
-            <p className="text-sm text-white/70 flex items-center gap-1.5 font-medium">
-              <MapPin size={13} className="text-brand-red" /> {property.location}
+            <h1 className="font-display font-semibold text-[32px] md:text-[48px] leading-[1.1] text-white mb-2 text-balance">{property.title}</h1>
+            <p className="text-sm md:text-[15px] text-white/75 flex items-center gap-1.5 font-medium">
+              <MapPin size={13} className="text-[#D31E28]" /> {property.location}
               <span className="mx-1.5 text-white/30">·</span>
-              By <span className="text-white/90 font-bold ml-1">{property.architect}</span>
+              By <span className="text-white font-semibold ml-1">{property.architect}</span>
             </p>
           </div>
         </div>
       </div>
 
       {/* ── STICKY TAB NAV ─────────────────────────────────────────────── */}
-      <div className="sticky top-[72px] z-30 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center gap-1 overflow-x-auto no-scrollbar">
+      <div className="sticky top-0 z-30 bg-white border-b border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)]">
+        <div className={`${CONTAINER} ${SECTION_X} flex items-center gap-1 overflow-x-auto no-scrollbar`}>
           {TABS.map(tab => (
             <button key={tab} onClick={() => scrollToSection(tab)}
-              className={`shrink-0 px-4 py-3.5 text-xs font-bold border-b-2 transition-all duration-200 cursor-pointer ${activeTab === tab ? "border-brand-red text-brand-red" : "border-transparent text-gray-500 hover:text-gray-800"}`}>
+              className={`shrink-0 px-4 py-3.5 text-[13px] font-semibold border-b-2 transition-all duration-200 cursor-pointer ${activeTab === tab ? "border-[#D31E28] text-[#D31E28]" : "border-transparent text-[#6b6659] hover:text-[#0A0A0A]"}`}>
               {tab}
             </button>
           ))}
         </div>
       </div>
 
-      <main className="bg-gray-50 min-h-screen pb-24">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 pt-8">
+      <main className="bg-[#FAF7F1] min-h-screen pb-24">
+        <div className={`${CONTAINER} ${SECTION_X} pt-8`}>
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-8 items-start">
 
             {/* ── LEFT COLUMN ──────────────────────────────────────────── */}
@@ -290,12 +303,11 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
 
               {/* ── OVERVIEW ─────────────────────────────── */}
               <section ref={el => { sectionRefs.current["Overview"] = el; }}>
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-100">
-                    <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-0.5">Complete Details</p>
-                    <h2 className="text-base font-extrabold text-gray-900">Property Overview</h2>
+                <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] overflow-hidden">
+                  <div className="px-6 py-5 border-b border-[#f0ebe1]">
+                    <CardHeader eyebrow="Complete Details" title="Property Overview" />
                   </div>
-                  <div className="divide-y divide-gray-50">
+                  <div className="divide-y divide-[#f0ebe1]">
                     {[
                       { label: "Project Name", value: property.title, icon: Building2 },
                       { label: "Builder Name", value: property.architect, icon: Home },
@@ -305,13 +317,13 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                       { label: "Property Type", value: property.type, icon: Landmark },
                       { label: "Configurations", value: `${property.bhk} BHK${property.bhk > 2 ? `, ${property.bhk - 1} BHK, ${property.bhk - 2 > 0 ? `${property.bhk - 2} BHK` : "Studio"}` : ""}`, icon: Layers },
                     ].map(({ label, value, icon: Icon }) => (
-                      <div key={label} className="flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50 transition-colors">
-                        <div className="w-8 h-8 rounded-lg bg-brand-red/6 flex items-center justify-center shrink-0">
-                          <Icon size={14} className="text-brand-red" />
+                      <div key={label} className="flex items-center gap-4 px-6 py-3.5 hover:bg-[#FAF7F1] transition-colors">
+                        <div className="w-8 h-8 rounded-lg bg-[#faf0f0] flex items-center justify-center shrink-0">
+                          <Icon size={14} className="text-[#D31E28]" />
                         </div>
                         <div className="flex items-center justify-between flex-1 min-w-0">
-                          <span className="text-xs font-semibold text-gray-500 shrink-0 w-36">{label}</span>
-                          <span className="text-xs font-bold text-gray-900 text-right">{value}</span>
+                          <span className="text-xs font-semibold uppercase tracking-wider text-[#948d7c] shrink-0 w-36">{label}</span>
+                          <span className="text-[13px] font-semibold text-[#0A0A0A] text-right">{value}</span>
                         </div>
                       </div>
                     ))}
@@ -321,29 +333,29 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                 {/* Quick stats bar */}
                 <div className="grid grid-cols-3 gap-4 mt-4">
                   {[
-                    { label: "Starting Price", value: `₹${(property.price / 10000000).toFixed(1)} Cr` },
-                    { label: "Property Type", value: property.type },
-                    { label: "Super Built-up", value: property.area },
+                    { label: "Starting Price", value: `₹${(property.price / 10000000).toFixed(1)} Cr`, red: true },
+                    { label: "Property Type", value: property.type, red: false },
+                    { label: "Super Built-up", value: property.area, red: false },
                   ].map(s => (
-                    <div key={s.label} className="bg-white rounded-xl border border-gray-200 p-4 text-center shadow-sm">
-                      <p className="text-base font-extrabold text-gray-900">{s.value}</p>
-                      <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mt-0.5">{s.label}</p>
+                    <div key={s.label} className="bg-white rounded-2xl border border-[#EEE9E0] p-4 text-center shadow-[0_1px_3px_rgba(30,25,15,0.04)]">
+                      <p className={`text-base md:text-lg font-bold ${s.red ? "text-[#D31E28]" : "text-[#0A0A0A]"}`}>{s.value}</p>
+                      <p className="text-[11px] text-[#948d7c] font-semibold uppercase tracking-wider mt-1">{s.label}</p>
                     </div>
                   ))}
                 </div>
 
                 {/* NexHouz Recommendation Report Card */}
                 {property.recommendationReport && (
-                  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mt-4 space-y-5">
+                  <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] p-6 mt-4 space-y-5">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="w-2 h-2 rounded-full bg-brand-red animate-pulse" />
-                        <p className="text-xs font-extrabold uppercase tracking-widest text-brand-red">NexHouz Recommendation Report</p>
+                        <span className="w-2 h-2 rounded-full bg-[#D31E28] animate-pulse" />
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D31E28]">NexHouz Recommendation Report</p>
                       </div>
-                      <h3 className="text-base font-extrabold text-gray-900 leading-tight">Why We Recommend This Property</h3>
+                      <h3 className="font-display font-semibold text-[22px] md:text-[24px] leading-[1.2] text-[#0A0A0A]">Why We Recommend This Property</h3>
                     </div>
 
-                    <p className="text-xs text-gray-600 leading-relaxed font-medium bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                    <p className="text-sm text-[#57534a] leading-relaxed bg-[#FAF7F1] p-4 rounded-xl border border-[#EEE9E0]">
                       {property.recommendationReport.whyRecommended}
                     </p>
 
@@ -358,13 +370,13 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                         { label: "Builder Trust Rating", val: property.recommendationReport.builderTrustRating },
                       ].map((item) => (
                         <div key={item.label} className="space-y-1.5">
-                          <div className="flex justify-between text-xs font-bold text-gray-500 uppercase tracking-wider">
+                          <div className="flex justify-between text-[11px] font-semibold text-[#948d7c] uppercase tracking-wider">
                             <span>{item.label}</span>
-                            <span className="text-brand-black font-extrabold">{item.val} / 10</span>
+                            <span className="text-[#0A0A0A] font-bold">{item.val} / 10</span>
                           </div>
-                          <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                            <div 
-                              className="h-full bg-brand-red rounded-full" 
+                          <div className="w-full h-1.5 bg-[#f0ebe1] rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-[#D31E28] rounded-full"
                               style={{ width: `${item.val * 10}%` }}
                             />
                           </div>
@@ -377,98 +389,95 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
 
               {/* ── PRICING & FLOOR PLANS ─────────────────── */}
               <section ref={el => { sectionRefs.current["Pricing"] = el; }}>
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-100">
-                    <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-0.5">Unit Configurations</p>
-                    <h2 className="text-base font-extrabold text-gray-900">Pricing & Floor Plans</h2>
+                <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] overflow-hidden">
+                  <div className="px-6 py-5 border-b border-[#f0ebe1]">
+                    <CardHeader eyebrow="Unit Configurations" title="Pricing & Floor Plans" />
                   </div>
 
                   {/* Table */}
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="bg-gray-50 border-b border-gray-100">
+                        <tr className="bg-[#FAF7F1] border-b border-[#f0ebe1]">
                           {["Unit Type", "Size (sq ft)", "Facing", "Price*"].map(h => (
-                            <th key={h} className="text-left px-5 py-3 text-xs font-extrabold uppercase tracking-wider text-gray-400">{h}</th>
+                            <th key={h} className="text-left px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-[#948d7c]">{h}</th>
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-50">
+                      <tbody className="divide-y divide-[#f0ebe1]">
                         {floorPlans.map((fp: any, i: number) => (
-                          <tr key={i} className="hover:bg-gray-50 transition-colors">
+                          <tr key={i} className="hover:bg-[#FAF7F1] transition-colors">
                             <td className="px-5 py-3.5">
-                              <span className="inline-block text-sm font-extrabold px-2.5 py-0.5 rounded-full bg-brand-red/6 text-brand-red">{fp.type}</span>
+                              <span className="inline-block text-[13px] font-bold px-2.5 py-0.5 rounded-full bg-[#faf0f0] text-[#D31E28]">{fp.type}</span>
                             </td>
-                            <td className="px-5 py-3.5 text-xs font-bold text-gray-800">{fp.size.toLocaleString()}</td>
-                            <td className="px-5 py-3.5 text-xs text-gray-500 font-medium">{fp.facing}</td>
-                            <td className="px-5 py-3.5 text-xs font-extrabold text-gray-900">{fp.priceLabel}</td>
+                            <td className="px-5 py-3.5 text-[13px] font-semibold text-[#44403a]">{fp.size.toLocaleString()}</td>
+                            <td className="px-5 py-3.5 text-[13px] text-[#6b6659] font-medium">{fp.facing}</td>
+                            <td className="px-5 py-3.5 text-[13px] font-bold text-[#0A0A0A]">{fp.priceLabel}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-                  <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
-                    <p className="text-xs text-gray-400 font-medium">* Prices are approximate and subject to change. GST applicable. Contact advisor for exact pricing.</p>
+                  <div className="px-6 py-3 bg-[#FAF7F1] border-t border-[#f0ebe1]">
+                    <p className="text-xs text-[#948d7c] font-medium">* Prices are approximate and subject to change. GST applicable. Contact advisor for exact pricing.</p>
                   </div>
                 </div>
 
                 {/* EMI Calculator */}
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mt-4">
-                  <div className="mb-4">
-                    <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-0.5">Fintech Curation</p>
-                    <h3 className="text-base font-extrabold text-gray-900">EMI Calculator</h3>
+                <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] p-6 mt-4">
+                  <div className="mb-5">
+                    <CardHeader eyebrow="Fintech Curation" title="EMI Calculator" />
                   </div>
                   <div className="space-y-4">
                     <div>
-                      <div className="flex justify-between text-xs font-extrabold uppercase tracking-wider text-gray-400 mb-1.5">
+                      <div className="flex justify-between text-[11px] font-semibold uppercase tracking-wider text-[#948d7c] mb-1.5">
                         <span>Down Payment ({downPaymentPercent}%)</span>
-                        <span className="text-gray-800">₹{Math.round((property.price * downPaymentPercent) / 100).toLocaleString()}</span>
+                        <span className="text-[#0A0A0A]">₹{Math.round((property.price * downPaymentPercent) / 100).toLocaleString()}</span>
                       </div>
                       <input type="range" min={10} max={50} step={5} value={downPaymentPercent}
                         onChange={e => setDownPaymentPercent(+e.target.value)}
-                        className="w-full h-1.5 bg-gray-200 appearance-none cursor-pointer accent-brand-red rounded-full" />
-                      <div className="flex justify-between text-xs text-gray-400 mt-1 font-bold"><span>10%</span><span>50%</span></div>
+                        className="w-full h-1.5 bg-[#EEE9E0] appearance-none cursor-pointer accent-[#D31E28] rounded-full" />
+                      <div className="flex justify-between text-[11px] text-[#948d7c] mt-1 font-semibold"><span>10%</span><span>50%</span></div>
                     </div>
                     <div>
-                      <div className="flex justify-between text-xs font-extrabold uppercase tracking-wider text-gray-400 mb-1.5">
-                        <span>Loan Tenure</span><span className="text-gray-800">{tenureYears} Years</span>
+                      <div className="flex justify-between text-[11px] font-semibold uppercase tracking-wider text-[#948d7c] mb-1.5">
+                        <span>Loan Tenure</span><span className="text-[#0A0A0A]">{tenureYears} Years</span>
                       </div>
                       <input type="range" min={5} max={30} step={5} value={tenureYears}
                         onChange={e => setTenureYears(+e.target.value)}
-                        className="w-full h-1.5 bg-gray-200 appearance-none cursor-pointer accent-brand-red rounded-full" />
-                      <div className="flex justify-between text-xs text-gray-400 mt-1 font-bold"><span>5 Years</span><span>30 Years</span></div>
+                        className="w-full h-1.5 bg-[#EEE9E0] appearance-none cursor-pointer accent-[#D31E28] rounded-full" />
+                      <div className="flex justify-between text-[11px] text-[#948d7c] mt-1 font-semibold"><span>5 Years</span><span>30 Years</span></div>
                     </div>
-                    <div className="flex items-center justify-between py-3 border-t border-b border-gray-100">
-                      <span className="text-xs font-extrabold uppercase tracking-wider text-gray-400">Est. Monthly EMI</span>
-                      <span className="text-2xl font-extrabold text-brand-red">₹{Math.round(monthlyEMI).toLocaleString()}</span>
+                    <div className="flex items-center justify-between py-3 border-t border-b border-[#f0ebe1]">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[#948d7c]">Est. Monthly EMI</span>
+                      <span className="text-2xl font-bold text-[#D31E28]">₹{Math.round(monthlyEMI).toLocaleString()}</span>
                     </div>
-                    <p className="text-xs text-gray-400">@ {interestRate}% p.a. interest rate. For indicative purposes only.</p>
+                    <p className="text-xs text-[#948d7c]">@ {interestRate}% p.a. interest rate. For indicative purposes only.</p>
                   </div>
                 </div>
               </section>
 
               {/* ── AMENITIES ─────────────────────────────── */}
               <section ref={el => { sectionRefs.current["Amenities"] = el; }}>
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-100">
-                    <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-0.5">Verified Features</p>
-                    <h2 className="text-base font-extrabold text-gray-900">Amenities</h2>
+                <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] overflow-hidden">
+                  <div className="px-6 py-5 border-b border-[#f0ebe1]">
+                    <CardHeader eyebrow="Verified Features" title="Amenities" />
                   </div>
                   <div className="p-6">
                     {/* Amenities grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                       {(showAllAmenities ? property.amenities : property.amenities.slice(0, 6)).map((a: string) => (
-                        <div key={a} className="flex items-center gap-2.5 p-3 rounded-xl bg-gray-50 border border-gray-100 hover:border-gray-200 transition-colors">
+                        <div key={a} className="flex items-center gap-2.5 p-3 rounded-xl bg-[#FAF7F1] border border-[#EEE9E0] hover:border-[#d8d2c6] transition-colors">
                           <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
                             <Check size={10} className="text-emerald-600 stroke-[3]" />
                           </div>
-                          <span className="text-xs font-semibold text-gray-700 leading-tight">{a}</span>
+                          <span className="text-[13px] font-medium text-[#44403a] leading-tight">{a}</span>
                         </div>
                       ))}
                     </div>
                     {property.amenities.length > 6 && (
                       <button onClick={() => setShowAllAmenities(!showAllAmenities)}
-                        className="mt-4 text-xs font-bold text-brand-red flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity">
+                        className="mt-4 text-[13px] font-semibold text-[#D31E28] hover:text-[#B8171F] flex items-center gap-1 cursor-pointer transition-colors">
                         {showAllAmenities ? <><ChevronUp size={13} /> Show Less</> : <><ChevronDown size={13} /> Show All {property.amenities.length} Amenities</>}
                       </button>
                     )}
@@ -478,26 +487,23 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
 
               {/* ── LOCATION ──────────────────────────────── */}
               <section ref={el => { sectionRefs.current["Location"] = el; }}>
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-0.5">Location & Connectivity</p>
-                      <h2 className="text-base font-extrabold text-gray-900">{property.location}</h2>
-                    </div>
+                <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] overflow-hidden">
+                  <div className="px-6 py-5 border-b border-[#f0ebe1] flex items-center justify-between gap-3">
+                    <CardHeader eyebrow="Location & Connectivity" title={property.location} />
                     <a href={`https://maps.google.com/?q=${encodeURIComponent(property.location)}`} target="_blank" rel="noreferrer"
-                      className="flex items-center gap-1.5 text-sm font-bold text-brand-red hover:opacity-75 transition-opacity">
+                      className="flex items-center gap-1.5 text-[13px] font-semibold text-[#D31E28] hover:text-[#B8171F] transition-colors shrink-0">
                       <ExternalLink size={12} /> Open in Maps
                     </a>
                   </div>
 
                   {/* Map placeholder */}
-                  <div className="relative h-48 bg-gray-100 overflow-hidden">
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                  <div className="relative h-48 bg-[#F6F1E7] overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
-                        <div className="w-12 h-12 rounded-full bg-brand-red/10 flex items-center justify-center mx-auto mb-2">
-                          <MapPin size={20} className="text-brand-red" />
+                        <div className="w-12 h-12 rounded-full bg-[#faf0f0] flex items-center justify-center mx-auto mb-2">
+                          <MapPin size={20} className="text-[#D31E28]" />
                         </div>
-                        <p className="text-xs font-bold text-gray-600">{property.location}</p>
+                        <p className="text-[13px] font-semibold text-[#57534a]">{property.location}</p>
                       </div>
                     </div>
                   </div>
@@ -505,7 +511,7 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                   <div className="p-6">
                     {/* Nearby Amenities */}
                     <div className="mb-6">
-                      <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-3">Nearby Amenities (Within 5km)</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8A6D2F] mb-3">Nearby Amenities (Within 5km)</p>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         {[
                           { icon: Stethoscope, label: "Hospitals", count: property.nearby?.hospitals ?? 20, color: "#ef4444" },
@@ -513,12 +519,12 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                           { icon: GraduationCap, label: "Schools", count: property.nearby?.schools ?? 20, color: "#3b82f6" },
                           { icon: UtensilsCrossed, label: "Restaurants", count: property.nearby?.restaurants ?? 20, color: "#f97316" },
                         ].map(({ icon: Icon, label, count, color }) => (
-                          <div key={label} className="text-center p-4 rounded-xl border border-gray-100 bg-gray-50 hover:border-gray-200 transition-colors">
+                          <div key={label} className="text-center p-4 rounded-xl border border-[#EEE9E0] bg-[#FAF7F1] hover:border-[#d8d2c6] transition-colors">
                             <div className="w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: `${color}12` }}>
                               <Icon size={16} style={{ color }} />
                             </div>
-                            <p className="text-xl font-extrabold text-gray-900">{count}+</p>
-                            <p className="text-xs font-semibold text-gray-400 mt-0.5">{label}</p>
+                            <p className="text-xl font-bold text-[#0A0A0A]">{count}+</p>
+                            <p className="text-xs font-medium text-[#948d7c] mt-0.5">{label}</p>
                           </div>
                         ))}
                       </div>
@@ -526,20 +532,20 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
 
                     {/* Transportation */}
                     <div>
-                      <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-3">Transportation & Connectivity</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8A6D2F] mb-3">Transportation & Connectivity</p>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {[
                           { icon: Navigation, label: "Metro Stations", count: property.nearby?.metroStations ?? 3, color: "#6366f1" },
                           { icon: Train, label: "Railway Stations", count: property.nearby?.railwayStations ?? 3, color: "#0891b2" },
                           { icon: Building2, label: "IT Parks", count: property.nearby?.itParks ?? 5, color: "#16a34a" },
                         ].map(({ icon: Icon, label, count, color }) => (
-                          <div key={label} className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-100 bg-gray-50">
+                          <div key={label} className="flex items-center gap-3 p-3.5 rounded-xl border border-[#EEE9E0] bg-[#FAF7F1]">
                             <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: `${color}10` }}>
                               <Icon size={15} style={{ color }} />
                             </div>
                             <div>
-                              <p className="text-lg font-extrabold text-gray-900 leading-none">{count}</p>
-                              <p className="text-xs font-semibold text-gray-400 mt-0.5">{label}</p>
+                              <p className="text-lg font-bold text-[#0A0A0A] leading-none">{count}</p>
+                              <p className="text-xs font-medium text-[#948d7c] mt-0.5">{label}</p>
                             </div>
                           </div>
                         ))}
@@ -551,15 +557,12 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
 
               {/* ── AIR QUALITY ───────────────────────────── */}
               <section ref={el => { sectionRefs.current["Air Quality"] = el; }}>
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                    <div>
-                      <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-0.5">Environmental Data</p>
-                      <h2 className="text-base font-extrabold text-gray-900">Air Quality Index</h2>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Wind size={14} className="text-brand-red" />
-                      <span className="text-xs font-bold text-gray-500">Updated Live</span>
+                <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] overflow-hidden">
+                  <div className="px-6 py-5 border-b border-[#f0ebe1] flex items-center justify-between gap-3">
+                    <CardHeader eyebrow="Environmental Data" title="Air Quality Index" />
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Wind size={14} className="text-[#D31E28]" />
+                      <span className="text-xs font-semibold text-[#6b6659]">Updated Live</span>
                     </div>
                   </div>
                   <div className="p-6">
@@ -567,24 +570,24 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                     <div className="flex items-start gap-6 mb-6">
                       <div className="text-center">
                         <div className="w-20 h-20 rounded-2xl flex flex-col items-center justify-center" style={{ background: aqiMeta.bg }}>
-                          <p className="text-2xl font-extrabold leading-none" style={{ color: aqiMeta.text }}>{aqiScore}</p>
-                          <p className="text-xs font-extrabold uppercase tracking-wider mt-1" style={{ color: aqiMeta.text }}>AQI</p>
+                          <p className="text-2xl font-bold leading-none" style={{ color: aqiMeta.text }}>{aqiScore}</p>
+                          <p className="text-[11px] font-bold uppercase tracking-wider mt-1" style={{ color: aqiMeta.text }}>AQI</p>
                         </div>
                         <p className="text-xs font-bold mt-2" style={{ color: aqiMeta.text }}>{aqiMeta.label}</p>
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-sm font-extrabold text-gray-900 mb-3">{property.location}</h3>
+                        <h3 className="text-[15px] font-semibold text-[#0A0A0A] mb-3">{property.location}</h3>
                         <div className="space-y-1.5">
-                          <p className="text-sm text-gray-600 font-medium flex items-center gap-1.5"><Check size={11} className="text-emerald-500 stroke-[3] shrink-0" /> Air quality is acceptable for most people</p>
-                          <p className="text-sm text-gray-600 font-medium flex items-center gap-1.5"><Check size={11} className="text-amber-500 stroke-[3] shrink-0" /> Sensitive individuals should limit outdoor exertion</p>
-                          <p className="text-sm text-gray-600 font-medium flex items-center gap-1.5"><Check size={11} className="text-emerald-500 stroke-[3] shrink-0" /> Generally safe for outdoor activities</p>
+                          <p className="text-sm text-[#57534a] flex items-center gap-1.5"><Check size={11} className="text-emerald-500 stroke-[3] shrink-0" /> Air quality is acceptable for most people</p>
+                          <p className="text-sm text-[#57534a] flex items-center gap-1.5"><Check size={11} className="text-amber-500 stroke-[3] shrink-0" /> Sensitive individuals should limit outdoor exertion</p>
+                          <p className="text-sm text-[#57534a] flex items-center gap-1.5"><Check size={11} className="text-emerald-500 stroke-[3] shrink-0" /> Generally safe for outdoor activities</p>
                         </div>
                       </div>
                     </div>
 
                     {/* AQI Scale */}
                     <div>
-                      <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-2">AQI Scale Reference</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8A6D2F] mb-2">AQI Scale Reference</p>
                       <div className="flex gap-1.5 flex-wrap">
                         {[
                           { range: "0–50", label: "Good", color: "#16a34a" },
@@ -596,7 +599,7 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                         ].map(s => (
                           <div key={s.range} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: `${s.color}10` }}>
                             <div className="w-2 h-2 rounded-full" style={{ background: s.color }} />
-                            <span className="text-xs font-extrabold" style={{ color: s.color }}>{s.range}: {s.label}</span>
+                            <span className="text-[11px] font-bold" style={{ color: s.color }}>{s.range}: {s.label}</span>
                           </div>
                         ))}
                       </div>
@@ -607,23 +610,22 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
 
               {/* ── ABOUT ─────────────────────────────────── */}
               <section ref={el => { sectionRefs.current["About"] = el; }}>
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-100">
-                    <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-0.5">Project Description</p>
-                    <h2 className="text-base font-extrabold text-gray-900">About {property.title}</h2>
+                <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] overflow-hidden">
+                  <div className="px-6 py-5 border-b border-[#f0ebe1]">
+                    <CardHeader eyebrow="Project Description" title={`About ${property.title}`} />
                   </div>
                   <div className="p-6 space-y-4">
-                    <p className="text-sm text-gray-600 leading-relaxed font-medium">{property.description}</p>
-                    <p className="text-sm text-gray-600 leading-relaxed font-medium">
-                      Commissioned through <strong className="text-gray-900">{property.architect}</strong>, this structure represents a validated benchmark of modern luxury living in {property.location}. The design incorporates low-vibration structural anchors, natural thermal ventilation, and energy-efficient systems to ensure both comfort and sustainability.
+                    <p className="text-[15px] text-[#57534a] leading-[1.7]">{property.description}</p>
+                    <p className="text-[15px] text-[#57534a] leading-[1.7]">
+                      Commissioned through <strong className="text-[#0A0A0A] font-semibold">{property.architect}</strong>, this structure represents a validated benchmark of modern luxury living in {property.location}. The design incorporates low-vibration structural anchors, natural thermal ventilation, and energy-efficient systems to ensure both comfort and sustainability.
                     </p>
 
                     {/* Investment type badge */}
                     <div className="flex items-center gap-2 pt-2">
-                      <span className="text-xs font-extrabold uppercase tracking-wider px-3 py-1.5 rounded-full border" style={{ background: "#fef3f2", borderColor: "#fecaca", color: "#C9171E" }}>
+                      <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border border-[#f3d6d4] bg-[#faf0f0] text-[#D31E28]">
                         {property.investmentType}
                       </span>
-                      <span className="text-xs font-extrabold uppercase tracking-wider px-3 py-1.5 rounded-full bg-gray-100 text-gray-600">
+                      <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#F6F1E7] text-[#8A6D2F]">
                         {property.type}
                       </span>
                     </div>
@@ -631,9 +633,9 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                 </div>
 
                 {/* Why Choose NexHouz */}
-                <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 mt-4">
-                  <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-3">Our Advantage</p>
-                  <h3 className="text-sm font-extrabold text-gray-900 mb-4">Why Choose NexHouz?</h3>
+                <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] p-6 mt-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8A6D2F] mb-1">Our Advantage</p>
+                  <h3 className="font-display font-semibold text-[22px] leading-[1.2] text-[#0A0A0A] mb-4">Why Choose NexHouz?</h3>
                   <div className="space-y-2.5">
                     {[
                       "Zero Brokerage on New Projects",
@@ -646,7 +648,7 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                         <div className="w-5 h-5 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0">
                           <Check size={10} className="text-emerald-600 stroke-[3]" />
                         </div>
-                        <span className="text-xs font-semibold text-gray-700">{pt}</span>
+                        <span className="text-[13.5px] font-medium text-[#44403a]">{pt}</span>
                       </div>
                     ))}
                   </div>
@@ -655,12 +657,12 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                       href={property.brochureUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-5 w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-extrabold text-white bg-brand-red hover:bg-brand-red/90 cursor-pointer transition-colors"
+                      className="mt-5 w-full flex items-center justify-center gap-2 py-4 rounded-lg text-sm font-semibold text-white bg-[#D31E28] hover:bg-[#B8171F] shadow-[0_4px_14px_rgba(211,30,40,0.25)] cursor-pointer transition-colors"
                     >
                       <Download size={14} /> Download Brochure
                     </a>
                   ) : (
-                    <button className="mt-5 w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-extrabold text-white bg-brand-red hover:bg-brand-red/90 cursor-pointer transition-colors opacity-60" disabled>
+                    <button className="mt-5 w-full flex items-center justify-center gap-2 py-4 rounded-lg text-sm font-semibold text-white bg-[#D31E28] hover:bg-[#B8171F] shadow-[0_4px_14px_rgba(211,30,40,0.25)] cursor-pointer transition-colors opacity-60" disabled>
                       <Download size={14} /> Download Brochure
                     </button>
                   )}
@@ -668,21 +670,22 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
 
                 {/* Similar Properties */}
                 {relatedProperties.length > 0 && (
-                  <div className="mt-4">
-                    <h3 className="text-sm font-extrabold text-gray-900 mb-3">Similar Properties</h3>
+                  <div className="mt-6">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8A6D2F] mb-1">Keep Exploring</p>
+                    <h3 className="font-display font-semibold text-[22px] leading-[1.2] text-[#0A0A0A] mb-4">Similar Properties</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {relatedProperties.map(prop => (
                         <Link key={prop.id} href={`/properties/${prop.slug}`}
-                          className="bg-white rounded-2xl border border-gray-200 hover:border-brand-red/20 shadow-sm overflow-hidden group transition-all hover:shadow-md">
-                          <div className="h-32 overflow-hidden">
+                          className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] hover:shadow-[0_10px_30px_rgba(30,25,15,0.08)] overflow-hidden group transition-shadow">
+                          <div className="h-32 overflow-hidden bg-[#efeae1]">
                             <img src={prop.image} alt={prop.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           </div>
                           <div className="p-4">
-                            <p className="text-xs text-gray-400 font-semibold mb-0.5">{prop.location}</p>
-                            <p className="text-sm font-extrabold text-gray-900 group-hover:text-brand-red transition-colors leading-tight mb-2">{prop.title}</p>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#948d7c] mb-1">{prop.location.split(",")[0]}</p>
+                            <p className="text-[15px] font-semibold text-[#0A0A0A] group-hover:text-[#D31E28] transition-colors leading-snug mb-2">{prop.title}</p>
                             <div className="flex items-center justify-between">
-                              <span className="text-xs text-gray-500 font-medium">{prop.bhk} BHK · {prop.area}</span>
-                              <span className="text-xs font-extrabold text-gray-900">₹{(prop.price / 10000000).toFixed(1)} Cr</span>
+                              <span className="text-xs text-[#6b6659] font-medium">{prop.bhk} BHK · {prop.area}</span>
+                              <span className="text-[13px] font-bold text-[#D31E28]">₹{(prop.price / 10000000).toFixed(1)} Cr</span>
                             </div>
                           </div>
                         </Link>
@@ -694,29 +697,29 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
             </div>
 
             {/* ── RIGHT STICKY SIDEBAR ─────────────────────────────── */}
-            <div className="space-y-4 lg:sticky lg:top-32">
+            <div className="space-y-4 lg:sticky lg:top-20">
 
               {/* Price Card */}
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+              <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] p-5">
                 <div className="flex items-baseline justify-between mb-4">
-                  <p className="text-2xl font-extrabold text-gray-900">₹{(property.price / 10000000).toFixed(1)} Cr</p>
-                  <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">Onwards</span>
+                  <p className="text-[28px] font-bold text-[#0A0A0A]">₹{(property.price / 10000000).toFixed(1)} Cr</p>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#8A6D2F] bg-[#F6F1E7] px-2.5 py-1 rounded-full">Onwards</span>
                 </div>
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 border border-gray-100 mb-4">
-                  <Calendar size={13} className="text-brand-red shrink-0" />
-                  <span className="text-xs font-semibold text-gray-700">Possession: <strong>{property.possession === "Ready" ? "Ready to Move" : "Dec 2027"}</strong></span>
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#FAF7F1] border border-[#EEE9E0] mb-3">
+                  <Calendar size={13} className="text-[#D31E28] shrink-0" />
+                  <span className="text-[13px] font-medium text-[#44403a]">Possession: <strong className="font-semibold text-[#0A0A0A]">{property.possession === "Ready" ? "Ready to Move" : "Dec 2027"}</strong></span>
                 </div>
-                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#FAF7F1] border border-[#EEE9E0]">
                   <BadgeCheck size={13} className="text-emerald-600 shrink-0" />
-                  <span className="text-xs font-semibold text-gray-700">RERA Verified · {property.type}</span>
+                  <span className="text-[13px] font-medium text-[#44403a]">RERA Verified · {property.type}</span>
                 </div>
               </div>
 
               {/* Site Visit CTA */}
-              <div className="bg-brand-red rounded-2xl p-5 text-white">
-                <p className="text-xs font-extrabold uppercase tracking-widest text-red-200 mb-1">Free of Charge</p>
-                <h3 className="text-base font-extrabold mb-1">Schedule Site Visit</h3>
-                <p className="text-xs text-red-100 mb-4 leading-relaxed">Get instant callback from our property experts. Zero brokerage guaranteed.</p>
+              <div className="bg-[#0A0A0A] rounded-2xl p-6 text-white">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D31E28] mb-1.5">Free of Charge</p>
+                <h3 className="font-display font-semibold text-[24px] leading-[1.2] mb-1.5">Schedule Site Visit</h3>
+                <p className="text-[13px] text-white/60 mb-4 leading-relaxed">Get instant callback from our property experts. Zero brokerage guaranteed.</p>
 
                 <AnimatePresence mode="wait">
                   {!isInquirySubmitted ? (
@@ -725,54 +728,54 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                       <input required type="text" placeholder="Your Name"
                         value={inquiryForm.name}
                         onChange={e => setInquiryForm(f => ({ ...f, name: e.target.value }))}
-                        className="w-full bg-white/15 border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder-red-200 focus:outline-none focus:bg-white/20 transition-colors" />
+                        className="w-full bg-white/10 border-[1.5px] border-white/15 rounded-[10px] px-[18px] py-3.5 text-sm text-white placeholder-white/45 focus:outline-none focus:border-[#D31E28] transition-colors" />
                       <input required type="tel" placeholder="+91 Phone Number"
                         value={inquiryForm.phone}
                         onChange={e => setInquiryForm(f => ({ ...f, phone: e.target.value }))}
-                        className="w-full bg-white/15 border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder-red-200 focus:outline-none focus:bg-white/20 transition-colors" />
+                        className="w-full bg-white/10 border-[1.5px] border-white/15 rounded-[10px] px-[18px] py-3.5 text-sm text-white placeholder-white/45 focus:outline-none focus:border-[#D31E28] transition-colors" />
                       <button type="submit"
-                        className="w-full py-3 rounded-xl text-sm font-extrabold text-brand-red bg-white hover:bg-gray-50 cursor-pointer transition-colors">
+                        className="w-full py-4 rounded-lg text-sm font-semibold text-white bg-[#D31E28] hover:bg-[#B8171F] shadow-[0_4px_14px_rgba(211,30,40,0.25)] cursor-pointer transition-colors">
                         Book Free Site Visit
                       </button>
                     </motion.form>
                   ) : (
                     <motion.div key="success" className="text-center py-4"
                       initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-                      <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center mx-auto mb-2">
-                        <Check size={18} className="text-brand-red" />
+                      <div className="w-10 h-10 rounded-full bg-[#D31E28] flex items-center justify-center mx-auto mb-2">
+                        <Check size={18} className="text-white" strokeWidth={3} />
                       </div>
-                      <p className="font-extrabold">Booking Confirmed!</p>
-                      <p className="text-xs text-red-100 mt-1">Our advisor will call you within 30 mins.</p>
+                      <p className="font-semibold text-[17px]">Booking Confirmed!</p>
+                      <p className="text-xs text-white/60 mt-1">Our advisor will call you within 30 mins.</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/15">
+                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-white/10">
                   <div className="flex -space-x-1.5">
-                    {["#C9171E", "#1a1a2e", "#374151"].map((c, i) => (
-                      <div key={i} className="w-6 h-6 rounded-full border-2 border-white" style={{ background: c }} />
+                    {["#D31E28", "#8A6D2F", "#44403a"].map((c, i) => (
+                      <div key={i} className="w-6 h-6 rounded-full border-2 border-[#0A0A0A]" style={{ background: c }} />
                     ))}
                   </div>
-                  <p className="text-xs text-red-100 font-medium">3 advisors available now</p>
+                  <p className="text-xs text-white/60 font-medium">3 advisors available now</p>
                 </div>
               </div>
 
               {/* Call CTA */}
-              <button className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-extrabold border-2 border-gray-200 text-gray-800 hover:border-brand-red hover:text-brand-red bg-white cursor-pointer transition-all">
+              <button className="w-full flex items-center justify-center gap-2 py-4 rounded-lg text-sm font-semibold border-[1.5px] border-[#d8d2c6] text-[#0A0A0A] hover:border-[#0A0A0A] bg-white cursor-pointer transition-colors">
                 <Phone size={15} /> Get Best Price Quote
               </button>
 
               {/* Offerings */}
-              <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
-                <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 mb-3">NexHouz Promise</p>
+              <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] p-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8A6D2F] mb-3">NexHouz Promise</p>
                 <div className="space-y-2.5">
                   {([
-                    { Icon: TrendingUp, text: "Best Price Guarantee", color: "#C9171E", bg: "#fef2f2" },
+                    { Icon: TrendingUp, text: "Best Price Guarantee", color: "#D31E28", bg: "#faf0f0" },
                     { Icon: BadgeCheck, text: "Verified & RERA Approved", color: "#16a34a", bg: "#f0fdf4" },
-                    { Icon: ShieldCheck, text: "Zero Brokerage", color: "#2563eb", bg: "#eff6ff" },
-                    { Icon: Layers, text: "Free Documentation Help", color: "#7c3aed", bg: "#f5f3ff" },
+                    { Icon: ShieldCheck, text: "Zero Brokerage", color: "#8A6D2F", bg: "#faf6ee" },
+                    { Icon: Layers, text: "Free Documentation Help", color: "#3d5a3d", bg: "#f2f4f0" },
                   ] as const).map(({ Icon, text, color, bg }) => (
-                    <div key={text} className="flex items-center gap-2.5 text-xs font-semibold text-gray-700">
+                    <div key={text} className="flex items-center gap-2.5 text-[13px] font-medium text-[#44403a]">
                       <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: bg }}>
                         <Icon size={13} style={{ color }} />
                       </div>
@@ -787,6 +790,6 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
       </main>
 
       <Footer />
-    </>
+    </div>
   );
 }

@@ -242,7 +242,7 @@ export default function FloatingChat() {
   const currentChips = STEP_CHIPS[chatState.step] || [];
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans">
+    <div className="floating-chat-root fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans">
       
       {/* ─── CHAT CONSOLE PANEL ─── */}
       <AnimatePresence>

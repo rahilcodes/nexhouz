@@ -5,12 +5,13 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Sparkles, X, Send, Award, ShieldCheck, ArrowRight,
+  Sparkles, Send, Award, ShieldCheck, ArrowRight,
   MapPin, Home, Phone, User, Calendar, CheckCircle,
-  Building2, Clock, Star, ChevronRight, TrendingUp,
+  Building2, Star, ChevronRight, TrendingUp,
   Layers, RotateCcw, Search
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
+import { CONTAINER } from "@/components/ui/theme";
 import { getAdvisorReply, AdvisorState } from "@/lib/chatService";
 import { fetchAllProperties } from "@/lib/db";
 import { Property } from "@/data/properties";
@@ -60,14 +61,14 @@ const STEP_CHIPS: Record<number, string[]> = {
 // Helper to render dynamic icons next to suggestion chips
 function getChipIcon(text: string) {
   const clean = text.toLowerCase().trim();
-  if (clean.includes("self use")) return <Home size={11} className="text-gray-400" />;
-  if (clean.includes("investment")) return <TrendingUp size={11} className="text-gray-400" />;
-  if (clean.includes("apartment")) return <Building2 size={11} className="text-gray-400" />;
-  if (clean.includes("villa")) return <Home size={11} className="text-gray-400" />;
-  if (clean.includes("penthouse")) return <Layers size={11} className="text-gray-400" />;
-  if (clean.includes("start over")) return <RotateCcw size={11} className="text-gray-400" />;
-  if (clean.includes("browse")) return <Search size={11} className="text-gray-400" />;
-  if (clean.includes("call")) return <Phone size={11} className="text-gray-400" />;
+  if (clean.includes("self use")) return <Home size={11} className="text-[#948d7c]" />;
+  if (clean.includes("investment")) return <TrendingUp size={11} className="text-[#948d7c]" />;
+  if (clean.includes("apartment")) return <Building2 size={11} className="text-[#948d7c]" />;
+  if (clean.includes("villa")) return <Home size={11} className="text-[#948d7c]" />;
+  if (clean.includes("penthouse")) return <Layers size={11} className="text-[#948d7c]" />;
+  if (clean.includes("start over")) return <RotateCcw size={11} className="text-[#948d7c]" />;
+  if (clean.includes("browse")) return <Search size={11} className="text-[#948d7c]" />;
+  if (clean.includes("call")) return <Phone size={11} className="text-[#948d7c]" />;
   return null;
 }
 
@@ -92,32 +93,32 @@ function LeadCaptureCard({ onSubmit, isSubmitting }: {
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-[85%] bg-white border border-brand-red/20 rounded-2xl overflow-hidden shadow-md mt-2"
+      className="w-full max-w-[85%] bg-white border border-[#EEE9E0] rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(30,25,15,0.08)] mt-2"
     >
-      <div className="bg-brand-red/5 px-5 py-3.5 border-b border-brand-red/10 flex items-center gap-2">
-        <Sparkles size={14} className="text-brand-red" />
-        <p className="text-xs font-extrabold text-brand-black">Get Floor Plans & Pricing on WhatsApp</p>
+      <div className="bg-[#FAF7F1] px-5 py-3.5 border-b border-[#EEE9E0] flex items-center gap-2">
+        <Sparkles size={14} className="text-[#D31E28]" />
+        <p className="text-[12.5px] font-semibold text-[#0A0A0A]">Get Floor Plans &amp; Pricing on WhatsApp</p>
       </div>
       <form onSubmit={handleSubmit} className="p-4 space-y-3">
         <div className="relative">
-          <User size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <User size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#948d7c]" />
           <input
             type="text"
             placeholder="Your full name"
             value={name}
             onChange={e => setName(e.target.value)}
-            className="w-full pl-8 pr-4 py-2.5 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-brand-red font-semibold bg-gray-50"
+            className="w-full pl-8 pr-4 py-2.5 text-[12.5px] border-[1.5px] border-[#e0d9cb] rounded-[10px] focus:outline-none focus:border-[#D31E28] font-medium bg-white text-[#0A0A0A] placeholder-[#948d7c] transition-colors"
             required
           />
         </div>
         <div className="relative">
-          <Phone size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Phone size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#948d7c]" />
           <input
             type="tel"
             placeholder="WhatsApp number (10 digits)"
             value={phone}
             onChange={e => setPhone(e.target.value)}
-            className="w-full pl-8 pr-4 py-2.5 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-brand-red font-semibold bg-gray-50"
+            className="w-full pl-8 pr-4 py-2.5 text-[12.5px] border-[1.5px] border-[#e0d9cb] rounded-[10px] focus:outline-none focus:border-[#D31E28] font-medium bg-white text-[#0A0A0A] placeholder-[#948d7c] transition-colors"
             pattern="[0-9+\- ]{10,15}"
             required
           />
@@ -125,7 +126,7 @@ function LeadCaptureCard({ onSubmit, isSubmitting }: {
         <button
           type="submit"
           disabled={isSubmitting || !name.trim() || phone.trim().length < 10}
-          className="w-full py-2.5 bg-brand-red text-white text-xs font-extrabold rounded-xl hover:bg-brand-red/90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full py-3 bg-[#D31E28] hover:bg-[#B8171F] text-white text-[12.5px] font-semibold rounded-[10px] active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
         >
           {isSubmitting ? (
             <><span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> Sending…</>
@@ -133,7 +134,7 @@ function LeadCaptureCard({ onSubmit, isSubmitting }: {
             <><Send size={12} /> Send Me Property Details</>
           )}
         </button>
-        <p className="text-[9px] text-gray-400 text-center font-semibold">🔒 No spam. WhatsApp only. You can opt out anytime.</p>
+        <p className="text-[10px] text-[#948d7c] text-center font-medium">🔒 No spam. WhatsApp only. You can opt out anytime.</p>
       </form>
     </motion.div>
   );
@@ -169,11 +170,11 @@ function SiteVisitPicker({ onSelect }: { onSelect: (option: string) => void }) {
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-[85%] bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-md mt-2"
+      className="w-full max-w-[85%] bg-white border border-[#EEE9E0] rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(30,25,15,0.08)] mt-2"
     >
-      <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2 bg-gray-50/80">
-        <Calendar size={13} className="text-brand-red" />
-        <p className="text-xs font-extrabold text-brand-black">Schedule Site Visit</p>
+      <div className="px-4 py-3 border-b border-[#EEE9E0] flex items-center gap-2 bg-[#FAF7F1]">
+        <Calendar size={13} className="text-[#D31E28]" />
+        <p className="text-[12.5px] font-semibold text-[#0A0A0A]">Schedule Site Visit</p>
       </div>
       <div className="p-3 grid grid-cols-2 gap-2">
         {options.map(opt => (
@@ -186,13 +187,13 @@ function SiteVisitPicker({ onSelect }: { onSelect: (option: string) => void }) {
             }}
             className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all cursor-pointer ${
               selected === opt.id
-                ? "border-brand-red bg-brand-red/5"
-                : "border-gray-100 hover:border-brand-red/30 bg-white"
+                ? "border-[#D31E28] bg-[#fdf6f6]"
+                : "border-[#EEE9E0] hover:border-[#d8d2c6] bg-white"
             }`}
           >
             <span className="text-base">{opt.icon}</span>
-            <span className="text-[11px] font-extrabold text-brand-black mt-1">{opt.label}</span>
-            <span className="text-[9px] text-gray-400 font-semibold">{opt.date}</span>
+            <span className="text-[11.5px] font-semibold text-[#0A0A0A] mt-1">{opt.label}</span>
+            <span className="text-[10px] text-[#948d7c] font-medium">{opt.date}</span>
           </button>
         ))}
       </div>
@@ -204,12 +205,12 @@ function SiteVisitPicker({ onSelect }: { onSelect: (option: string) => void }) {
               value={customDate}
               onChange={e => setCustomDate(e.target.value)}
               min={new Date().toISOString().split("T")[0]}
-              className="w-full px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-brand-red font-semibold"
+              className="w-full px-3 py-2 text-xs border-[1.5px] border-[#e0d9cb] rounded-[10px] focus:outline-none focus:border-[#D31E28] font-medium text-[#0A0A0A] transition-colors"
             />
             <button
               onClick={() => { if (customDate) onSelect(`Custom: ${customDate}`); }}
               disabled={!customDate}
-              className="w-full mt-2 py-2 bg-brand-red text-white text-xs font-extrabold rounded-xl hover:bg-brand-red/90 disabled:opacity-40 transition-all"
+              className="w-full mt-2 py-2.5 bg-[#D31E28] hover:bg-[#B8171F] text-white text-xs font-semibold rounded-[10px] disabled:opacity-40 transition-colors cursor-pointer"
             >
               Confirm Date
             </button>
@@ -231,15 +232,15 @@ function ConversationSummary({ profile, recommendedProperties }: {
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-[90%] bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-lg mt-2"
+      className="w-full max-w-[90%] bg-white border border-[#EEE9E0] rounded-2xl overflow-hidden shadow-[0_10px_30px_rgba(30,25,15,0.1)] mt-2"
     >
-      <div className="bg-brand-black px-5 py-3.5 flex items-center gap-2">
+      <div className="bg-[#0A0A0A] px-5 py-3.5 flex items-center gap-2">
         <CheckCircle size={14} className="text-emerald-400" />
-        <p className="text-xs font-extrabold text-white">Your Advisory Summary</p>
+        <p className="text-[12.5px] font-semibold text-white">Your Advisory Summary</p>
       </div>
 
       {/* Profile summary */}
-      <div className="p-4 grid grid-cols-2 gap-2 border-b border-gray-100">
+      <div className="p-4 grid grid-cols-2 gap-2 border-b border-[#EEE9E0]">
         {[
           { icon: "💰", label: "Budget", value: profile.budget ? `₹${(profile.budget / 10000000).toFixed(1)} Cr` : "N/A" },
           { icon: "🏠", label: "Purpose", value: profile.purpose || "N/A" },
@@ -251,8 +252,8 @@ function ConversationSummary({ profile, recommendedProperties }: {
           <div key={item.label} className="flex items-center gap-2">
             <span className="text-sm">{item.icon}</span>
             <div>
-              <p className="text-[9px] text-gray-400 font-extrabold uppercase tracking-wider">{item.label}</p>
-              <p className="text-[11px] font-extrabold text-brand-black">{item.value}</p>
+              <p className="text-[9.5px] text-[#948d7c] font-semibold uppercase tracking-wider">{item.label}</p>
+              <p className="text-[11.5px] font-semibold text-[#0A0A0A]">{item.value}</p>
             </div>
           </div>
         ))}
@@ -260,27 +261,27 @@ function ConversationSummary({ profile, recommendedProperties }: {
 
       {/* Recommended properties */}
       {recommendedProperties.length > 0 && (
-        <div className="p-4 space-y-2 border-b border-gray-100">
-          <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Your Top Matches</p>
+        <div className="p-4 space-y-2 border-b border-[#EEE9E0]">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#948d7c]">Your Top Matches</p>
           {recommendedProperties.slice(0, 3).map(prop => (
             <Link
               key={prop.id}
               href={`/properties/${prop.slug}`}
               target="_blank"
-              className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-xl hover:bg-brand-red/5 border border-gray-100 hover:border-brand-red/20 transition-all group"
+              className="flex items-center gap-3 p-2.5 bg-[#FAF7F1] rounded-xl border border-[#EEE9E0] hover:border-[#d8d2c6] transition-all group"
             >
               <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0">
                 <img src={prop.image} alt={prop.title} className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-extrabold text-brand-black truncate group-hover:text-brand-red transition-colors">{prop.title}</p>
-                <p className="text-[8px] text-gray-400 font-bold">{prop.location.split(",")[0]} · {prop.possession === "Ready" ? "RTM" : "Ongoing"}</p>
+                <p className="text-[11px] font-semibold text-[#0A0A0A] truncate group-hover:text-[#D31E28] transition-colors">{prop.title}</p>
+                <p className="text-[9px] text-[#948d7c] font-medium">{prop.location.split(",")[0]} · {prop.possession === "Ready" ? "RTM" : "Ongoing"}</p>
               </div>
               <div className="flex flex-col items-end shrink-0">
-                <span className="text-[10px] font-black text-brand-red">
+                <span className="text-[10.5px] font-bold text-[#D31E28]">
                   ₹{prop.price >= 10000000 ? `${(prop.price / 10000000).toFixed(1)} Cr` : `${(prop.price / 100000).toFixed(0)}L`}
                 </span>
-                <ChevronRight size={10} className="text-gray-400 group-hover:text-brand-red transition-colors" />
+                <ChevronRight size={10} className="text-[#948d7c] group-hover:text-[#D31E28] transition-colors" />
               </div>
             </Link>
           ))}
@@ -288,10 +289,10 @@ function ConversationSummary({ profile, recommendedProperties }: {
       )}
 
       <div className="p-4 flex gap-2">
-        <Link href="/" className="flex-1 py-2.5 text-center text-xs font-extrabold bg-gray-100 hover:bg-gray-200 text-brand-black rounded-xl transition-all">
+        <Link href="/" className="flex-1 py-2.5 text-center text-xs font-semibold border-[1.5px] border-[#d8d2c6] hover:border-[#0A0A0A] text-[#0A0A0A] rounded-[10px] transition-colors">
           Back to Home
         </Link>
-        <Link href="/properties" className="flex-1 py-2.5 text-center text-xs font-extrabold bg-brand-red text-white rounded-xl hover:bg-brand-red/90 transition-all">
+        <Link href="/properties" className="flex-1 py-2.5 text-center text-xs font-semibold bg-[#D31E28] hover:bg-[#B8171F] text-white rounded-[10px] transition-colors">
           Browse All Properties
         </Link>
       </div>
@@ -307,39 +308,39 @@ function PropertyCard({ prop, matchScore }: { prop: Property; matchScore?: numbe
     <Link
       href={`/properties/${prop.slug}`}
       target="_blank"
-      className="w-48 bg-white border border-gray-150 rounded-2xl overflow-hidden shrink-0 snap-start shadow-sm hover:shadow-lg hover:border-brand-red/30 transition-all flex flex-col justify-between group cursor-pointer"
+      className="w-48 bg-white border border-[#EEE9E0] rounded-2xl overflow-hidden shrink-0 snap-start shadow-[0_1px_3px_rgba(30,25,15,0.04)] hover:shadow-[0_10px_30px_rgba(30,25,15,0.08)] hover:border-[#d8d2c6] transition-all flex flex-col justify-between group cursor-pointer"
     >
-      <div className="relative h-28 bg-gray-50 overflow-hidden">
+      <div className="relative h-28 bg-[#efeae1] overflow-hidden">
         <img src={prop.image} alt={prop.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         {/* Match score badge */}
         {matchScore && (
-          <div className="absolute top-2 right-2 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-[8px] font-black flex items-center gap-1">
+          <div className="absolute top-2 right-2 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-[8px] font-bold flex items-center gap-1">
             <Star size={7} className="fill-white" />{matchScore}% Match
           </div>
         )}
         {/* RTM badge */}
-        <div className="absolute top-2 left-2 bg-brand-black/80 text-white px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase">
+        <div className="absolute top-2 left-2 bg-[#0A0A0A]/80 text-white px-1.5 py-0.5 rounded-full text-[8px] font-bold uppercase tracking-wider">
           {prop.possession === "Ready" ? "RTM" : "Ongoing"}
         </div>
         {/* BHK overlay on image bottom */}
-        <div className="absolute bottom-2 left-2 text-white text-[9px] font-extrabold">
+        <div className="absolute bottom-2 left-2 text-white text-[9px] font-semibold">
           <span className="bg-black/50 backdrop-blur-sm px-1.5 py-0.5 rounded">{prop.bhk} · {prop.type}</span>
         </div>
       </div>
       <div className="p-3 space-y-2.5 flex-grow flex flex-col justify-between">
         <div className="space-y-0.5">
-          <h4 className="text-[11px] font-black text-brand-black group-hover:text-brand-red transition-colors line-clamp-2 leading-tight">{prop.title}</h4>
-          <div className="flex items-center gap-1 text-gray-400">
+          <h4 className="text-[11px] font-bold text-[#0A0A0A] group-hover:text-[#D31E28] transition-colors line-clamp-2 leading-tight">{prop.title}</h4>
+          <div className="flex items-center gap-1 text-[#948d7c]">
             <MapPin size={8} />
-            <p className="text-[8px] font-extrabold uppercase tracking-widest truncate">{prop.location.split(",")[0]}</p>
+            <p className="text-[8px] font-semibold uppercase tracking-widest truncate">{prop.location.split(",")[0]}</p>
           </div>
         </div>
-        <div className="flex items-center justify-between pt-1.5 border-t border-gray-100">
-          <span className="text-[12px] font-black text-brand-red">
+        <div className="flex items-center justify-between pt-1.5 border-t border-[#EEE9E0]">
+          <span className="text-[12px] font-bold text-[#D31E28]">
             ₹{prop.price >= 10000000 ? `${(prop.price / 10000000).toFixed(2)} Cr` : `${(prop.price / 100000).toFixed(0)} L`}
           </span>
-          <span className="text-[9px] font-black uppercase tracking-widest text-brand-black group-hover:text-brand-red transition-colors flex items-center gap-0.5">
+          <span className="text-[9px] font-bold uppercase tracking-widest text-[#0A0A0A] group-hover:text-[#D31E28] transition-colors flex items-center gap-0.5">
             View <ArrowRight size={8} />
           </span>
         </div>
@@ -357,11 +358,11 @@ function MessageText({ text }: { text: string }) {
     <>
       {parts.map((part, i) => {
         if (part.startsWith("**") && part.endsWith("**")) {
-          return <strong key={i} className="font-extrabold">{part.slice(2, -2)}</strong>;
+          return <strong key={i} className="font-bold">{part.slice(2, -2)}</strong>;
         }
         // Handle markdown-style headers
         if (part.startsWith("# ") || part.startsWith("## ")) {
-          return <span key={i} className="block font-black text-brand-black mt-2 mb-0.5">{part.replace(/^#+\s/, "")}</span>;
+          return <span key={i} className="block font-bold text-[#0A0A0A] mt-2 mb-0.5">{part.replace(/^#+\s/, "")}</span>;
         }
         return <span key={i}>{part}</span>;
       })}
@@ -434,10 +435,10 @@ function ChatContent() {
           setChatState(parsedState);
           setLeadCaptureSubmitted(storedLeadCaptured);
           setSiteVisitSelected(storedSiteVisit);
-          
+
           // Find any recommended properties in stored state
           if (parsedState.profile?.recommendedIds) {
-            const matchedProps = parsedState.profile.recommendedIds.map((id: string) => 
+            const matchedProps = parsedState.profile.recommendedIds.map((id: string) =>
               props.find(p => p.id === id)
             ).filter(Boolean) as Property[];
             setSummaryProps(matchedProps);
@@ -483,7 +484,7 @@ function ChatContent() {
 
     try {
       const reply = await getAdvisorReply(userMsg, historyBefore, liveProperties, chatState);
-      
+
       // Track recommended properties for summary
       if (reply.properties && reply.properties.length > 0) {
         setSummaryProps(reply.properties);
@@ -572,36 +573,38 @@ function ChatContent() {
   const currentChips = activeChips.length > 0 ? activeChips : (STEP_CHIPS[chatState.step] || []);
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden bg-gray-50 text-brand-black">
+    <div className="font-archivo h-dvh w-full flex flex-col overflow-hidden bg-[#FAF7F1] text-[#0A0A0A]">
+      {/* Navbar sits in normal flow; the flex column keeps the chat below it without overflow */}
       <Navbar />
 
       {/* Main container beneath Navbar */}
-      <main className="flex-1 mt-[76px] p-4 overflow-hidden max-w-7xl mx-auto w-full flex flex-col md:flex-row gap-4">
+      <main className="flex-1 min-h-0 w-full px-4 md:px-6 xl:px-[60px] py-4 overflow-hidden">
+        <div className={`${CONTAINER} h-full flex flex-col md:flex-row gap-4`}>
 
         {/* Left Sidebar */}
-        <div className="w-full md:w-72 shrink-0 h-full flex flex-col bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
+        <div className="hidden md:flex w-72 lg:w-80 shrink-0 h-full flex-col bg-white border border-[#EEE9E0] rounded-2xl overflow-hidden">
           {/* Bot identity header */}
-          <div className="p-5 pb-4 border-b border-gray-50 space-y-3">
+          <div className="p-5 pb-4 border-b border-[#EEE9E0] space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-brand-red/5 border border-brand-red/10 flex items-center justify-center text-brand-red shrink-0">
+              <div className="w-11 h-11 rounded-xl bg-[#FAF7F1] border border-[#EEE9E0] flex items-center justify-center text-[#D31E28] shrink-0">
                 <Sparkles size={18} className="animate-pulse" />
               </div>
               <div>
-                <h2 className="font-extrabold text-brand-black text-sm">{botName}</h2>
+                <h2 className="font-semibold text-[#0A0A0A] text-[15px]">{botName}</h2>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
-                  <span className="text-[9px] text-emerald-600 font-extrabold uppercase tracking-wider">Active 24/7 Advisor</span>
+                  <span className="text-[9px] text-emerald-600 font-bold uppercase tracking-wider">Active 24/7 Advisor</span>
                 </div>
               </div>
             </div>
-            <p className="text-[11px] text-gray-500 font-semibold leading-relaxed">
+            <p className="text-[12px] text-[#57534a] leading-relaxed">
               Senior luxury real estate consultant. Personally advising buyers in Hyderabad since 2018.
             </p>
           </div>
 
           {/* Discovery Roadmap */}
-          <div className="flex-1 p-5 overflow-y-auto space-y-3 bg-gray-50/30">
-            <h3 className="text-[9px] font-black uppercase tracking-widest text-gray-400">Consultation Roadmap</h3>
+          <div className="flex-1 p-5 overflow-y-auto space-y-3 bg-white">
+            <h3 className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#8A6D2F]">Consultation Roadmap</h3>
             <div className="space-y-2.5">
               {[
                 { step: 1, label: "Budget Range" },
@@ -620,16 +623,16 @@ function ChatContent() {
                 const isActive = chatState.step === s.step;
                 return (
                   <div key={s.step} className="flex items-center gap-3">
-                    <div className={`w-5 h-5 rounded-lg flex items-center justify-center text-[9px] font-black border transition-all ${
+                    <div className={`w-5 h-5 rounded-lg flex items-center justify-center text-[9px] font-bold border transition-all ${
                       isCompleted ? "bg-emerald-500 border-emerald-500 text-white" :
-                      isActive ? "bg-brand-red border-brand-red text-white shadow-sm shadow-brand-red/20 animate-pulse" :
-                      "border-gray-200 text-gray-400 bg-white"
+                      isActive ? "bg-[#D31E28] border-[#D31E28] text-white shadow-sm shadow-[#D31E28]/20 animate-pulse" :
+                      "border-[#e0d9cb] text-[#948d7c] bg-white"
                     }`}>
                       {isCompleted ? "✓" : s.step}
                     </div>
-                    <span className={`text-[11px] font-bold transition-all ${
-                      isCompleted ? "text-gray-400 line-through" :
-                      isActive ? "text-brand-black font-extrabold" : "text-gray-400"
+                    <span className={`text-[11.5px] transition-all ${
+                      isCompleted ? "text-[#948d7c] line-through font-medium" :
+                      isActive ? "text-[#0A0A0A] font-semibold" : "text-[#948d7c] font-medium"
                     }`}>{s.label}</span>
                   </div>
                 );
@@ -638,29 +641,29 @@ function ChatContent() {
           </div>
 
           {/* Bottom trust badges */}
-          <div className="p-4 bg-brand-black text-white space-y-2">
-            <div className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-wider text-white/90">
-              <Award size={12} className="text-brand-red" />
-              <span>RERA & GHMC Vetted Listings</span>
+          <div className="p-4 bg-[#0A0A0A] text-white space-y-2">
+            <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-wider text-white/90">
+              <Award size={12} className="text-[#D31E28]" />
+              <span>RERA &amp; GHMC Vetted Listings</span>
             </div>
-            <div className="flex items-center gap-2 text-[9px] font-extrabold uppercase tracking-wider text-white/90">
-              <ShieldCheck size={12} className="text-brand-red" />
+            <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-wider text-white/90">
+              <ShieldCheck size={12} className="text-[#D31E28]" />
               <span>100% Commission-Free Guidance</span>
             </div>
           </div>
         </div>
 
         {/* Right: Chat Container */}
-        <div className="flex-grow h-full flex flex-col bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
+        <div className="flex-grow h-full min-h-0 flex flex-col bg-white border border-[#EEE9E0] rounded-2xl overflow-hidden">
           {/* Messages */}
-          <div className="flex-grow p-5 overflow-y-auto space-y-4 bg-gray-50/40">
+          <div className="flex-grow p-4 md:p-5 overflow-y-auto space-y-4 bg-white">
             {chatMessages.map((msg, i) => (
               <div key={i} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
                 {/* Message bubble */}
-                <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-xs leading-relaxed whitespace-pre-line ${
+                <div className={`max-w-[80%] rounded-2xl px-4 py-3 text-[13px] leading-relaxed whitespace-pre-line ${
                   msg.sender === "user"
-                    ? "bg-brand-red text-white rounded-tr-sm shadow-md shadow-brand-red/10 font-semibold"
-                    : "bg-white border border-gray-100 text-brand-black rounded-tl-sm shadow-sm font-medium"
+                    ? "bg-[#0A0A0A] text-white rounded-br-md font-medium"
+                    : "bg-[#FAF7F1] border border-[#EEE9E0] text-[#2b2823] rounded-bl-md"
                 }`}>
                   {msg.sender === "bot"
                     ? <MessageText text={msg.text} />
@@ -715,16 +718,16 @@ function ChatContent() {
             {/* Typing indicator */}
             {isBotTyping && (
               <div className="flex items-start gap-2">
-                <div className="w-7 h-7 rounded-xl bg-brand-red/5 border border-brand-red/10 flex items-center justify-center shrink-0">
-                  <Sparkles size={11} className="text-brand-red animate-pulse" />
+                <div className="w-7 h-7 rounded-lg bg-[#FAF7F1] border border-[#EEE9E0] flex items-center justify-center shrink-0">
+                  <Sparkles size={11} className="text-[#D31E28] animate-pulse" />
                 </div>
-                <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 flex flex-col gap-1.5 shadow-sm">
+                <div className="bg-[#FAF7F1] border border-[#EEE9E0] rounded-2xl rounded-tl-md px-4 py-3 flex flex-col gap-1.5">
                   <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <span className="w-1.5 h-1.5 bg-[#948d7c] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 bg-[#948d7c] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 bg-[#948d7c] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
-                  <span className="text-[9px] font-semibold text-gray-400 animate-pulse">{TYPING_MESSAGES[typingMsgIdx]}</span>
+                  <span className="text-[10px] font-medium text-[#948d7c] animate-pulse">{TYPING_MESSAGES[typingMsgIdx]}</span>
                 </div>
               </div>
             )}
@@ -739,13 +742,13 @@ function ChatContent() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 8 }}
-                className="px-4 py-2.5 border-t border-gray-50 flex gap-2 flex-wrap bg-gray-50/50"
+                className="px-4 py-2.5 border-t border-[#EEE9E0] flex gap-2 flex-wrap bg-white"
               >
                 {currentChips.map(chip => (
                   <button
                     key={chip}
                     onClick={() => handleChipClick(chip)}
-                    className="px-3 py-1.5 bg-white border border-gray-200 hover:border-brand-red hover:text-brand-red text-gray-600 text-[10px] font-extrabold rounded-full transition-all cursor-pointer whitespace-nowrap hover:shadow-sm active:scale-95 flex items-center gap-1.5"
+                    className="px-3.5 py-2 bg-white border border-[#d8d2c6] hover:border-[#0A0A0A] text-[#2b2823] text-[11.5px] font-semibold rounded-full transition-colors cursor-pointer whitespace-nowrap active:scale-95 flex items-center gap-1.5"
                   >
                     {getChipIcon(chip)}
                     {chip}
@@ -756,23 +759,24 @@ function ChatContent() {
           </AnimatePresence>
 
           {/* Input form */}
-          <form onSubmit={handleSend} className="p-3.5 border-t border-gray-100 bg-white flex items-center gap-2.5 shrink-0">
+          <form onSubmit={handleSend} className="p-3.5 border-t border-[#EEE9E0] bg-white flex items-center gap-2.5 shrink-0">
             <input
               type="text"
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               placeholder="Type your response or tap a suggestion above…"
-              className="flex-1 bg-gray-50 border border-gray-200 px-4 py-3 text-xs rounded-full focus:outline-none focus:border-brand-red font-semibold transition-all placeholder:text-gray-400"
+              className="flex-1 bg-white border-[1.5px] border-[#e0d9cb] px-4 py-3 text-[13px] rounded-[10px] focus:outline-none focus:border-[#D31E28] font-medium text-[#0A0A0A] transition-colors placeholder-[#948d7c]"
               disabled={isBotTyping}
             />
             <button
               type="submit"
               disabled={isBotTyping || !chatInput.trim()}
-              className="w-10 h-10 rounded-full bg-brand-red text-white flex items-center justify-center hover:bg-brand-red/90 active:scale-95 transition-all shrink-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-brand-red/10"
+              className="w-11 h-11 rounded-lg bg-[#D31E28] text-white flex items-center justify-center hover:bg-[#B8171F] active:scale-95 transition-all shrink-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-[0_4px_14px_rgba(211,30,40,0.25)]"
             >
-              <Send size={14} />
+              <Send size={15} />
             </button>
           </form>
+        </div>
         </div>
       </main>
     </div>
@@ -782,8 +786,8 @@ function ChatContent() {
 export default function ChatPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#FAF7F1] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#D31E28] border-t-transparent rounded-full animate-spin" />
       </div>
     }>
       <ChatContent />

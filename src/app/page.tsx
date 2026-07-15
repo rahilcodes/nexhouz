@@ -1,315 +1,480 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   MapPin,
-  ShieldCheck,
-  Zap,
-  ArrowRight,
   ChevronDown,
-  Star,
-  Check,
-  Info,
-  Building,
-  Heart,
-  User,
-  PhoneCall,
-  CheckCircle,
-  X,
-  Compass,
-  Sparkles,
-  Crown,
-  Home,
-  Clock,
-  Users,
-  TrendingUp,
-  FileText,
-  BadgeCheck,
-  Car,
-  GraduationCap,
-  Phone,
-  MessageCircle,
+  ChevronLeft,
   ChevronRight,
-  BrainCircuit,
-  CalendarCheck,
-  HeartHandshake,
-  ScanSearch,
-  UserCheck,
-  BadgeDollarSign,
-  AlertTriangle
+  Check,
+  Phone,
+  Star,
+  Heart,
+  X,
+  ArrowRight,
+  Info,
+  AlertTriangle,
+  Building,
+  Compass,
+  ShieldCheck,
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import { CONTAINER, Reveal, Eyebrow, PHONE_DISPLAY, PHONE_TEL } from "@/components/ui/theme";
 import { fetchAllProperties, submitLead } from "@/lib/db";
 import { properties as defaultProperties, Property } from "@/data/properties";
 import { supabase } from "@/lib/supabaseClient";
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Design tokens (NexHouz Web Style Guide)
+//   Primary Red #D31E28 (hover #B8171F) · Near-Black #0A0A0A · Warm White #FAF7F1
+//   Champagne #F6F1E7 · Gold #8A6D2F · Border #EEE9E0
+//   Display: Cormorant Garamond 600 · UI/body: Archivo
+// ─────────────────────────────────────────────────────────────────────────────
+
+const HERO_SLIDES = [
+  { src: "/images/hyderabad_skyline_facade.png", alt: "Kokapet skyline — gated community towers" },
+  { src: "/images/hero_modernist_villa.png", alt: "Luxury villa exterior, Tellapur" },
+  { src: "/images/vanguard_penthouse.png", alt: "Premium residence interiors" },
+];
+
+const scrollToCallback = () => {
+  document.getElementById("callback-form-section")?.scrollIntoView({ behavior: "smooth" });
+};
+
+const formatCr = (price: number) => `₹${parseFloat((price / 10000000).toFixed(2))} Cr`;
+
+
+const possessionLabel = (p: Property) =>
+  p.possessionDate || (p.possession === "Ready" ? "Ready to move" : "Under construction");
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HeroSection — upgraded left column + layout wrapper
+// HERO — crossfade slider + search console (desktop) / search CTA (mobile)
 // ─────────────────────────────────────────────────────────────────────────────
-function HeroSection({ onCloseDropdowns }: { onCloseDropdowns: () => void }) {
-  const personas = [
-    "IT professionals in Gachibowli.",
-    "NRI investors in Hyderabad.",
-    "first-time homebuyers.",
-    "families upgrading in Kokapet.",
-    "HNIs seeking luxury villas.",
-  ];
-  const [personaIdx, setPersonaIdx] = useState(0);
-  const [displayedPersona, setDisplayedPersona] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [statsVisible, setStatsVisible] = useState(false);
+function HeroSection() {
+  const [slide, setSlide] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Typewriter for persona cycling
-  useEffect(() => {
-    const target = personas[personaIdx];
-    let timeout: ReturnType<typeof setTimeout>;
-    if (!isDeleting && displayedPersona.length < target.length) {
-      timeout = setTimeout(() => setDisplayedPersona(target.slice(0, displayedPersona.length + 1)), 45);
-    } else if (!isDeleting && displayedPersona.length === target.length) {
-      timeout = setTimeout(() => setIsDeleting(true), 1800);
-    } else if (isDeleting && displayedPersona.length > 0) {
-      timeout = setTimeout(() => setDisplayedPersona(displayedPersona.slice(0, -1)), 22);
-    } else if (isDeleting && displayedPersona.length === 0) {
-      setIsDeleting(false);
-      setPersonaIdx(i => (i + 1) % personas.length);
-    }
-    return () => clearTimeout(timeout);
-  }, [displayedPersona, isDeleting, personaIdx]);
-
-  // Trigger stats counter when section mounts
-  useEffect(() => {
-    const t = setTimeout(() => setStatsVisible(true), 600);
-    return () => clearTimeout(t);
+  const startTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => setSlide((s) => (s + 1) % HERO_SLIDES.length), 5000);
   }, []);
 
-  const stats = [
-    { value: "1,500+", label: "Properties Scanned" },
-    { value: "130+", label: "Families Served" },
-    { value: "98%", label: "Satisfaction Rate" },
+  useEffect(() => {
+    startTimer();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [startTimer]);
+
+  const go = (n: number) => {
+    startTimer();
+    setSlide(((n % HERO_SLIDES.length) + HERO_SLIDES.length) % HERO_SLIDES.length);
+  };
+
+  // Search console state
+  const [activeTab, setActiveTab] = useState<"Buy" | "Commercial" | "New Launch">("Buy");
+  const [search, setSearch] = useState({ location: "", type: "Apartment", priceRange: "₹ 50L - ₹ 5Cr+", bhk: "3" });
+  const [openField, setOpenField] = useState<null | "location" | "type" | "budget" | "bhk">(null);
+
+  useEffect(() => {
+    const close = () => setOpenField(null);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, []);
+
+  const suggestedDestinations = [
+    { name: "Kokapet & Financial District", desc: "High-growth commercial expansion node", icon: Building },
+    { name: "Jubilee & Banjara Hills", desc: "Timeless prime premium residential hills", icon: Compass },
+    { name: "Narsingi & Tellapur", desc: "Green suburbs popular with tech families", icon: MapPin },
+    { name: "Osman & Himayat Sagar's", desc: "Quiet lakeside villa enclaves", icon: Building },
   ];
 
-  const mobileTrustCards = [
-    { icon: BrainCircuit, label: "AI Matched" },
-    { icon: ShieldCheck, label: "RERA Verified" },
-    { icon: UserCheck, label: "Expert Reviewed" },
-    { icon: CheckCircle, label: "Visit Booked" },
-  ];
+  const searchHref =
+    activeTab === "New Launch"
+      ? "/new-launches"
+      : `/properties?location=${encodeURIComponent(search.location || "Kokapet")}&type=${encodeURIComponent(
+          activeTab === "Commercial" ? "Commercial" : search.type
+        )}&price=${encodeURIComponent(search.priceRange)}&bhk=${encodeURIComponent(search.bhk)}`;
+
+  const fieldLabel = "text-[13px] font-semibold tracking-[0.1em] text-[#948d7c] mb-2";
+  const fieldValue = "flex items-center justify-between gap-2 text-[17px] font-medium text-[#0A0A0A] cursor-pointer";
 
   return (
-    <section
-      className="relative h-screen overflow-hidden"
-      onClick={onCloseDropdowns}
-      style={{ background: "#ffffff" }}
-    >
-      {/* Dynamic styles to ensure visual perfection on smaller heights/100% zoom */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media (max-height: 820px) {
-          .hero-title {
-            font-size: clamp(1.8rem, 3.5vw + 0.5rem, 3rem) !important;
-            margin-bottom: 0.75rem !important;
-          }
-          .hero-sub {
-            margin-bottom: 0.5rem !important;
-          }
-          .hero-stats {
-            margin-bottom: 1rem !important;
-          }
-          .hero-pillars {
-            gap: 0.75rem !important;
-          }
-          .hero-pillar-desc {
-            display: none !important;
-          }
-        }
-        @media (max-height: 700px) {
-          .hero-title {
-            font-size: clamp(1.5rem, 3vw + 0.5rem, 2.5rem) !important;
-            margin-bottom: 0.5rem !important;
-          }
-          .hero-stats {
-            margin-bottom: 0.75rem !important;
-          }
-        }
-      `}} />
-
-      {/* Animated soft gradient background — left side breathing glow */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none z-0"
-        animate={{
-          background: [
-            "radial-gradient(ellipse 70% 60% at 15% 50%, rgba(201,23,30,0.04) 0%, transparent 70%)",
-            "radial-gradient(ellipse 70% 60% at 20% 45%, rgba(201,23,30,0.07) 0%, transparent 70%)",
-            "radial-gradient(ellipse 70% 60% at 15% 55%, rgba(201,23,30,0.04) 0%, transparent 70%)",
-          ],
-        }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-      />
-
-      {/* Right side: Animated panel */}
-      <div className="absolute right-0 top-0 bottom-0 w-full lg:w-[58%] z-0">
+    <section className="relative">
+      {/* ── Desktop hero — fills the viewport below the header, console included ── */}
+      <div className="hidden lg:block relative h-[calc(100vh-132px)] min-h-[560px] max-h-[820px] overflow-hidden bg-[#efeae1]">
+        {HERO_SLIDES.map((s, i) => (
+          <div
+            key={s.src}
+            className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+            style={{ opacity: slide === i ? 1 : 0 }}
+          >
+            <img src={s.src} alt={s.alt} className="w-full h-full object-cover" />
+          </div>
+        ))}
+        {/* Readability gradient */}
         <div
-          className="absolute inset-0"
-          style={{ background: "linear-gradient(150deg, #f3f3f6 0%, #eaeaee 100%)" }}
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(94deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.93) 34%, rgba(255,255,255,0.55) 56%, rgba(255,255,255,0) 78%)",
+          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-white via-white/85 to-white/10 lg:to-transparent" />
-        <div
-          className="relative z-10 w-full h-full hidden lg:flex items-center justify-center"
-          style={{ paddingLeft: "8%", paddingRight: "4%" }}
-        >
-          <HeroLivePanel />
+
+        {/* Content layer — centered container keeps copy/console aligned on wide screens */}
+        <div className="absolute inset-0">
+        <div className={`relative h-full ${CONTAINER} px-6 xl:px-[60px]`}>
+        <div className="h-full flex flex-col justify-center pb-[160px] pointer-events-none">
+          <div className="max-w-[680px]">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2.5 bg-white border border-[#eadfd0] rounded-lg px-4 py-2.5 text-[15px] font-semibold text-[#8A6D2F] shadow-[0_2px_8px_rgba(30,25,15,0.06)]"
+            >
+              <Star size={14} className="fill-[#8A6D2F] text-[#8A6D2F]" />
+              Hyderabad&apos;s Trusted Buying Advisory · 130+ Families Served
+            </motion.div>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.08 }}
+              className="font-display font-semibold leading-[1.08] text-[#0A0A0A] mt-5 text-balance"
+              style={{ fontSize: "clamp(38px, 6.6vh, 64px)" }}
+            >
+              Buy your dream home with complete confidence.
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.16 }}
+              className="leading-[1.6] text-[#44403a] mt-4 max-w-[560px]"
+              style={{ fontSize: "clamp(15px, 2.1vh, 19px)" }}
+            >
+              Every property we show is RERA-verified, builder-audited across 47 points and 100% legal-clear — with
+              expert advisors guiding you from search to registration. Zero brokerage.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.24 }}
+              className="flex gap-4 mt-7 pointer-events-auto"
+            >
+              <button
+                onClick={scrollToCallback}
+                className="bg-[#D31E28] hover:bg-[#B8171F] text-white text-[17px] font-semibold px-8 py-[18px] rounded-lg cursor-pointer shadow-[0_6px_18px_rgba(211,30,40,0.28)] transition-colors"
+              >
+                Book Free Expert Session
+              </button>
+              <a
+                href={PHONE_TEL}
+                className="flex items-center gap-2 bg-white text-[#0A0A0A] text-[17px] font-semibold px-8 py-[18px] rounded-lg border-[1.5px] border-[#d8d2c6] hover:border-[#0A0A0A] transition-colors"
+              >
+                <Phone size={16} /> Talk to an Advisor
+              </a>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Slider controls */}
+        <div className="absolute right-6 xl:right-[60px] bottom-[178px] flex items-center gap-3.5 z-10">
+          <button
+            onClick={() => go(slide - 1)}
+            aria-label="Previous slide"
+            className="w-12 h-12 rounded-full bg-white text-[#0A0A0A] hover:bg-[#D31E28] hover:text-white flex items-center justify-center cursor-pointer shadow-[0_4px_14px_rgba(30,25,15,0.18)] transition-colors"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          {HERO_SLIDES.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => go(i)}
+              aria-label={`Go to slide ${i + 1}`}
+              className="w-3 h-3 rounded-full cursor-pointer transition-colors"
+              style={{ background: slide === i ? "#D31E28" : "rgba(255,255,255,0.85)" }}
+            />
+          ))}
+          <button
+            onClick={() => go(slide + 1)}
+            aria-label="Next slide"
+            className="w-12 h-12 rounded-full bg-white text-[#0A0A0A] hover:bg-[#D31E28] hover:text-white flex items-center justify-center cursor-pointer shadow-[0_4px_14px_rgba(30,25,15,0.18)] transition-colors"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
+
+        {/* Search console */}
+        <div className="absolute left-6 right-6 xl:left-[60px] xl:right-[60px] bottom-0 z-20">
+          <div
+            className="bg-white border border-[#EEE9E0] border-b-0 rounded-t-2xl shadow-[0_-8px_30px_rgba(30,25,15,0.08)] px-6 pb-5 pt-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Tabs */}
+            <div className="flex gap-1 py-2.5">
+              {(["Buy", "Commercial", "New Launch"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`text-base px-6 py-3 rounded-lg cursor-pointer transition-colors ${
+                    activeTab === tab
+                      ? "font-semibold text-white bg-[#0A0A0A]"
+                      : "font-medium text-[#57534a] hover:bg-[#f4efe6]"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+            {/* Fields */}
+            <div className="grid grid-cols-[1.3fr_1fr_1fr_1fr_auto] items-stretch">
+              {/* Location */}
+              <div className="relative py-2 pr-6 pl-1 border-r border-[#EEE9E0]">
+                <div className={fieldLabel}>LOCATION</div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    placeholder="Kokapet, Gachibowli…"
+                    value={search.location}
+                    onChange={(e) => {
+                      setSearch({ ...search, location: e.target.value });
+                      setOpenField("location");
+                    }}
+                    onFocus={() => setOpenField("location")}
+                    className="w-full bg-transparent text-[17px] font-medium text-[#0A0A0A] placeholder-[#948d7c] focus:outline-none"
+                  />
+                  <MapPin size={15} className="text-[#948d7c] shrink-0" />
+                </div>
+                <AnimatePresence>
+                  {openField === "location" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full left-0 w-[340px] mt-2 bg-white border border-[#EEE9E0] shadow-[0_18px_50px_rgba(30,25,15,0.14)] rounded-2xl p-3 z-50"
+                    >
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#948d7c] px-2 mb-2">
+                        Suggested hotspots
+                      </p>
+                      {suggestedDestinations.map((d) => (
+                        <button
+                          key={d.name}
+                          onClick={() => {
+                            setSearch({ ...search, location: d.name });
+                            setOpenField(null);
+                          }}
+                          className="w-full text-left px-2 py-2 flex items-center gap-2.5 rounded-lg hover:bg-[#FAF7F1] transition-colors cursor-pointer"
+                        >
+                          <MapPin size={12} className="text-[#D31E28] shrink-0" />
+                          <div>
+                            <p className="text-[14px] font-semibold text-[#0A0A0A]">{d.name}</p>
+                            <p className="text-[12.5px] text-[#948d7c]">{d.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              {/* Type */}
+              <div className="relative py-2 px-6 border-r border-[#EEE9E0]">
+                <div className={fieldLabel}>PROPERTY TYPE</div>
+                <button
+                  onClick={() => setOpenField(openField === "type" ? null : "type")}
+                  className={`w-full ${fieldValue}`}
+                >
+                  <span>{search.type}</span>
+                  <ChevronDown size={14} className={`text-[#948d7c] transition-transform ${openField === "type" ? "rotate-180" : ""}`} />
+                </button>
+                <AnimatePresence>
+                  {openField === "type" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full left-4 right-4 mt-2 bg-white border border-[#EEE9E0] shadow-[0_18px_50px_rgba(30,25,15,0.14)] rounded-2xl p-2 z-50"
+                    >
+                      {["Apartment", "Villa", "Plot", "Commercial"].map((t) => (
+                        <button
+                          key={t}
+                          onClick={() => {
+                            setSearch({ ...search, type: t });
+                            setOpenField(null);
+                          }}
+                          className={`w-full text-left px-3 py-2.5 text-[15px] font-medium rounded-xl transition-colors cursor-pointer ${
+                            search.type === t ? "bg-[#0A0A0A] text-white" : "hover:bg-[#FAF7F1] text-[#0A0A0A]"
+                          }`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              {/* Budget */}
+              <div className="relative py-2 px-6 border-r border-[#EEE9E0]">
+                <div className={fieldLabel}>BUDGET</div>
+                <button
+                  onClick={() => setOpenField(openField === "budget" ? null : "budget")}
+                  className={`w-full ${fieldValue}`}
+                >
+                  <span className="whitespace-nowrap">{search.priceRange}</span>
+                  <ChevronDown size={14} className={`text-[#948d7c] transition-transform ${openField === "budget" ? "rotate-180" : ""}`} />
+                </button>
+                <AnimatePresence>
+                  {openField === "budget" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full left-4 right-4 mt-2 bg-white border border-[#EEE9E0] shadow-[0_18px_50px_rgba(30,25,15,0.14)] rounded-2xl p-2 z-50"
+                    >
+                      {["₹ 50L - ₹ 5Cr+", "₹ 50L - ₹ 2Cr", "₹ 2Cr - ₹ 5Cr", "₹ 5Cr - ₹ 10Cr", "₹ 10Cr+"].map((b) => (
+                        <button
+                          key={b}
+                          onClick={() => {
+                            setSearch({ ...search, priceRange: b });
+                            setOpenField(null);
+                          }}
+                          className={`w-full text-left px-3 py-2.5 text-[15px] font-medium rounded-xl transition-colors cursor-pointer whitespace-nowrap ${
+                            search.priceRange === b ? "bg-[#0A0A0A] text-white" : "hover:bg-[#FAF7F1] text-[#0A0A0A]"
+                          }`}
+                        >
+                          {b}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              {/* BHK */}
+              <div className="relative py-2 px-6">
+                <div className={fieldLabel}>BHK</div>
+                <button
+                  onClick={() => setOpenField(openField === "bhk" ? null : "bhk")}
+                  className={`w-full ${fieldValue}`}
+                >
+                  <span>{search.bhk === "Any" ? "Any BHK" : `${search.bhk} BHK`}</span>
+                  <ChevronDown size={14} className={`text-[#948d7c] transition-transform ${openField === "bhk" ? "rotate-180" : ""}`} />
+                </button>
+                <AnimatePresence>
+                  {openField === "bhk" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full left-4 right-4 mt-2 bg-white border border-[#EEE9E0] shadow-[0_18px_50px_rgba(30,25,15,0.14)] rounded-2xl p-2 z-50"
+                    >
+                      {["Any", "2", "3", "4", "5+"].map((k) => (
+                        <button
+                          key={k}
+                          onClick={() => {
+                            setSearch({ ...search, bhk: k });
+                            setOpenField(null);
+                          }}
+                          className={`w-full text-left px-3 py-2.5 text-[15px] font-medium rounded-xl transition-colors cursor-pointer ${
+                            search.bhk === k ? "bg-[#0A0A0A] text-white" : "hover:bg-[#FAF7F1] text-[#0A0A0A]"
+                          }`}
+                        >
+                          {k === "Any" ? "Any BHK" : `${k} BHK`}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              {/* Search */}
+              <div className="flex items-center pl-2">
+                <Link
+                  href={searchHref}
+                  className="flex items-center gap-2 bg-[#D31E28] hover:bg-[#B8171F] text-white text-[17px] font-semibold px-9 py-[19px] rounded-lg transition-colors"
+                >
+                  <Search size={16} strokeWidth={2.5} /> Search
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div>
         </div>
       </div>
 
-      {/* Left side: Content */}
-      <div className="relative z-10 w-full h-full max-w-7xl mx-auto px-6 lg:px-10 flex flex-col justify-center pt-16">
-        <div className="max-w-[520px]">
-
-          {/* Trust badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-            className="inline-flex items-center gap-2 px-3 py-1 bg-brand-red/5 border border-brand-red/20 rounded-full mb-4"
-          >
-            <Home size={10} className="text-brand-red" />
-            <span className="text-xs font-extrabold tracking-[0.18em] uppercase text-brand-red">
-              100% Legal Clear Curation
-            </span>
-          </motion.div>
-
-          {/* Headline with animated Hyderabad underline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.08 }}
-            className="hero-title font-extrabold text-brand-black leading-[1.03] tracking-tight mb-4"
-            style={{ fontSize: "clamp(2rem, 4.2vw + 0.5rem, 3.75rem)" }}
-          >
-            Discover<br />
-            <span className="relative inline-block text-brand-red">
-              Hyderabad&apos;s
-              {/* Animated underline draws from left to right */}
-              <motion.span
-                className="absolute left-0 bottom-0 h-[3px] bg-brand-red rounded-full"
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+      {/* ── Mobile hero ── */}
+      <div className="lg:hidden">
+        <div className="relative h-[400px] overflow-hidden bg-[#efeae1]">
+          {HERO_SLIDES.map((s, i) => (
+            <div
+              key={s.src}
+              className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+              style={{ opacity: slide === i ? 1 : 0 }}
+            >
+              <img src={s.src} alt={s.alt} className="w-full h-full object-cover" />
+            </div>
+          ))}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.85) 26%, rgba(255,255,255,0) 60%)",
+            }}
+          />
+          <div className="absolute left-0 right-0 top-0 px-5 pt-7 text-center pointer-events-none">
+            <div className="text-xs font-semibold tracking-[0.22em] text-[#8A6D2F]">
+              HYDERABAD&apos;S TRUSTED ADVISORY
+            </div>
+            <h1 className="font-display font-semibold text-[34px] leading-[1.2] text-[#0A0A0A] mt-3 text-balance">
+              Buy your dream home with complete confidence.
+            </h1>
+          </div>
+          <div className="absolute left-0 right-0 bottom-3.5 flex justify-center gap-2.5">
+            {HERO_SLIDES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => go(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                className="w-3 h-3 rounded-full cursor-pointer shadow-[0_1px_4px_rgba(0,0,0,0.3)] transition-colors"
+                style={{ background: slide === i ? "#D31E28" : "rgba(255,255,255,0.85)" }}
               />
-            </span><br />
-            Premium Properties.
-          </motion.h1>
-
-          {/* Typewriter subheadline cycling through personas */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.16 }}
-            className="hero-sub mb-2"
-          >
-            <p className="text-xs text-brand-black/55 leading-relaxed font-medium max-w-[400px]">
-              Find your next home with 100% peace of mind — perfect for{" "}
-              <span className="text-brand-black font-bold">
-                {displayedPersona}
-                <motion.span
-                  className="inline-block align-middle ml-px"
-                  style={{ width: 2, height: 12, background: "#C9171E", borderRadius: 1 }}
-                  animate={{ opacity: [1, 0, 1] }}
-                  transition={{ duration: 0.5, repeat: Infinity }}
-                />
-              </span>
-            </p>
-          </motion.div>
-
-          {/* Live stats strip */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.22 }}
-            className="hero-stats flex items-center gap-5 mb-5"
-          >
-            {stats.map((s, i) => (
-              <div key={s.label} className="flex items-center gap-2">
-                {i > 0 && <div className="w-px h-6 bg-gray-200" />}
-                <div>
-                  <motion.p
-                    className="text-sm font-extrabold text-brand-black leading-none"
-                    initial={{ opacity: 0 }}
-                    animate={statsVisible ? { opacity: 1 } : {}}
-                    transition={{ delay: 0.3 + i * 0.1 }}
-                  >
-                    {s.value}
-                  </motion.p>
-                  <p className="text-xs text-brand-black/40 font-semibold uppercase tracking-wider leading-tight mt-0.5">
-                    {s.label}
-                  </p>
-                </div>
-              </div>
             ))}
-          </motion.div>
+          </div>
+        </div>
 
-          {/* Three trust pillars */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.28 }}
-            className="hero-pillars grid grid-cols-3 gap-4"
+        {/* Mobile CTAs */}
+        <div className="px-4 pt-4">
+          <p className="text-base leading-relaxed text-[#44403a] text-center">
+            RERA-verified · 47-point audited · 100% legal-clear · ₹0 brokerage
+          </p>
+          <Link
+            href="/properties"
+            className="flex items-center justify-center gap-2 bg-[#0A0A0A] active:bg-[#D31E28] text-white text-[17px] font-semibold py-[18px] rounded-[10px] mt-4 transition-colors"
           >
-            {[
-              { icon: FileText, title: "Builder Pre-Audited", desc: "RERA & GHMC verified every listing." },
-              { icon: ShieldCheck, title: "Zero Broker Pressure", desc: "No commission, no spam, no push." },
-              { icon: Car, title: "Commute-Optimised", desc: "Mapped to your Hitec City hub." }
-            ].map((pillar) => {
-              const Icon = pillar.icon;
-              return (
-                <div key={pillar.title} className="space-y-1">
-                  <div className="w-7 h-7 rounded-lg bg-brand-red/5 flex items-center justify-center text-brand-red">
-                    <Icon size={12} className="stroke-[2]" />
-                  </div>
-                  <h4 className="text-xs font-extrabold text-brand-black uppercase tracking-wide leading-tight">
-                    {pillar.title}
-                  </h4>
-                  <p className="hero-pillar-desc text-xs text-brand-black/50 leading-snug font-medium">
-                    {pillar.desc}
-                  </p>
-                </div>
-              );
-            })}
-          </motion.div>
+            <Search size={16} strokeWidth={2.5} /> Search all properties
+          </Link>
+          <p className="text-[13.5px] text-[#6b6659] text-center mt-2.5">
+            No spam · No pressure · Response within 4 hours
+          </p>
+        </div>
 
-          {/* Mobile-only horizontal trust-card strip */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.36 }}
-            className="flex lg:hidden items-center gap-3 mt-6 overflow-x-auto pb-1 -mx-1 px-1"
-            style={{ scrollbarWidth: "none" }}
-          >
-            {mobileTrustCards.map((card, i) => {
-              const Icon = card.icon;
-              return (
-                <div
-                  key={card.label}
-                  className="flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-100 bg-gray-50"
-                >
-                  <div className="w-5 h-5 rounded-lg bg-brand-red/8 flex items-center justify-center">
-                    <Icon size={10} className="text-brand-red" strokeWidth={2} />
-                  </div>
-                  <span className="text-xs font-extrabold text-brand-black uppercase tracking-wide whitespace-nowrap">
-                    {card.label}
-                  </span>
-                  {i < mobileTrustCards.length - 1 && (
-                    <ArrowRight size={8} className="text-brand-red ml-1" />
-                  )}
-                </div>
-              );
-            })}
-          </motion.div>
-
+        {/* Mobile mini stats */}
+        <div className="grid grid-cols-3 gap-2 px-4 py-4">
+          {[
+            { v: "1,500+", l: "audited", red: false },
+            { v: "130+", l: "families", red: false },
+            { v: "₹0", l: "brokerage", red: true },
+          ].map((s) => (
+            <div key={s.l} className="text-center bg-[#fcfaf6] border border-[#EEE9E0] rounded-xl py-3.5 px-1.5">
+              <div className={`text-xl font-semibold ${s.red ? "text-[#D31E28]" : "text-[#0A0A0A]"}`}>{s.v}</div>
+              <div className="text-xs text-[#6b6659] mt-1">{s.l}</div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -317,534 +482,675 @@ function HeroSection({ onCloseDropdowns }: { onCloseDropdowns: () => void }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// HeroLivePanel — self-running 4-stage animated process dashboard (v2)
-
+// STATS BAR (desktop)
 // ─────────────────────────────────────────────────────────────────────────────
-function HeroLivePanel() {
-  const [stage, setStage] = useState(0);
-  const [visibleRows, setVisibleRows] = useState<number[]>([]);
-  const [typedText, setTypedText] = useState("");
-  const [mapPins, setMapPins] = useState<number[]>([]);
-
-  const STAGE_DURATION = 4600;
-
-  useEffect(() => {
-    const t = setInterval(() => setStage(s => (s + 1) % 4), STAGE_DURATION);
-    return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    setVisibleRows([]);
-    setTypedText("");
-    setMapPins([]);
-
-    if (stage === 0) {
-      // Stagger scan rows
-      [0, 1, 2, 3, 4].forEach(i =>
-        setTimeout(() => setVisibleRows(p => [...p, i]), 180 + i * 430)
-      );
-      // Drop map pins with slight delay
-      [0, 1, 2].forEach(i =>
-        setTimeout(() => setMapPins(p => [...p, i]), 600 + i * 550)
-      );
-    }
-
-    if (stage === 2) {
-      const msg =
-        "I've reviewed your shortlist. Kokapet Summit Villa is 14% below current market — that's a strong buy. I'd recommend moving fast.";
-      let i = 0;
-      const t = setInterval(() => {
-        i++;
-        setTypedText(msg.slice(0, i));
-        if (i >= msg.length) clearInterval(t);
-      }, 24);
-      return () => clearInterval(t);
-    }
-  }, [stage]);
-
-  const scanProperties = [
-    { name: "Kokapet Summit Villa", loc: "Kokapet", pass: true },
-    { name: "Jubilee Heights Tower A", loc: "Jubilee Hills", pass: true },
-    { name: "Legacy Realty Phase 2", loc: "Bandlaguda", pass: false },
-    { name: "Narsingi Green Villas", loc: "Narsingi", pass: true },
-    { name: "HiTech Signature Apt.", loc: "Gachibowli", pass: true },
+function StatsBar() {
+  const stats = [
+    { v: "1,500+", l: "Properties scanned & audited", red: false },
+    { v: "130+", l: "Families served end-to-end", red: false },
+    { v: "98%", l: "Client satisfaction", red: false },
+    { v: "₹0", l: "Brokerage · buyer-side only", red: true },
   ];
-
-  // Map pin positions [top%, left%]
-  const pinPositions = [
-    { top: "38%", left: "48%", label: "Kokapet" },
-    { top: "28%", left: "35%", label: "Jubilee" },
-    { top: "55%", left: "58%", label: "Narsingi" },
-  ];
-
-  const matchedProps = [
-    { name: "Kokapet Summit Villa", price: "₹2.4Cr", bhk: "3 BHK", score: 97, area: "2,150 sqft", best: true },
-    { name: "Narsingi Green Villas", price: "₹1.85Cr", bhk: "3 BHK", score: 91, area: "1,920 sqft", best: false },
-    { name: "Jubilee Heights", price: "₹3.1Cr", bhk: "4 BHK", score: 88, area: "2,800 sqft", best: false },
-  ];
-
-  const stageMeta = [
-    { label: "AI Scan", hint: "Scanning" },
-    { label: "Matches", hint: "Matched" },
-    { label: "Expert", hint: "Reviewed" },
-    { label: "Booked", hint: "Confirmed" },
-  ];
-
-  // Social proof avatars (coloured initials)
-  const avatarColors = ["#C9171E", "#2563eb", "#16a34a", "#d97706"];
-  const avatarInitials = ["SR", "PK", "AM", "VR"];
-
   return (
-    <motion.div
-      className="relative w-full max-w-[420px]"
-      animate={{ y: [0, -6, 0] }}
-      transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-      style={{
-        transformOrigin: "center center",
-        transform: "scale(clamp(0.8, calc((100vh - 80px) / 440px), 1))",
-      }}
-    >
-      {/* Ambient glow */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          inset: "-30px",
-          borderRadius: "3rem",
-          background: "radial-gradient(ellipse at center, rgba(201,23,30,0.2) 0%, transparent 68%)",
-        }}
-      />
-
-      {/* Floating trust badge — top right */}
-      <motion.div
-        className="absolute -top-3 -right-3 z-20 flex items-center gap-2 px-2.5 py-1.5 rounded-xl"
-        initial={{ opacity: 0, scale: 0.8, y: 8 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.5, type: "spring" }}
-        style={{
-          background: "rgba(255,255,255,0.96)",
-          border: "1px solid rgba(0,0,0,0.06)",
-          boxShadow: "0 6px 24px rgba(0,0,0,0.1)",
-        }}
-      >
-        {/* Overlapping avatars */}
-        <div className="flex -space-x-1.5">
-          {avatarInitials.map((init, i) => (
-            <div
-              key={i}
-              className="w-5 h-5 rounded-full flex items-center justify-center text-[6px] font-extrabold text-white border-2 border-white"
-              style={{ background: avatarColors[i] }}
-            >
-              {init}
+    <div className="hidden lg:block border-t border-[#EEE9E0] bg-white">
+      <div className={`${CONTAINER} grid grid-cols-4`}>
+        {stats.map((s, i) => (
+          <div key={s.l} className={`text-center py-7 px-5 ${i < 3 ? "border-r border-[#EEE9E0]" : ""}`}>
+            <div className={`text-[32px] leading-none font-semibold ${s.red ? "text-[#D31E28]" : "text-[#0A0A0A]"}`}>
+              {s.v}
             </div>
-          ))}
-        </div>
-        <div>
-          <p className="text-xs font-extrabold text-gray-800 leading-tight">130+ families</p>
-          <p className="text-xs text-gray-400 font-medium leading-tight">trust NexHouz</p>
-        </div>
-      </motion.div>
-
-      {/* Floating live visits pill — bottom left */}
-      <motion.div
-        className="absolute -bottom-2.5 -left-2.5 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-lg"
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1.1, duration: 0.5 }}
-        style={{
-          background: "rgba(8,8,12,0.96)",
-          border: "1px solid rgba(201,23,30,0.3)",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
-        }}
-      >
-        <motion.div
-          className="w-1.5 h-1.5 rounded-full bg-brand-red"
-          animate={{ opacity: [1, 0.2, 1] }}
-          transition={{ duration: 0.9, repeat: Infinity }}
-        />
-        <span className="text-xs font-extrabold text-white/70 uppercase tracking-widest">156 visits this week</span>
-      </motion.div>
-
-      {/* Glass card */}
-      <div
-        className="relative overflow-hidden"
-        style={{
-          borderRadius: "1.5rem",
-          background: "rgba(8,8,12,0.97)",
-          border: "1px solid rgba(255,255,255,0.09)",
-          boxShadow:
-            "0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.07)",
-        }}
-      >
-        {/* Top bar */}
-        <div
-          className="flex items-center justify-between px-4 py-2"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-        >
-          <div className="flex items-center gap-1.5">
-            <motion.div
-              className="w-1.5 h-1.5 rounded-full bg-brand-red"
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ duration: 1.4, repeat: Infinity }}
-            />
-            <span className="text-xs font-extrabold uppercase tracking-[0.2em] text-white/45">
-              NexHouz Process · Buy Real Estate Smartly
-            </span>
+            <div className="text-[15px] leading-normal text-[#6b6659] mt-2">{s.l}</div>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full" style={{ background: "#ff5f57" }} />
-            <div className="w-2 h-2 rounded-full" style={{ background: "#febc2e" }} />
-            <div className="w-2 h-2 rounded-full" style={{ background: "#28c840" }} />
-          </div>
-        </div>
-
-        {/* Stage content */}
-        <div className="px-4 pt-4 pb-2" style={{ minHeight: 280 }}>
-          <AnimatePresence mode="wait">
-
-            {/* ── STAGE 0: AI SCAN (with map background pins) ── */}
-            {stage === 0 && (
-              <motion.div
-                key="scan"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.35 }}
-              >
-                {/* Mini map with animated pins */}
-                <div
-                  className="relative w-full h-12 rounded-lg mb-2 overflow-hidden"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, rgba(201,23,30,0.04) 0%, rgba(37,99,235,0.04) 100%)",
-                    border: "1px solid rgba(255,255,255,0.05)",
-                  }}
-                >
-                  {/* Grid lines mimicking a map */}
-                  <div
-                    className="absolute inset-0 opacity-10"
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)",
-                      backgroundSize: "20px 20px",
-                    }}
-                  />
-                  <span
-                    className="absolute top-1 left-2 text-xs font-bold uppercase tracking-widest"
-                    style={{ color: "rgba(255,255,255,0.2)" }}
-                  >
-                    Hyderabad · Live Scan
-                  </span>
-                  {/* Animated map pins */}
-                  {pinPositions.map((pin, i) => (
-                    <AnimatePresence key={i}>
-                      {mapPins.includes(i) && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0, y: -8 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 18 }}
-                          className="absolute flex flex-col items-center"
-                          style={{ top: pin.top, left: pin.left }}
-                        >
-                          <MapPin size={11} className="text-brand-red" fill="rgba(201,23,30,0.4)" />
-                          <span
-                            className="text-[5.5px] font-bold mt-0.5 px-0.5 rounded"
-                            style={{
-                              background: "rgba(201,23,30,0.2)",
-                              color: "rgba(201,23,30,0.9)",
-                            }}
-                          >
-                            {pin.label}
-                          </span>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  ))}
-                </div>
-
-                <div className="flex items-center gap-2 mb-2">
-                  <div
-                    className="flex items-center gap-1 px-2 py-0.5 rounded-full"
-                    style={{ background: "rgba(201,23,30,0.14)" }}
-                  >
-                    <motion.div
-                      className="w-1 h-1 rounded-full bg-brand-red"
-                      animate={{ opacity: [1, 0.2, 1] }}
-                      transition={{ duration: 0.9, repeat: Infinity }}
-                    />
-                    <span className="text-xs font-extrabold text-brand-red uppercase tracking-widest">
-                      LIVE · 4,847 Properties
-                    </span>
-                  </div>
-                  <span className="text-xs text-white/25 font-medium">47-point audit…</span>
-                </div>
-
-                <div className="space-y-1">
-                  {scanProperties.map((p, i) => (
-                    <motion.div
-                      key={p.name}
-                      initial={{ opacity: 0, x: -12 }}
-                      animate={visibleRows.includes(i) ? { opacity: 1, x: 0 } : { opacity: 0, x: -12 }}
-                      transition={{ duration: 0.28 }}
-                      className="flex items-center justify-between px-2.5 py-1.5 rounded-lg"
-                      style={{
-                        background: "rgba(255,255,255,0.03)",
-                        border: "1px solid rgba(255,255,255,0.045)",
-                      }}
-                    >
-                      <div>
-                        <p className="text-xs font-bold text-white/85 leading-tight">{p.name}</p>
-                        <p className="text-xs text-white/28 font-medium">{p.loc}</p>
-                      </div>
-                      {p.pass ? (
-                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full" style={{ background: "rgba(22,163,74,0.14)" }}>
-                          <Check size={7} className="text-green-400" strokeWidth={3} />
-                          <span className="text-[6.5px] font-bold text-green-400">CLEAR</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-full" style={{ background: "rgba(239,68,68,0.14)" }}>
-                          <X size={7} className="text-red-400" strokeWidth={3} />
-                          <span className="text-[6.5px] font-bold text-red-400">SKIP</span>
-                        </div>
-                      )}
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
-            {/* ── STAGE 1: MATCHES ── */}
-            {stage === 1 && (
-              <motion.div
-                key="matches"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.35 }}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full" style={{ background: "rgba(22,163,74,0.14)" }}>
-                    <CheckCircle size={8} className="text-green-400" />
-                    <span className="text-xs font-extrabold text-green-400 uppercase tracking-widest">3 Perfect Matches</span>
-                  </div>
-                  <span className="text-xs text-white/28 font-semibold">AI Score ↑</span>
-                </div>
-                <div className="space-y-1.5">
-                  {matchedProps.map((p, i) => (
-                    <motion.div
-                      key={p.name}
-                      initial={{ opacity: 0, x: 22 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.36, delay: i * 0.11 }}
-                      className="relative px-3 py-2 rounded-xl"
-                      style={{
-                        background: p.best ? "rgba(201,23,30,0.09)" : "rgba(255,255,255,0.03)",
-                        border: p.best ? "1px solid rgba(201,23,30,0.28)" : "1px solid rgba(255,255,255,0.06)",
-                      }}
-                    >
-                      {p.best && (
-                        <span
-                          className="absolute -top-2 left-2.5 text-xs font-extrabold uppercase tracking-widest px-1.5 py-0.5 rounded-full text-brand-red"
-                          style={{ background: "rgba(201,23,30,0.16)" }}
-                        >
-                          ★ Best Match
-                        </span>
-                      )}
-                      <div className="flex items-start justify-between mt-0.5">
-                        <div>
-                          <p className="text-xs font-bold text-white/90 leading-tight">{p.name}</p>
-                          <p className="text-xs text-white/35 font-medium mt-0.5">{p.bhk} · {p.area}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs font-extrabold text-white leading-tight">{p.price}</p>
-                          <p className="text-xs font-bold" style={{ color: "#4ade80" }}>{p.score}% match</p>
-                        </div>
-                      </div>
-                      <div className="mt-1 flex items-center gap-1">
-                        <span className="text-xs font-extrabold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(22,163,74,0.12)", color: "#4ade80" }}>RERA CLEAR</span>
-                        <span className="text-xs font-extrabold px-1.5 py-0.5 rounded-full" style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.38)" }}>GHMC APPROVED</span>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
-            {/* ── STAGE 2: EXPERT REVIEW ── */}
-            {stage === 2 && (
-              <motion.div
-                key="expert"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.35 }}
-              >
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full mb-2 w-fit" style={{ background: "rgba(37,99,235,0.14)" }}>
-                  <div className="w-1 h-1 rounded-full bg-blue-400" />
-                  <span className="text-xs font-extrabold text-blue-400 uppercase tracking-widest">Expert Review</span>
-                </div>
-                <div className="flex items-center gap-2.5 p-2 rounded-xl mb-2" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg, #C9171E, #7f1d1d)" }}>
-                    <User size={14} className="text-white" strokeWidth={1.5} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-extrabold text-white">Priya Sharma</p>
-                    <p className="text-xs text-white/38 font-medium">Senior Advisor · 8 yrs Hyderabad</p>
-                    <div className="flex items-center gap-0.5 mt-0.5">
-                      {[...Array(5)].map((_, i) => <Star key={i} size={6} className="fill-brand-red text-brand-red" />)}
-                    </div>
-                  </div>
-                  <span className="text-xs font-extrabold px-1.5 py-0.5 rounded-full flex-shrink-0" style={{ background: "rgba(22,163,74,0.12)", color: "#4ade80" }}>Online</span>
-                </div>
-                <div className="p-3 rounded-xl rounded-tl-sm" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                  <p className="text-xs text-white/78 leading-relaxed font-medium min-h-[2.8rem]">
-                    {typedText}
-                    <motion.span
-                      className="inline-block align-middle ml-0.5"
-                      style={{ width: 2, height: 10, background: "#C9171E", borderRadius: 1 }}
-                      animate={{ opacity: [1, 0, 1] }}
-                      transition={{ duration: 0.6, repeat: Infinity }}
-                    />
-                  </p>
-                </div>
-                <p className="text-xs text-white/22 mt-2 font-semibold">Zero broker pressure · Human-verified · 100% private</p>
-              </motion.div>
-            )}
-
-            {/* ── STAGE 3: VISIT BOOKED (with social proof) ── */}
-            {stage === 3 && (
-              <motion.div
-                key="booked"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.35 }}
-                className="flex flex-col items-center justify-center text-center py-1"
-              >
-                <motion.div
-                  className="w-11 h-11 rounded-xl flex items-center justify-center mb-2.5"
-                  initial={{ scale: 0, rotate: -15 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", stiffness: 280, damping: 18, delay: 0.15 }}
-                  style={{ background: "linear-gradient(135deg, #C9171E, #7f1d1d)", boxShadow: "0 0 24px rgba(201,23,30,0.4)" }}
-                >
-                  <CheckCircle size={20} className="text-white" strokeWidth={1.5} />
-                </motion.div>
-
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.32 }}>
-                  <p className="text-xs font-extrabold uppercase tracking-[0.25em] text-brand-red mb-0">Site Visit Confirmed</p>
-                  <p className="text-base font-extrabold text-white mb-2.5">Sat, 7 June · 11:00 AM</p>
-                </motion.div>
-
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.48 }} className="w-full space-y-1 mb-2.5">
-                  {[
-                    { label: "Property", value: "Kokapet Summit Villa" },
-                    { label: "Advisor", value: "Priya Sharma" },
-                    { label: "Mode", value: "Private tour · No crowds" },
-                  ].map(item => (
-                    <div key={item.label} className="flex items-center justify-between px-3 py-1.5 rounded-lg" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.05)" }}>
-                      <span className="text-xs text-white/30 uppercase tracking-widest font-bold">{item.label}</span>
-                      <span className="text-xs text-white/75 font-semibold">{item.value}</span>
-                    </div>
-                  ))}
-                </motion.div>
-
-                {/* Social proof: others booked this week */}
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.68 }}
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg"
-                  style={{ background: "rgba(22,163,74,0.08)", border: "1px solid rgba(22,163,74,0.15)" }}
-                >
-                  <div className="flex -space-x-1">
-                    {["#C9171E","#2563eb","#d97706"].map((c, i) => (
-                      <div key={i} className="w-4 h-4 rounded-full border border-black/20 flex items-center justify-center text-[5.5px] font-extrabold text-white" style={{ background: c }}>
-                        {["SR","PK","AM"][i]}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-green-400 font-semibold">156 families visited properties this week</p>
-                </motion.div>
-              </motion.div>
-            )}
-
-          </AnimatePresence>
-        </div>
-
-        {/* Stage progress dots with labels */}
-        <div className="px-4 py-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <div className="flex items-center justify-center gap-2.5 mb-1">
-            {stageMeta.map((s, i) => (
-              <button
-                key={i}
-                onClick={() => setStage(i)}
-                className="flex flex-col items-center gap-1 cursor-pointer group"
-                title={`Jump to: ${s.hint}`}
-              >
-                <motion.div
-                  className="rounded-full"
-                  animate={
-                    stage === i
-                      ? { width: 20, background: "#C9171E" }
-                      : { width: 5, background: "rgba(255,255,255,0.16)" }
-                  }
-                  style={{ height: 4 }}
-                  transition={{ duration: 0.35 }}
-                />
-              </button>
-            ))}
-          </div>
-          <p className="text-center text-xs text-white/22 font-semibold uppercase tracking-widest">
-            Click dots to explore · {stageMeta[stage]?.hint}
-          </p>
-        </div>
-
-        {/* Bottom CTA strip */}
-        <Link
-          href="/contact"
-          className="flex items-center justify-center gap-1.5 px-4 py-2 transition-all"
-          style={{
-            background: "linear-gradient(90deg, rgba(201,23,30,0.12), rgba(201,23,30,0.06))",
-            borderTop: "1px solid rgba(201,23,30,0.18)",
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "linear-gradient(90deg, rgba(201,23,30,0.2), rgba(201,23,30,0.1))"; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "linear-gradient(90deg, rgba(201,23,30,0.12), rgba(201,23,30,0.06))"; }}
-        >
-          <span className="text-xs font-extrabold text-brand-red uppercase tracking-widest">Start your search with NexHouz</span>
-          <ArrowRight size={10} className="text-brand-red" />
-        </Link>
+        ))}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
-export default function HomePage() {
-  const [heroSearch, setHeroSearch] = useState({
-    location: "",
-    type: "Select Type",
-    priceRange: "₹ 50L - ₹ 5Cr+",
-    bhk: "Any"
-  });
+// ─────────────────────────────────────────────────────────────────────────────
+// WHY NEXHOUZ
+// ─────────────────────────────────────────────────────────────────────────────
+function WhySection() {
+  const cards = [
+    {
+      badge: "AI",
+      badgeBg: "#faf0f0",
+      badgeColor: "#D31E28",
+      title: "AI Matchmaking",
+      body: "Tell us your needs on the web or our WhatsApp bot — our engine matches you across 1,500+ audited Hyderabad properties in minutes, not weeks.",
+    },
+    {
+      badge: "✓",
+      badgeBg: "#faf6ee",
+      badgeColor: "#8A6D2F",
+      title: "Certified Expert Guidance",
+      body: "A dedicated, certified advisor reviews every match and guides every decision. Buyer-side only — no broker pressure, no commissions, no spam.",
+    },
+    {
+      badge: "∞",
+      badgeBg: "#f2f4f0",
+      badgeColor: "#3d5a3d",
+      title: "End-to-End Support",
+      body: "Private site visits, negotiation 5–15% below market, legal, loan & registration — through to lifetime post-purchase support.",
+    },
+  ];
+  return (
+    <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-[#FAF7F1]">
+      <div className={CONTAINER}>
+      <Reveal className="text-center max-w-[760px] mx-auto">
+        <Eyebrow>Why NexHouz</Eyebrow>
+        <h2 className="font-display font-semibold text-[28px] md:text-[40px] lg:text-[48px] leading-[1.2] lg:leading-[1.15] text-[#0A0A0A] mt-3 lg:mt-4 text-balance">
+          Not a listing portal. A buying advisory that works only for you.
+        </h2>
+      </Reveal>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5 lg:gap-6 mt-6 lg:mt-[52px]">
+        {cards.map((c, i) => (
+          <Reveal key={c.title} delay={i * 0.08}>
+            <div className="bg-white border border-[#EEE9E0] rounded-2xl p-6 lg:p-9 lg:px-8 h-full">
+              <div
+                className="w-14 h-14 rounded-[14px] flex items-center justify-center text-[22px] font-bold"
+                style={{ background: c.badgeBg, color: c.badgeColor }}
+              >
+                {c.badge}
+              </div>
+              <div className="text-[19px] lg:text-[22px] font-semibold text-[#0A0A0A] mt-5 lg:mt-[22px]">{c.title}</div>
+              <div className="text-[15px] lg:text-[16.5px] leading-[1.65] text-[#57534a] mt-3">{c.body}</div>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+      </div>
+    </section>
+  );
+}
 
-  const [activeSearchTab, setActiveSearchTab] = useState("Buy");
-  const [showLocationPopover, setShowLocationPopover] = useState(false);
-  const [showTypeDropdown, setShowTypeDropdown] = useState(false);
-  const [showBudgetDropdown, setShowBudgetDropdown] = useState(false);
-  const [showBhkDropdown, setShowBhkDropdown] = useState(false);
-  const [favorites, setFavorites] = useState<string[]>([]);
+// ─────────────────────────────────────────────────────────────────────────────
+// TRUST & VERIFICATION — dark band
+// ─────────────────────────────────────────────────────────────────────────────
+function TrustBand() {
+  const audits = [
+    { n: "01", t: "47-Point Builder Audit", d: "Track record, delivery history, litigation, financial health." },
+    { n: "02", t: "RERA & GHMC Verified", d: "Registration, approvals and permissions checked at source." },
+    { n: "03", t: "100% Legal-Clear Title", d: "Title, encumbrance and link documents vetted by our legal team." },
+    { n: "04", t: "Price Intelligence", d: "Real transaction data — we negotiate 5–15% below quoted price." },
+  ];
+  return (
+    <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-[#0A0A0A]">
+      <div className={`${CONTAINER} grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-[70px] items-start`}>
+        <Reveal>
+          <Eyebrow light>Trust &amp; Verification</Eyebrow>
+          <h2 className="font-display font-semibold text-[28px] md:text-[40px] lg:text-[48px] leading-[1.2] lg:leading-[1.15] text-white mt-3 lg:mt-4 text-balance">
+            Verified before you ever see it.
+          </h2>
+          <p className="text-[16px] lg:text-lg leading-[1.7] text-white/65 mt-4 lg:mt-[18px] max-w-[480px]">
+            Most buyers discover legal problems after they&apos;ve fallen in love with a property. We reverse that:
+            nothing enters your shortlist until it clears our full audit.
+          </p>
+          <div className="flex flex-wrap gap-8 lg:gap-10 mt-8 lg:mt-10">
+            {[
+              { v: "1,500+", l: "properties scanned" },
+              { v: "47", l: "audit checkpoints" },
+              { v: "100%", l: "legal-clear promise" },
+            ].map((s) => (
+              <div key={s.l}>
+                <div className="text-[26px] lg:text-[30px] leading-none font-semibold text-white">{s.v}</div>
+                <div className="text-sm text-white/50 mt-2">{s.l}</div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-[18px]">
+          {audits.map((a, i) => (
+            <Reveal key={a.n} delay={i * 0.07}>
+              <div className="border border-white/[0.14] rounded-[14px] p-5 lg:p-[26px] lg:px-6 h-full">
+                <div className="text-[17px] font-bold text-[#D31E28]">{a.n}</div>
+                <div className="text-[17px] lg:text-lg font-semibold leading-[1.35] text-white mt-3">{a.t}</div>
+                <div className="text-[14px] lg:text-[15px] leading-[1.6] text-white/55 mt-2">{a.d}</div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEATURED PROPERTIES — live data
+// ─────────────────────────────────────────────────────────────────────────────
+function FeaturedSection({
+  properties,
+  favorites,
+  onToggleFavorite,
+  onEnquire,
+  isOffline,
+  isDebugMode,
+  dbError,
+}: {
+  properties: Property[];
+  favorites: string[];
+  onToggleFavorite: (id: string, e: React.MouseEvent) => void;
+  onEnquire: (p: Property) => void;
+  isOffline: boolean;
+  isDebugMode: boolean;
+  dbError: string | null;
+}) {
+  const featured = [...properties]
+    .sort((a, b) => Number(b.featured) - Number(a.featured))
+    .slice(0, 3);
+
+  return (
+    <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-white">
+      <div className={CONTAINER}>
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-6 lg:mb-10">
+        <Reveal>
+          <Eyebrow>Featured &amp; Verified</Eyebrow>
+          <h2 className="font-display font-semibold text-[28px] md:text-[40px] lg:text-[48px] leading-[1.2] lg:leading-[1.15] text-[#0A0A0A] mt-3 lg:mt-3.5">
+            Homes that cleared the audit.
+          </h2>
+        </Reveal>
+        <Link
+          href="/properties"
+          className="hidden lg:inline-flex items-center gap-2 text-base font-semibold text-[#0A0A0A] border-[1.5px] border-[#d8d2c6] hover:border-[#0A0A0A] rounded-lg px-6 py-4 transition-colors whitespace-nowrap"
+        >
+          View all properties <ArrowRight size={15} />
+        </Link>
+      </div>
+
+      {isOffline && (
+        <div className="border border-amber-200 bg-amber-50/60 rounded-2xl py-3.5 px-5 flex items-center gap-3 mb-6">
+          <AlertTriangle size={17} className="text-amber-600 shrink-0" />
+          <p className="text-[13.5px] text-amber-900 font-medium">
+            Live listings are temporarily unavailable — showing our verified local collection.
+          </p>
+          {isDebugMode && dbError && (
+            <span className="text-[11px] text-red-700 font-mono bg-red-50 border border-red-100 px-2 py-1 rounded-lg max-w-xs truncate">
+              {dbError}
+            </span>
+          )}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+        {featured.length === 0 ? (
+          <div className="col-span-full border border-[#EEE9E0] rounded-2xl py-14 flex flex-col items-center justify-center gap-4">
+            <div className="w-9 h-9 border-4 border-[#D31E28] border-t-transparent rounded-full animate-spin" />
+            <p className="text-[13px] text-[#948d7c] font-semibold tracking-[0.18em] uppercase">Loading properties…</p>
+          </div>
+        ) : (
+          featured.map((property, idx) => (
+            <Reveal key={property.id} delay={idx * 0.08}>
+              <div className="border border-[#EEE9E0] rounded-2xl overflow-hidden bg-white h-full flex flex-col group shadow-[0_1px_3px_rgba(30,25,15,0.04)] hover:shadow-[0_10px_30px_rgba(30,25,15,0.08)] transition-shadow">
+                <Link
+                  href={`/properties/${property.slug}`}
+                  className="relative block aspect-[4/3] overflow-hidden bg-[#efeae1]"
+                >
+                  <img
+                    src={property.image}
+                    alt={property.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <span className="absolute left-3.5 top-3.5 bg-emerald-500 text-white rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldCheck size={11} /> 100% Legal Clear
+                  </span>
+                  <button
+                    onClick={(e) => onToggleFavorite(property.id, e)}
+                    aria-label="Save property"
+                    className="absolute right-3.5 top-3.5 w-9 h-9 rounded-full bg-white/95 shadow-sm flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+                  >
+                    <Heart
+                      size={15}
+                      className={favorites.includes(property.id) ? "fill-[#D31E28] text-[#D31E28]" : "text-[#57534a]"}
+                    />
+                  </button>
+                </Link>
+                <div className="p-5 lg:p-6 flex flex-col flex-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#948d7c]">
+                      {property.location.split(",")[0]}
+                    </span>
+                    <span className="text-[17px] lg:text-lg font-bold text-[#D31E28] whitespace-nowrap">
+                      {formatCr(property.price)}
+                    </span>
+                  </div>
+                  <Link
+                    href={`/properties/${property.slug}`}
+                    className="text-[17px] lg:text-[19px] font-bold leading-snug text-[#D31E28] hover:text-[#B8171F] transition-colors mt-2.5 line-clamp-2"
+                  >
+                    {property.title}
+                  </Link>
+                  <p className="text-[13.5px] lg:text-sm text-[#6b6659] leading-relaxed line-clamp-2 mt-2">
+                    {property.description}
+                  </p>
+                  <div className="mt-auto pt-4">
+                    <div className="border-t border-[#EEE9E0] pt-3.5 flex items-center justify-between text-[11.5px] lg:text-xs font-bold uppercase tracking-widest text-[#948d7c]">
+                      <span>{property.bhk} BHK</span>
+                      <span className="text-[#e0d9cb]">|</span>
+                      <span>{property.area}</span>
+                      <span className="text-[#e0d9cb]">|</span>
+                      <span>{property.possession === "Ready" ? "Ready" : possessionLabel(property)}</span>
+                    </div>
+                    <button
+                      onClick={() => onEnquire(property)}
+                      className="w-full bg-[#0A0A0A] hover:bg-[#D31E28] text-white text-xs font-bold uppercase tracking-wider py-4 rounded-full cursor-pointer transition-colors mt-4"
+                    >
+                      Initiate Safe Inquiry
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          ))
+        )}
+      </div>
+
+      <Link
+        href="/properties"
+        className="lg:hidden flex items-center justify-center gap-2 border-[1.5px] border-[#d8d2c6] text-[#0A0A0A] text-base font-semibold py-4 rounded-[10px] mt-4"
+      >
+        View all properties <ArrowRight size={15} />
+      </Link>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MICRO-MARKETS
+// ─────────────────────────────────────────────────────────────────────────────
+function MicroMarkets() {
+  const markets = [
+    {
+      name: "Kokapet & Financial District",
+      meta: "12 verified residences · ₹1.8 – 5 Cr",
+      img: "/images/hyderabad_luxury_towers.png",
+      href: "/properties?location=Kokapet",
+    },
+    {
+      name: "Tellapur & Narsingi",
+      meta: "9 verified residences · ₹1.2 – 2.8 Cr",
+      img: "/images/hero_modernist_villa.png",
+      href: "/properties?location=Tellapur",
+    },
+    {
+      name: "Jubilee & Banjara Hills",
+      meta: "6 verified residences · ₹3 – 15 Cr",
+      img: "/images/obsidian_pavilion.png",
+      href: "/properties?location=Jubilee Hills",
+    },
+    {
+      name: "Lakeside Enclaves",
+      meta: "5 verified residences · ₹1.5 – 4 Cr",
+      img: "/images/vanguard_penthouse.png",
+      href: "/properties?location=Lakeside",
+    },
+  ];
+  return (
+    <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-[#FAF7F1]">
+      <div className={CONTAINER}>
+      <Reveal className="text-center max-w-[720px] mx-auto mb-6 lg:mb-10">
+        <Eyebrow>Hyderabad Micro-Markets</Eyebrow>
+        <h2 className="font-display font-semibold text-[28px] md:text-[40px] lg:text-[48px] leading-[1.2] lg:leading-[1.15] text-[#0A0A0A] mt-3 lg:mt-4">
+          We know these streets house by house.
+        </h2>
+      </Reveal>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 lg:gap-5">
+        {markets.map((m, i) => (
+          <Reveal key={m.name} delay={i * 0.06}>
+            <Link href={m.href} className="block rounded-xl lg:rounded-2xl overflow-hidden bg-white border border-[#EEE9E0] group h-full">
+              <div className="hidden md:block h-[170px] overflow-hidden">
+                <img
+                  src={m.img}
+                  alt={m.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="p-4 lg:p-5 lg:px-[22px]">
+                <div className="text-[15px] lg:text-lg font-semibold leading-[1.35] text-[#0A0A0A] group-hover:text-[#D31E28] transition-colors">
+                  {m.name}
+                </div>
+                <div className="text-[13px] lg:text-[14.5px] leading-[1.55] text-[#6b6659] mt-1.5">{m.meta}</div>
+              </div>
+            </Link>
+          </Reveal>
+        ))}
+      </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BUYING JOURNEY — nine steps
+// ─────────────────────────────────────────────────────────────────────────────
+function JourneySection() {
+  const steps = [
+    { t: "Share your needs", d: "Web form or WhatsApp — 5 minutes." },
+    { t: "AI match", d: "Shortlist from 1,500+ audited homes." },
+    { t: "Expert review", d: "Your advisor pressure-tests every match." },
+    { t: "Consultation", d: "Free session — goals, budget, timelines." },
+    { t: "Private site visits", d: "Scheduled around you. No sales staff." },
+    { t: "Comparison report", d: "Side-by-side data on your finalists." },
+    { t: "Negotiation", d: "We close 5–15% below quoted price." },
+    { t: "Legal & registration", d: "Loan, documentation, registration — handled." },
+    { t: "Lifetime support", d: "Rentals, resale, tax — we stay with you." },
+  ];
+  return (
+    <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-white">
+      <div className={CONTAINER}>
+      <Reveal className="text-center max-w-[720px] mx-auto mb-6 lg:mb-10">
+        <Eyebrow>The NexHouz Journey</Eyebrow>
+        <h2 className="font-display font-semibold text-[28px] md:text-[40px] lg:text-[48px] leading-[1.2] lg:leading-[1.15] text-[#0A0A0A] mt-3 lg:mt-4">
+          Nine steps. One advisor. Zero stress.
+        </h2>
+      </Reveal>
+
+      {/* Desktop / tablet: card grid */}
+      <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-[18px] max-w-[1180px] mx-auto">
+        {steps.map((s, i) => {
+          const last = i === steps.length - 1;
+          return (
+            <Reveal key={s.t} delay={(i % 3) * 0.06}>
+              <div
+                className={`rounded-[14px] p-6 px-[26px] flex gap-[18px] items-start h-full ${
+                  last ? "border-[1.5px] border-[#D31E28] bg-[#fdf6f6]" : "border border-[#EEE9E0]"
+                }`}
+              >
+                <span className="text-[15px] font-bold text-[#D31E28] pt-[3px]">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span>
+                  <span className="block text-[17.5px] font-semibold leading-[1.3] text-[#0A0A0A]">{s.t}</span>
+                  <span className="block text-[14.5px] leading-[1.55] text-[#6b6659] mt-1.5">{s.d}</span>
+                </span>
+              </div>
+            </Reveal>
+          );
+        })}
+      </div>
+
+      {/* Mobile: numbered list */}
+      <div className="md:hidden flex flex-col">
+        {steps.map((s, i) => (
+          <div
+            key={s.t}
+            className={`flex gap-4 py-3 ${i < steps.length - 1 ? "border-b border-[#f0ebe1]" : ""}`}
+          >
+            <span className="text-sm font-bold text-[#D31E28] min-w-6 leading-normal">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <span className="text-base font-medium leading-normal text-[#0A0A0A]">
+              {s.t} — <span className="font-normal text-[#57534a]">{s.d}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SOCIAL PROOF — testimonials + stat tiles
+// ─────────────────────────────────────────────────────────────────────────────
+function SocialProof() {
+  const tiles = [
+    { v: "98%", l: "client satisfaction", red: false },
+    { v: "−9.2%", l: "avg. below quoted price", red: true },
+    { v: "130+", l: "families served", red: false },
+    { v: "4 hrs", l: "max response time", red: false },
+  ];
+  return (
+    <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-[#FAF7F1]">
+      <div className={`${CONTAINER} grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 lg:gap-[60px] items-center`}>
+        <Reveal>
+          <Eyebrow>Families who trusted us</Eyebrow>
+          <blockquote className="font-display italic font-medium text-[22px] md:text-[28px] lg:text-[34px] leading-[1.45] text-[#0A0A0A] mt-4 lg:mt-[22px]">
+            &ldquo;NexHouz negotiated ₹22 lakhs below the quoted price and personally handled every document up to
+            registration. We never once felt sold to.&rdquo;
+          </blockquote>
+          <div className="text-[15px] font-semibold text-[#0A0A0A] mt-5 lg:mt-6 tracking-wide">
+            RAVI &amp; DEEPTHI KUMAR
+          </div>
+          <div className="text-sm text-[#6b6659] mt-1.5">3 BHK, Kokapet · relocated from Bengaluru</div>
+          <blockquote className="font-display italic font-medium text-[19px] md:text-[24px] lg:text-[28px] leading-[1.5] text-[#2b2823] mt-8 lg:mt-10">
+            &ldquo;As an NRI in Dubai, I bought a villa in Tellapur entirely over virtual tours. Their audit report gave
+            me more confidence than my own site visit would have.&rdquo;
+          </blockquote>
+          <div className="text-[15px] font-semibold text-[#0A0A0A] mt-4 lg:mt-5 tracking-wide">
+            SANDEEP REDDY · NRI INVESTOR, DUBAI
+          </div>
+        </Reveal>
+        <div className="grid grid-cols-2 gap-3 lg:gap-[18px]">
+          {tiles.map((t, i) => (
+            <Reveal key={t.l} delay={i * 0.06}>
+              <div className="bg-white border border-[#EEE9E0] rounded-2xl p-6 lg:p-[30px] lg:px-[26px] text-center h-full">
+                <div className={`text-[26px] lg:text-[34px] leading-none font-semibold ${t.red ? "text-[#D31E28]" : "text-[#0A0A0A]"}`}>
+                  {t.v}
+                </div>
+                <div className="text-[13px] lg:text-[14.5px] leading-normal text-[#6b6659] mt-2">{t.l}</div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NRI DESK
+// ─────────────────────────────────────────────────────────────────────────────
+function NriDesk() {
+  const points = [
+    "Live virtual tours of every shortlisted property",
+    "Dedicated NRI tax & regulation advisors (FEMA, TDS, repatriation)",
+    "Power-of-attorney and remote registration guidance",
+    "Post-purchase management — rentals, maintenance, resale",
+  ];
+  return (
+    <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-white">
+      <div className={`${CONTAINER} grid grid-cols-1 lg:grid-cols-[1fr_520px] gap-8 lg:gap-16 items-center`}>
+        <Reveal>
+          <Eyebrow>NRI Investor Desk</Eyebrow>
+          <h2 className="font-display font-semibold text-[28px] md:text-[40px] lg:text-[48px] leading-[1.2] lg:leading-[1.15] text-[#0A0A0A] mt-3 lg:mt-4 text-balance">
+            Buying from abroad? We&apos;re your eyes on the ground.
+          </h2>
+          <div className="flex flex-col gap-3 lg:gap-4 mt-5 lg:mt-7">
+            {points.map((p) => (
+              <div key={p} className="flex gap-3.5 text-[15.5px] lg:text-[17px] leading-[1.6] text-[#44403a]">
+                <Check size={18} className="text-[#D31E28] shrink-0 mt-1" strokeWidth={3} />
+                {p}
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={scrollToCallback}
+            className="inline-block bg-[#0A0A0A] hover:bg-[#D31E28] text-white text-base lg:text-[17px] font-semibold px-8 py-[17px] lg:py-[19px] rounded-lg mt-6 lg:mt-8 cursor-pointer transition-colors w-full sm:w-auto"
+          >
+            Schedule a virtual consultation
+          </button>
+        </Reveal>
+        <Reveal delay={0.1} className="hidden lg:block">
+          <div className="h-[420px] rounded-[20px] overflow-hidden">
+            <img
+              src="/images/expert_advisory_visual.png"
+              alt="Video call — NexHouz advisor walking a villa"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FINAL CONVERSION — free expert session + callback form
+// ─────────────────────────────────────────────────────────────────────────────
+function ConversionSection({
+  form,
+  setForm,
+  submitted,
+  onSubmit,
+}: {
+  form: { name: string; phone: string; location: string };
+  setForm: (f: { name: string; phone: string; location: string }) => void;
+  submitted: boolean;
+  onSubmit: (e: React.FormEvent) => void;
+}) {
+  const locations = ["Kokapet", "Narsingi", "Tellapur", "Jubilee Hills", "Gachibowli", "Anywhere in Hyderabad"];
+  const inputClass =
+    "w-full border-[1.5px] border-[#e0d9cb] rounded-[10px] px-[18px] py-4 text-base font-normal text-[#0A0A0A] placeholder-[#948d7c] focus:outline-none focus:border-[#D31E28] transition-colors bg-white";
+
+  return (
+    <section id="callback-form-section" className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-[#0A0A0A] scroll-mt-4">
+      <div className={`${CONTAINER} grid grid-cols-1 lg:grid-cols-[1fr_560px] gap-8 lg:gap-[70px] items-center`}>
+        <Reveal>
+          <Eyebrow light>Free Expert Session</Eyebrow>
+          <h2 className="font-display font-semibold text-[28px] md:text-[42px] lg:text-[52px] leading-[1.2] lg:leading-[1.15] text-white mt-3 lg:mt-4 text-balance">
+            Talk to a certified advisor. It costs nothing.
+          </h2>
+          <p className="text-base lg:text-lg leading-[1.7] text-white/65 mt-4 lg:mt-[18px] max-w-[480px]">
+            Tell us what you&apos;re looking for and an advisor will call you back with a verified shortlist — no spam,
+            no pressure, no obligation.
+          </p>
+          <div className="flex flex-wrap gap-4 lg:gap-[30px] mt-6 lg:mt-[30px] text-[15px] font-medium text-white/75">
+            <span className="flex items-center gap-2">
+              <Check size={14} className="text-[#D31E28]" strokeWidth={3} /> Response within 4 hours
+            </span>
+            <span className="flex items-center gap-2">
+              <Check size={14} className="text-[#D31E28]" strokeWidth={3} /> ₹0 fees, always
+            </span>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.1}>
+          <div className="bg-white rounded-[18px] p-6 lg:p-[34px] lg:px-8">
+            <AnimatePresence mode="wait">
+              {!submitted ? (
+                <motion.form
+                  key="callback-form"
+                  onSubmit={onSubmit}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div className="text-[20px] lg:text-[22px] font-semibold leading-[1.3] text-[#0A0A0A]">
+                    Request a free callback
+                  </div>
+                  <div className="flex flex-col gap-3.5 mt-5">
+                    <input
+                      type="text"
+                      required
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      placeholder="Your name"
+                      className={inputClass}
+                    />
+                    <input
+                      type="tel"
+                      required
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      placeholder="Phone / WhatsApp number"
+                      className={inputClass}
+                    />
+                    <div className="relative">
+                      <select
+                        value={form.location}
+                        onChange={(e) => setForm({ ...form, location: e.target.value })}
+                        className={`${inputClass} appearance-none cursor-pointer pr-10`}
+                      >
+                        {locations.map((l) => (
+                          <option key={l} value={l}>
+                            {l}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown
+                        size={16}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[#948d7c] pointer-events-none"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="bg-[#D31E28] hover:bg-[#B8171F] text-white text-[17px] font-semibold py-[19px] rounded-[10px] cursor-pointer shadow-[0_6px_18px_rgba(211,30,40,0.3)] transition-colors"
+                    >
+                      Get my free expert callback
+                    </button>
+                    <p className="text-[13.5px] text-[#948d7c] text-center">
+                      No spam. A certified advisor responds within 4 hours.
+                    </p>
+                  </div>
+                </motion.form>
+              ) : (
+                <motion.div
+                  key="callback-success"
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center justify-center py-10 text-center"
+                >
+                  <div className="w-14 h-14 rounded-full bg-[#D31E28] flex items-center justify-center">
+                    <Check size={24} className="text-white" strokeWidth={3} />
+                  </div>
+                  <div className="text-[22px] font-semibold text-[#0A0A0A] mt-4">Callback confirmed</div>
+                  <p className="text-[15px] leading-relaxed text-[#57534a] mt-2 max-w-xs">
+                    A certified advisor will call you within 4 hours with a verified shortlist.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOBILE STICKY ACTION BAR
+// ─────────────────────────────────────────────────────────────────────────────
+function StickyActionBar() {
+  return (
+    <div className="lg:hidden fixed left-0 right-0 bottom-0 z-40 flex gap-2.5 px-4 py-3.5 border-t border-[#EEE9E0] bg-white shadow-[0_-8px_24px_rgba(30,25,15,0.1)]">
+      <a
+        href={PHONE_TEL}
+        className="flex-1 flex items-center justify-center gap-1.5 bg-white border-[1.5px] border-[#d8d2c6] text-[#0A0A0A] text-base font-semibold py-[15px] rounded-xl"
+      >
+        <Phone size={15} /> Call
+      </a>
+      <button
+        onClick={scrollToCallback}
+        className="flex-[2.2] bg-[#D31E28] active:bg-[#B8171F] text-white text-base font-semibold py-[15px] rounded-xl cursor-pointer shadow-[0_6px_16px_rgba(211,30,40,0.25)]"
+      >
+        Book Free Expert Session
+      </button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+export default function HomePage() {
   const [liveProperties, setLiveProperties] = useState<Property[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [dbError, setDbError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
   const [isDebugMode, setIsDebugMode] = useState(false);
 
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [isInquirySubmitted, setIsInquirySubmitted] = useState(false);
+  const [inquiryForm, setInquiryForm] = useState({ name: "", email: "", phone: "", notes: "" });
+
+  const [callbackForm, setCallbackForm] = useState({ name: "", phone: "", location: "Kokapet" });
+  const [isCallbackSubmitted, setIsCallbackSubmitted] = useState(false);
+
   useEffect(() => {
     const isDev = process.env.NODE_ENV === "development";
     const params = new URLSearchParams(window.location.search);
-    const hasDebug = params.get("debug") === "true";
-    if (isDev || hasDebug) {
-      setIsDebugMode(true);
-    }
+    if (isDev || params.get("debug") === "true") setIsDebugMode(true);
   }, []);
 
   useEffect(() => {
@@ -868,9 +1174,7 @@ export default function HomePage() {
           setIsOffline(true);
           setLiveProperties(defaultProperties);
           const { error } = await supabase.from("properties").select("id").limit(1);
-          if (error) {
-            setDbError(`Supabase connection failed: ${error.message}`);
-          }
+          if (error) setDbError(`Supabase connection failed: ${error.message}`);
         }
       } catch (e: any) {
         setIsOffline(true);
@@ -881,33 +1185,15 @@ export default function HomePage() {
     loadProperties();
   }, []);
 
-  const [selectedProperty, setSelectedProperty] = useState<any | null>(null);
-  const [isInquirySubmitted, setIsInquirySubmitted] = useState(false);
-  const [inquiryForm, setInquiryForm] = useState({ name: "", email: "", phone: "", notes: "" });
-  const [callbackForm, setCallbackForm] = useState({ name: "", phone: "", location: "Kokapet" });
-  const [isCallbackSubmitted, setIsCallbackSubmitted] = useState(false);
-
-  const [activeComparisonTab, setActiveComparisonTab] = useState<"properties" | "advisors">("properties");
-  const displayProperties = liveProperties;
-
-  const suggestedDestinations = [
-    { name: "Kokapet & Financial District", desc: "High-growth commercial expansion node", icon: Building },
-    { name: "Jubilee & Banjara Hills", desc: "Timeless prime premium residential hills", icon: Compass },
-    { name: "Narsingi & Tellapur", desc: "Green residential suburbs popular with tech families", icon: MapPin },
-    { name: "Osman & Himayat Sagar's", desc: "Quiet lakeside villa enclaves with clean air", icon: Building }
-  ];
-
   const toggleFavorite = (id: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setFavorites(prev => {
-      const next = prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id];
+    setFavorites((prev) => {
+      const next = prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id];
       localStorage.setItem("nexhouz_favorites", JSON.stringify(next));
       return next;
     });
   };
-
-
 
   const handleInquirySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -917,11 +1203,15 @@ export default function HomePage() {
       email: inquiryForm.email,
       phone: inquiryForm.phone,
       notes: inquiryForm.notes,
-      leadType: "property_inquiry"
+      leadType: "property_inquiry",
     });
     if (success) {
       setIsInquirySubmitted(true);
-      setTimeout(() => { setSelectedProperty(null); setIsInquirySubmitted(false); setInquiryForm({ name: "", email: "", phone: "", notes: "" }); }, 2500);
+      setTimeout(() => {
+        setSelectedProperty(null);
+        setIsInquirySubmitted(false);
+        setInquiryForm({ name: "", email: "", phone: "", notes: "" });
+      }, 2500);
     }
   };
 
@@ -932,1049 +1222,156 @@ export default function HomePage() {
       email: "",
       phone: callbackForm.phone,
       notes: `Requested callback from homepage for location: ${callbackForm.location}`,
-      leadType: "callback"
+      leadType: "callback",
     });
     if (success) {
       setIsCallbackSubmitted(true);
-      setTimeout(() => { setIsCallbackSubmitted(false); setCallbackForm({ name: "", phone: "", location: "Kokapet" }); }, 2500);
+      setTimeout(() => {
+        setIsCallbackSubmitted(false);
+        setCallbackForm({ name: "", phone: "", location: "Kokapet" });
+      }, 2500);
     }
   };
 
-  useEffect(() => {
-    const handler = () => {
-      setShowLocationPopover(false);
-      setShowTypeDropdown(false);
-      setShowBudgetDropdown(false);
-      setShowBhkDropdown(false);
-    };
-    window.addEventListener("click", handler);
-    return () => window.removeEventListener("click", handler);
-  }, []);
-
   return (
-    <>
+    <div className="font-archivo bg-white">
+      {/* Lift the floating chat above the mobile sticky action bar */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `@media (max-width: 1023.98px) { .floating-chat-root { bottom: 92px !important; } }`,
+        }}
+      />
+
       <Navbar />
-      <main className="flex-grow bg-white">
 
-        {/* ============================================================ */}
-        {/* SECTION 1: FULL-BLEED HERO  (v2 — fully upgraded)            */}
-        {/* ============================================================ */}
-        <HeroSection
-          onCloseDropdowns={() => {
-            setShowLocationPopover(false);
-            setShowTypeDropdown(false);
-            setShowBudgetDropdown(false);
-            setShowBhkDropdown(false);
-          }}
+      <main>
+        <HeroSection />
+        <StatsBar />
+        <WhySection />
+        <TrustBand />
+        <FeaturedSection
+          properties={liveProperties}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          onEnquire={(p) => setSelectedProperty(p)}
+          isOffline={isOffline}
+          isDebugMode={isDebugMode}
+          dbError={dbError}
         />
-
-        {/* ============================================================ */}
-        {/* SECTION 2: SEARCH CONSOLE                                    */}
-        {/* ============================================================ */}
-        <section className="bg-white py-0 relative z-20">
-          <div className="max-w-5xl mx-auto px-6 pt-12 pb-16">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-white rounded-3xl shadow-[0_8px_40px_-8px_rgba(0,0,0,0.15)] border border-black/8 p-6"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Tab row */}
-              <div className="flex items-center gap-1 border-b border-gray-100 pb-4 mb-5">
-                {[
-                  { name: "Buy", icon: Home },
-                  { name: "Commercial", icon: Building },
-                  { name: "New Launch", icon: Sparkles }
-                ].map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeSearchTab === tab.name;
-                  return (
-                    <button
-                      key={tab.name}
-                      onClick={() => setActiveSearchTab(tab.name)}
-                      className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        isActive ? "text-brand-red" : "text-brand-black/50 hover:text-brand-black"
-                      }`}
-                    >
-                      <Icon size={13} className={isActive ? "text-brand-red" : "text-brand-black/40"} />
-                      <span>{tab.name}</span>
-                      {isActive && (
-                        <motion.div
-                          layoutId="searchTabUnderline"
-                          className="absolute bottom-[-17px] left-0 right-0 h-[2px] bg-brand-red rounded-full"
-                        />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Input row */}
-              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                {/* Location */}
-                <div className="sm:col-span-4 space-y-1 relative">
-                  <label className="text-xs font-bold uppercase tracking-widest text-brand-black/50">Search by Location</label>
-                  <div className="flex items-center gap-2 border border-gray-200 bg-gray-50/50 px-3 py-2.5 rounded-xl hover:border-gray-300 focus-within:border-brand-red transition-all">
-                    <input
-                      type="text"
-                      placeholder="e.g. Kokapet, Gachibowli"
-                      value={heroSearch.location}
-                      onChange={(e) => { setHeroSearch({ ...heroSearch, location: e.target.value }); setShowLocationPopover(true); }}
-                      onFocus={() => setShowLocationPopover(true)}
-                      className="flex-1 bg-transparent text-xs font-semibold text-brand-black placeholder-gray-400 focus:outline-none"
-                    />
-                    <MapPin size={13} className="text-gray-400 shrink-0 cursor-pointer" onClick={() => setShowLocationPopover(!showLocationPopover)} />
-                  </div>
-                  <AnimatePresence>
-                    {showLocationPopover && (
-                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} transition={{ duration: 0.15 }} className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-2xl p-3 z-50">
-                        <p className="text-xs font-extrabold uppercase tracking-widest text-gray-400 px-2 mb-2">Suggested Hotspots</p>
-                        {suggestedDestinations.map((d) => (
-                          <button key={d.name} onClick={() => { setHeroSearch({ ...heroSearch, location: d.name }); setShowLocationPopover(false); }} className="w-full text-left px-2 py-2 flex items-center gap-2.5 rounded-lg hover:bg-gray-50 transition-colors">
-                            <MapPin size={11} className="text-brand-red shrink-0" />
-                            <div>
-                              <p className="text-xs font-bold text-brand-black">{d.name}</p>
-                              <p className="text-xs text-gray-400">{d.desc}</p>
-                            </div>
-                          </button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Type */}
-                <div className="sm:col-span-2 space-y-1 relative">
-                  <label className="text-xs font-bold uppercase tracking-widest text-brand-black/50">Property Type</label>
-                  <button onClick={(e) => { e.stopPropagation(); setShowTypeDropdown(!showTypeDropdown); setShowBudgetDropdown(false); setShowBhkDropdown(false); }} className="w-full flex items-center justify-between border border-gray-200 bg-gray-50/50 px-3 py-2.5 rounded-xl text-xs font-semibold text-brand-black hover:border-gray-300 transition-all cursor-pointer">
-                    <span>{heroSearch.type}</span>
-                    <ChevronDown size={12} className={`text-gray-400 transition-transform ${showTypeDropdown ? "rotate-180" : ""}`} />
-                  </button>
-                  <AnimatePresence>
-                    {showTypeDropdown && (
-                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-2xl p-2 z-50">
-                        {["Select Type", "Villa", "Apartment", "Plot", "Commercial"].map((t) => (
-                          <button key={t} onClick={() => { setHeroSearch({ ...heroSearch, type: t }); setShowTypeDropdown(false); }} className={`w-full text-left px-3 py-2 text-xs font-semibold rounded-xl transition-colors ${heroSearch.type === t ? "bg-brand-black text-white" : "hover:bg-gray-50 text-brand-black"}`}>{t}</button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Budget */}
-                <div className="sm:col-span-2 space-y-1 relative">
-                  <label className="text-xs font-bold uppercase tracking-widest text-brand-black/50">Budget Range</label>
-                  <button onClick={(e) => { e.stopPropagation(); setShowBudgetDropdown(!showBudgetDropdown); setShowTypeDropdown(false); setShowBhkDropdown(false); }} className="w-full flex items-center justify-between border border-gray-200 bg-gray-50/50 px-3 py-2.5 rounded-xl text-xs font-semibold text-brand-black hover:border-gray-300 transition-all cursor-pointer">
-                    <span>{heroSearch.priceRange}</span>
-                    <ChevronDown size={12} className={`text-gray-400 transition-transform ${showBudgetDropdown ? "rotate-180" : ""}`} />
-                  </button>
-                  <AnimatePresence>
-                    {showBudgetDropdown && (
-                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-2xl p-2 z-50">
-                        {["₹ 50L - ₹ 5Cr+", "₹ 50L - ₹ 2Cr", "₹ 2Cr - ₹ 5Cr", "₹ 5Cr - ₹ 10Cr", "₹ 10Cr+"].map((b) => (
-                          <button key={b} onClick={() => { setHeroSearch({ ...heroSearch, priceRange: b }); setShowBudgetDropdown(false); }} className={`w-full text-left px-3 py-2 text-xs font-semibold rounded-xl transition-colors ${heroSearch.priceRange === b ? "bg-brand-black text-white" : "hover:bg-gray-50 text-brand-black"}`}>{b}</button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* BHK */}
-                <div className="sm:col-span-1 space-y-1 relative">
-                  <label className="text-xs font-bold uppercase tracking-widest text-brand-black/50">BHK</label>
-                  <button onClick={(e) => { e.stopPropagation(); setShowBhkDropdown(!showBhkDropdown); setShowTypeDropdown(false); setShowBudgetDropdown(false); }} className="w-full flex items-center justify-between border border-gray-200 bg-gray-50/50 px-3 py-2.5 rounded-xl text-xs font-semibold text-brand-black hover:border-gray-300 transition-all cursor-pointer">
-                    <span>{heroSearch.bhk}</span>
-                    <ChevronDown size={12} className={`text-gray-400 transition-transform ${showBhkDropdown ? "rotate-180" : ""}`} />
-                  </button>
-                  <AnimatePresence>
-                    {showBhkDropdown && (
-                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-2xl p-2 z-50 min-w-[80px]">
-                        {["Any", "2", "3", "4", "5+"].map((k) => (
-                          <button key={k} onClick={() => { setHeroSearch({ ...heroSearch, bhk: k }); setShowBhkDropdown(false); }} className={`w-full text-center py-1.5 text-xs font-semibold rounded-lg transition-colors ${heroSearch.bhk === k ? "bg-brand-black text-white" : "hover:bg-gray-50 text-brand-black"}`}>{k}</button>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Search Button */}
-                <div className="sm:col-span-3">
-                  <Link
-                    href={`/properties?location=${encodeURIComponent(heroSearch.location || "Kokapet")}&type=${heroSearch.type}&price=${encodeURIComponent(heroSearch.priceRange)}&bhk=${heroSearch.bhk}`}
-                    className="w-full py-3 px-5 bg-brand-red hover:bg-brand-red/90 text-white text-xs font-extrabold uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-brand-red/25 hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap"
-                  >
-                    <Search size={14} className="stroke-[2.5]" />
-                    <span>Search Properties</span>
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* ============================================================ */}
-        {/* SECTION 3: SOVEREIGN CURATION STATS                          */}
-        {/* ============================================================ */}
-        <section className="bg-gray-50/50 py-16 border-y border-gray-100">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-              {/* Left */}
-              <div className="lg:col-span-4 space-y-4">
-                <h2 className="text-3xl md:text-4xl font-extrabold text-brand-black leading-tight">
-                  Exceptional Properties<br />in Hyderabad
-                </h2>
-                <p className="text-brand-red font-extrabold text-sm uppercase tracking-wide">Sovereign Curation</p>
-                <p className="text-sm text-gray-500 font-medium">Exceptional Properties Located in Stunning Surroundings.</p>
-                <Link href="/properties" className="inline-flex items-center gap-2 px-5 py-2.5 border border-brand-red text-brand-red text-xs font-extrabold uppercase tracking-wide rounded-full hover:bg-brand-red hover:text-white transition-all">
-                  Show Top-Curated Properties <ArrowRight size={12} />
-                </Link>
-              </div>
-
-              {/* Right: Stats */}
-              <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {[
-                  { count: "1,500+", label: "Verified Scanned Properties", icon: ShieldCheck, color: "bg-red-50 text-brand-red border-red-100" },
-                  { count: "130+", label: "Families Guided & Served", icon: Star, color: "bg-red-50 text-brand-red border-red-100" }
-                ].map((stat) => {
-                  const Icon = stat.icon;
-                  return (
-                    <motion.div
-                      key={stat.label}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5 }}
-                      className="bg-white border border-gray-100 rounded-3xl p-8 flex items-center gap-5 shadow-sm hover:shadow-md transition-all group"
-                    >
-                      <div className={`w-14 h-14 rounded-full flex items-center justify-center border ${stat.color} shrink-0 group-hover:scale-110 transition-transform`}>
-                        <Icon size={22} className="stroke-[1.5]" />
-                      </div>
-                      <div>
-                        <p className="text-4xl font-extrabold text-brand-black tracking-tight">{stat.count}</p>
-                        <p className="text-xs text-gray-500 font-semibold uppercase tracking-wide mt-1">{stat.label}</p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ============================================================ */}
-        {/* SECTION 4: AI & EXPERT ADVISORY ADVANTAGE                    */}
-        {/* ============================================================ */}
-        <section className="bg-white py-20">
-          <div className="max-w-7xl mx-auto px-6">
-            {/* Header */}
-            <div className="text-center mb-14 space-y-3">
-              <p className="text-sm font-extrabold uppercase tracking-[0.3em] text-gray-400">Why NexHouz is Special</p>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-brand-black tracking-tight">
-                Our <span className="text-brand-red">AI</span> & Expert Advisory Advantage
-              </h2>
-              <p className="text-sm text-gray-500 font-medium max-w-xl mx-auto leading-relaxed">
-                We combine artificial intelligence and certified real estate specialists to deliver Hyderabad's most transparent, frictionless property buying experience.
-              </p>
-            </div>
-
-            {/* Three cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-              {/* Card 1: AI Property Match Making */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4 }}
-                className="border border-gray-100 rounded-3xl p-7 bg-white shadow-sm hover:shadow-lg hover:border-brand-red/20 transition-all relative overflow-hidden flex flex-col group"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-red/5 border border-brand-red/15 rounded-full text-xs font-extrabold uppercase tracking-wider text-brand-red">
-                    <Sparkles size={9} /> AI Powered
-                  </span>
-                </div>
-
-                <div className="flex items-start justify-between gap-4 flex-1">
-                  <div className="flex-1 pr-4 space-y-3">
-                    <h3 className="text-xl font-extrabold text-brand-black leading-tight">AI Property Match Making</h3>
-                    <p className="text-xs text-gray-500 leading-relaxed font-medium">
-                      Experience intelligent property assistance with our AI-powered bots available on both web and WhatsApp. Get instant responses, property recommendations, and expert guidance 24/7 to help you find your right home.
-                    </p>
-                  </div>
-                  <div className="w-28 h-40 rounded-2xl bg-gray-50/80 border border-gray-150 shrink-0 overflow-hidden relative flex items-end justify-center group-hover:border-brand-red/20 transition-all duration-300">
-                    <img
-                      src="/images/robot_advisor_mascot.png?v=2"
-                      alt="AI Robot Mascot"
-                      className="w-full h-full object-contain pointer-events-none filter brightness-[1.05] contrast-[1.05] mix-blend-multiply group-hover:scale-105 group-hover:-rotate-2 transition-all duration-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Highlights */}
-                <div className="flex items-center gap-5 py-4 border-t border-gray-100 mt-4">
-                  {[{ icon: Zap, label: "Instant Response" }, { icon: Clock, label: "24/7 Available" }, { icon: Sparkles, label: "Smart AI" }].map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <div key={item.label} className="flex flex-col items-center gap-1.5 text-center">
-                        <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center">
-                          <Icon size={13} className="text-gray-500" />
-                        </div>
-                        <span className="text-xs font-bold uppercase tracking-wide text-gray-400 leading-tight">{item.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* CTAs */}
-                <div className="flex items-center gap-4 pt-2">
-                  <Link href="/chat?bot=AI Chat" className="py-2.5 px-5 bg-brand-red hover:bg-brand-red/90 text-white text-xs font-extrabold rounded-lg transition-all text-center">
-                    AI Chat
-                  </Link>
-                  <Link href="/chat?bot=NexHouz Genie" className="text-xs font-bold text-gray-600 hover:text-brand-red flex items-center gap-1 transition-colors">
-                    AI NexHouz Genie <ArrowRight size={11} />
-                  </Link>
-                </div>
-              </motion.div>
-
-              {/* Card 2: Expert Property Guidance */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: 0.1 }}
-                className="border border-gray-100 rounded-3xl p-7 bg-white shadow-sm hover:shadow-lg hover:border-brand-red/20 transition-all relative overflow-hidden flex flex-col group"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-red/5 border border-brand-red/15 rounded-full text-xs font-extrabold uppercase tracking-wider text-brand-red">
-                    <Users size={9} /> Human Expertise
-                  </span>
-                </div>
-
-                <div className="flex items-start justify-between gap-4 flex-1">
-                  <div className="flex-1 pr-4 space-y-3">
-                    <h3 className="text-xl font-extrabold text-brand-black leading-tight">Expert Property Guidance</h3>
-                    <p className="text-xs text-gray-500 leading-relaxed font-medium">
-                      Consult with our certified real estate experts to find the perfect property that matches your needs and budget with personalized advice, expert local market insights, end-to-end buying assistance, and complete post-purchase support.
-                    </p>
-                  </div>
-                  <div className="w-28 h-40 rounded-2xl bg-gray-50/80 border border-gray-150 shrink-0 overflow-hidden relative flex items-end justify-center group-hover:border-brand-red/20 transition-all duration-300">
-                    <img
-                      src="/images/real_estate_advisor_portrait.png?v=2"
-                      alt="Real Estate Expert"
-                      className="w-full h-full object-contain pointer-events-none filter brightness-[1.05] contrast-[1.05] mix-blend-multiply group-hover:scale-105 transition-all duration-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Highlights */}
-                <div className="flex items-center gap-5 py-4 border-t border-gray-100 mt-4">
-                  {[{ icon: BadgeCheck, label: "Free Consultation" }, { icon: ShieldCheck, label: "No Pressure" }].map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <div key={item.label} className="flex flex-col items-center gap-1.5 text-center">
-                        <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center">
-                          <Icon size={13} className="text-gray-500" />
-                        </div>
-                        <span className="text-xs font-bold uppercase tracking-wide text-gray-400 leading-tight">{item.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* CTAs */}
-                <div className="flex items-center gap-4 pt-2">
-                  <button
-                    onClick={() => { const el = document.getElementById("callback-form-section"); if (el) el.scrollIntoView({ behavior: "smooth" }); }}
-                    className="py-2.5 px-5 bg-brand-red hover:bg-brand-red/90 text-white text-xs font-extrabold rounded-lg transition-all cursor-pointer"
-                  >
-                    Certified Consultations
-                  </button>
-                  <button
-                    onClick={() => { const el = document.getElementById("callback-form-section"); if (el) el.scrollIntoView({ behavior: "smooth" }); }}
-                    className="text-xs font-bold text-gray-600 hover:text-brand-red flex items-center gap-1 transition-colors cursor-pointer"
-                  >
-                    Book a free expert session <ArrowRight size={11} />
-                  </button>
-                </div>
-              </motion.div>
-
-              {/* Card 3: End-to-End Process */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-                className="border border-gray-100 rounded-3xl p-7 bg-white shadow-sm hover:shadow-lg hover:border-brand-red/20 transition-all relative overflow-hidden flex flex-col group"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-red/5 border border-brand-red/15 rounded-full text-xs font-extrabold uppercase tracking-wider text-brand-red">
-                    <Compass size={9} /> Full Lifecycle
-                  </span>
-                </div>
-
-                <div className="flex items-start justify-between gap-4 flex-1">
-                  <div className="flex-1 space-y-3">
-                    <h3 className="text-xl font-extrabold text-brand-black leading-tight">End-to-End Process Support</h3>
-                    <p className="text-xs text-gray-500 leading-relaxed font-medium">
-                      At NexHouz, we guide you through every step of the property buying journey—from personalized property shortlisting and legal checks to loan assistance, registration, and post-purchase support.
-                    </p>
-                  </div>
-                  <img
-                    src="/images/obsidian_pavilion.png"
-                    alt="Modern Property"
-                    className="w-28 h-40 object-cover rounded-2xl shrink-0 border border-gray-150 group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-
-                {/* Highlights */}
-                <div className="flex items-center gap-5 py-4 border-t border-gray-100 mt-4">
-                  {[{ icon: ShieldCheck, label: "Full Support" }, { icon: FileText, label: "Legal Assistance" }, { icon: TrendingUp, label: "Loan Guidance" }].map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <div key={item.label} className="flex flex-col items-center gap-1.5 text-center">
-                        <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center">
-                          <Icon size={13} className="text-gray-500" />
-                        </div>
-                        <span className="text-xs font-bold uppercase tracking-wide text-gray-400 leading-tight">{item.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* CTAs */}
-                <div className="flex items-center gap-4 pt-2">
-                  <Link href="/contact" className="py-2.5 px-5 border border-brand-red text-brand-red hover:bg-brand-red hover:text-white text-xs font-extrabold rounded-lg transition-all flex items-center gap-1">
-                    End-to-End process <ArrowRight size={11} />
-                  </Link>
-                  <Link href="/contact" className="text-xs font-bold text-gray-600 hover:text-brand-red flex items-center gap-1 transition-colors">
-                    Purchase Process
-                  </Link>
-                </div>
-              </motion.div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ============================================================ */}
-        {/* SECTION 5: BUILDER AUDIT + SMARTER SELECTIONS                */}
-        {/* ============================================================ */}
-        <section className="bg-gray-50/50 py-20 border-y border-gray-100">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-              {/* Builder Track Record Card */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[340px]"
-              >
-                <div className="space-y-4 relative z-10 max-w-[55%]">
-                  <h3 className="text-2xl font-extrabold text-brand-black leading-tight">Builder Track-Record Auditing</h3>
-                  <p className="text-sm font-bold text-brand-black/70">We pre-screen Hyderabad's leading developers so you don't have to.</p>
-                  <p className="text-xs text-gray-500 leading-relaxed font-medium">We audit developers on past project delivery timelines, structural quality clearances, legal encumbrance claims, and municipal GHMC approvals. You only see listings from partners with verified track records of delivery.</p>
-                  <Link href="/about" className="inline-flex items-center gap-2 px-5 py-2.5 border border-brand-red text-brand-red text-xs font-extrabold uppercase tracking-wide rounded-full hover:bg-brand-red hover:text-white transition-all">
-                    Learn Our Audit Process <ArrowRight size={11} />
-                  </Link>
-                </div>
-                {/* Background illustration */}
-                <div className="absolute right-0 bottom-0 w-[48%] h-full">
-                  <img src="/images/obsidian_pavilion.png" alt="Audit" className="w-full h-full object-cover opacity-80 rounded-l-3xl" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-white via-white/20 to-transparent rounded-l-3xl" />
-                </div>
-              </motion.div>
-
-              {/* Smarter Selections */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm"
-              >
-                <div className="space-y-2 mb-7">
-                  <h3 className="text-2xl font-extrabold text-brand-black">Smarter Selections</h3>
-                  <p className="text-sm text-gray-500 font-medium">Smart property recommendations based on your needs.</p>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    {
-                      num: "1",
-                      icon: Car,
-                      title: "Your Daily Commute",
-                      desc: "Matching your location with your daily work hub (Hitec City, Wipro Circle, or Gachibowli) to minimize your hours spent in daily city traffic."
-                    },
-                    {
-                      num: "2",
-                      icon: Users,
-                      title: "Your Family's Lifestyle",
-                      desc: "Filtering for clean local parks, international school districts in Tellapur/Narsingi, reliable water clearance zones, and safe secure complexes."
-                    },
-                    {
-                      num: "3",
-                      icon: TrendingUp,
-                      title: "Growth Corridor Appreciation",
-                      desc: "Highlighting properties positioned in high-infrastructure growth areas to ensure long-term capital safety and appreciation."
-                    }
-                  ].map((step) => {
-                    const Icon = step.icon;
-                    return (
-                      <div key={step.num} className="text-center space-y-3">
-                        <div className="relative inline-block">
-                          <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto border border-gray-100">
-                            <Icon size={22} className="text-gray-600" />
-                          </div>
-                          <div className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-brand-red text-white text-xs font-extrabold flex items-center justify-center">{step.num}</div>
-                        </div>
-                        <h4 className="text-xs font-extrabold text-brand-black leading-tight">{step.title}</h4>
-                        <p className="text-xs text-gray-500 leading-relaxed font-medium">{step.desc}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </motion.div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ============================================================ */}
-        {/* SECTION 6: PROPERTY GRID                                     */}
-        {/* ============================================================ */}
-        <section className="bg-white py-20">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="flex items-end justify-between mb-12">
-              <div className="space-y-2">
-                <p className="text-sm font-extrabold uppercase tracking-[0.3em] text-brand-red">Curated Collection</p>
-                <h2 className="text-4xl md:text-5xl font-extrabold text-brand-black tracking-tight">Verified Properties Ready for Review.</h2>
-              </div>
-              <Link href="/properties" className="hidden md:flex items-center gap-2 text-xs font-bold text-brand-black hover:text-brand-red border-b border-brand-black hover:border-brand-red pb-0.5 transition-all">
-                Browse All <ArrowRight size={13} />
-              </Link>
-            </div>
-
-            {isOffline && (
-              <div className="col-span-full border border-amber-200 bg-amber-50/50 rounded-3xl py-4 px-6 flex items-center justify-between gap-4 shadow-sm w-full mb-6 text-left animate-fadeIn">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 shadow-inner">
-                    <AlertTriangle size={18} className="stroke-[2]" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-extrabold text-amber-950">Database Offline Preview</h3>
-                    <p className="text-xs text-amber-805 font-medium mt-0.5 leading-relaxed">
-                      We are currently experiencing connection latency with our database server. Displaying verified local properties.
-                    </p>
-                  </div>
-                </div>
-                {isDebugMode && dbError && (
-                  <div className="text-[10px] text-red-650 font-mono bg-red-50 border border-red-100 p-2 rounded-xl max-w-xs overflow-x-auto truncate">
-                    {dbError}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {displayProperties.length === 0 ? (
-                <div className="col-span-full border border-gray-200/60 rounded-3xl py-12 px-6 flex flex-col items-center justify-center text-center space-y-4 bg-white shadow-sm w-full">
-                  <div className="w-10 h-10 border-4 border-brand-red border-t-transparent rounded-full animate-spin mx-auto" />
-                  <p className="text-xs text-gray-500 font-bold tracking-widest uppercase">Loading Estates...</p>
-                </div>
-              ) : (
-                <>
-                  {displayProperties.slice(0, 3).map((property, idx) => (
-                    <motion.div
-                      key={property.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.4, delay: idx * 0.1 }}
-                      className="bg-white border border-gray-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-lg hover:border-brand-red/15 transition-all group"
-                    >
-                      <Link href={`/properties/${property.slug}`} className="block relative aspect-[4/3] overflow-hidden bg-gray-100">
-                        <img src={property.image} alt={property.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <div className="absolute top-3 left-3 bg-emerald-500 text-white text-xs font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full flex items-center gap-1">
-                          <ShieldCheck size={9} /> 100% Legal Clear
-                        </div>
-                        <button onClick={(e) => toggleFavorite(property.id, e)} className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform shadow-sm">
-                          <Heart size={13} className={favorites.includes(property.id) ? "fill-brand-red text-brand-red" : "text-gray-500"} />
-                        </button>
-                      </Link>
-                      <div className="p-6 space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold uppercase tracking-widest text-gray-400">{property.location.split(",")[0]}</span>
-                          <span className="text-base font-extrabold text-brand-red">₹{(property.price / 10000000).toFixed(1)} Cr</span>
-                        </div>
-                        <h3 className="text-lg font-extrabold text-brand-black leading-tight group-hover:text-brand-red transition-colors">
-                          <Link href={`/properties/${property.slug}`}>{property.title}</Link>
-                        </h3>
-                        <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 font-medium">{property.description}</p>
-                        <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs font-bold uppercase tracking-widest text-gray-400">
-                          <span>{property.bhk} BHK</span>
-                          <span className="text-gray-200">|</span>
-                          <span>{property.area}</span>
-                          <span className="text-gray-200">|</span>
-                          <span>{property.possession}</span>
-                        </div>
-                        <button onClick={() => setSelectedProperty(property)} className="w-full py-3 bg-brand-black hover:bg-brand-red text-white text-xs font-extrabold uppercase tracking-wider rounded-xl transition-all">
-                          Initiate Safe Inquiry
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* ============================================================ */}
-        {/* SECTION 7: HYDERABAD LOCATION AUTHORITY                      */}
-        {/* ============================================================ */}
-        <section className="bg-gray-50/50 py-20 border-y border-gray-100">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="space-y-3 mb-12">
-              <p className="text-sm font-extrabold uppercase tracking-[0.3em] text-brand-red">Local Authority</p>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-brand-black tracking-tight">Where to invest and live in Hyderabad.</h2>
-              <p className="text-sm text-gray-500 font-medium max-w-xl">We track infrastructure, municipal clearances, and developer track records across major growth corridors to help you choose the right location.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-              {[
-                { badge: "Tech Growth Center", title: "Kokapet & Financial District", desc: "Hyderabad's core commercial expansion corridor. High-rise luxury residential properties with direct access to the Nehru ORR and high compound valuation trends.", tag: "Growth Corridor Node" },
-                { badge: "Family & Schools", title: "Tellapur & Narsingi", desc: "Rapidly developing, leafy residential zones. Highly popular with technology professionals due to proximity to international schools, gated villa communities, and calm streets.", tag: "Emerging Family Hub" },
-                { badge: "Timeless Luxury", title: "Jubilee & Banjara Hills", desc: "The classic premium standard in Hyderabad. Extremely quiet, safe, and exclusive residential hills. High-capital value assets with tight inventory cleared through private networks.", tag: "Sovereign Estate Corridor" },
-                { badge: "Lakeside Sanctuary", title: "Osman & Himayat Sagar's", desc: "Peaceful enclaves bordering the lake reserve. Perfect for buyers seeking to escape noise while remaining within a short drive of Hitec City office hubs.", tag: "Eco-Residential Sanctuary" }
-              ].map((area) => (
-                <motion.div key={area.title} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} className="bg-white border border-gray-100 rounded-3xl p-7 shadow-sm flex flex-col justify-between h-72 hover:border-brand-red/20 hover:shadow-md transition-all">
-                  <div className="space-y-3">
-                    <span className="inline-block text-xs font-extrabold uppercase tracking-wider text-brand-red bg-red-50 border border-red-100 px-2.5 py-1 rounded-full">{area.badge}</span>
-                    <h3 className="text-lg font-extrabold text-brand-black leading-tight">{area.title}</h3>
-                    <p className="text-xs text-gray-500 leading-relaxed font-medium">{area.desc}</p>
-                  </div>
-                  <p className="text-xs font-extrabold uppercase tracking-widest text-gray-500">{area.tag}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ============================================================ */}
-        {/* ============================================================ */}
-        {/* SECTION 8: ANIMATED JOURNEY FLOW                            */}
-        {/* ============================================================ */}
-        {/* ============================================================ */}
-        {/* ============================================================ */}
-        {/* SECTION 8: ANIMATED JOURNEY FLOW (LIGHT THEME)              */}
-        {/* ============================================================ */}
-        <section id="process-section" className="relative py-28 overflow-hidden bg-gray-50/60 border-y border-gray-100">
-          {/* Background radial glow */}
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,23,30,0.04) 0%, transparent 70%)" }} />
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 40% at 50% 100%, rgba(201,23,30,0.02) 0%, transparent 60%)" }} />
-          {/* Subtle grid pattern */}
-          <div className="absolute inset-0 pointer-events-none opacity-[0.4]" style={{ backgroundImage: "linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-
-          <div className="relative max-w-6xl mx-auto px-6">
-            {/* Section header */}
-            <motion.div
-              className="text-center mb-20"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-            >
-              <div className="inline-flex items-center gap-2 mb-5">
-                <div className="w-6 h-px bg-brand-red" />
-                <p className="text-xs font-extrabold uppercase tracking-[0.4em] text-brand-red">The NexHouz Journey</p>
-                <div className="w-6 h-px bg-brand-red" />
-              </div>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-brand-black tracking-tight leading-tight">
-                From your first question<br />
-                <span style={{ background: "linear-gradient(90deg, #C9171E, #E53E3E)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>to your future asset.</span>
-              </h2>
-              <p className="text-sm text-gray-500 font-medium max-w-md mx-auto mt-4 leading-relaxed">
-                Nine precision-crafted touchpoints. One seamless experience. Your property, secured with confidence.
-              </p>
-            </motion.div>
-
-            {/* Journey steps — zigzag layout */}
-            <div className="relative">
-              {[
-                {
-                  step: "01",
-                  icon: User,
-                  title: "You Share Your Needs",
-                  desc: "Tell us your budget, preferred location, commute zone, family size and lifestyle requirements. One conversation. No forms, no pressure.",
-                  side: "left",
-                  tag: "Discovery"
-                },
-                {
-                  step: "02",
-                  icon: BrainCircuit,
-                  title: "AI + Data-Backed Matching",
-                  desc: "Our AI engine scans 1,500+ Hyderabad properties, trained on 2 years of market data, price trends, and neighbourhood intelligence. In minutes, not days.",
-                  side: "right",
-                  tag: "Intelligence"
-                },
-                {
-                  step: "03",
-                  icon: UserCheck,
-                  title: "Expert Review & Refinement",
-                  desc: "Our veteran Hyderabad advisors personally review every AI-shortlisted match against your profile — filtering out anything that doesn't meet our 47-point audit.",
-                  side: "left",
-                  tag: "Verification"
-                },
-                {
-                  step: "04",
-                  icon: CalendarCheck,
-                  title: "Discovery Meeting Scheduled",
-                  desc: "A structured 45-minute consultation — virtual or in-person — where we walk you through the curated shortlist, explain pros and cons, and answer every question.",
-                  side: "right",
-                  tag: "Consultation"
-                },
-                {
-                  step: "05",
-                  icon: MapPin,
-                  title: "Live Site Visits",
-                  desc: "Private, guided tours of your shortlisted properties at your convenience. Our advisor is with you on every visit, pointing out what brochures never show you.",
-                  side: "left",
-                  tag: "Experience"
-                },
-                {
-                  step: "06",
-                  icon: ScanSearch,
-                  title: "Educate & Compare Properties",
-                  desc: "We place every option side-by-side: construction quality, developer credibility, RERA compliance, appreciation potential, and honest risk flags.",
-                  side: "right",
-                  tag: "Comparison"
-                },
-                {
-                  step: "07",
-                  icon: BadgeDollarSign,
-                  title: "Beat the Market Price",
-                  desc: "We negotiate directly with developers using live market benchmarks. Our clients consistently secure prices 5–15% below what the market publicly lists.",
-                  side: "left",
-                  tag: "Negotiation"
-                },
-                {
-                  step: "08",
-                  icon: ShieldCheck,
-                  title: "Legal, Registration & Full Paperwork",
-                  desc: "Every deed, RERA timeline, GHMC clearance, sale agreement, loan documentation, and registration — handled in full. Zero surprises at the table.",
-                  side: "right",
-                  tag: "Security"
-                },
-                {
-                  step: "09",
-                  icon: HeartHandshake,
-                  title: "Continued Support & Future Projects",
-                  desc: "Our relationship doesn't end at registration. Resale guidance and priority access to future launches — for life.",
-                  side: "left",
-                  tag: "Partnership"
-                }
-              ].map((node, idx) => {
-                const Icon = node.icon;
-                const isLeft = node.side === "left";
-                return (
-                  <div key={node.step} className="relative">
-                    {/* Connector line between steps */}
-                    {idx < 8 && (
-                      <div className="hidden md:flex justify-center">
-                        <motion.div
-                          className="w-px bg-gradient-to-b from-brand-red/40 to-brand-red/5"
-                          style={{ height: "56px" }}
-                          initial={{ scaleY: 0, originY: 0 }}
-                          whileInView={{ scaleY: 1 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.5, delay: 0.3 }}
-                        />
-                      </div>
-                    )}
-
-                    <motion.div
-                      className={`flex flex-col md:flex-row items-center gap-6 md:gap-10 ${
-                        isLeft ? "md:flex-row" : "md:flex-row-reverse"
-                      }`}
-                      initial={{ opacity: 0, x: isLeft ? -40 : 40 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true, margin: "-80px" }}
-                      transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-                    >
-                      {/* Card */}
-                      <div className={`flex-1 group relative rounded-3xl p-7 border transition-all duration-500 shadow-sm ${
-                        isLeft ? "md:text-left" : "md:text-right"
-                      }`}
-                        style={{
-                          background: "#ffffff",
-                          borderColor: "#e5e7eb",
-                        }}
-                        onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLDivElement).style.background = "rgba(201,23,30,0.02)";
-                          (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(201,23,30,0.15)";
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLDivElement).style.background = "#ffffff";
-                          (e.currentTarget as HTMLDivElement).style.borderColor = "#e5e7eb";
-                        }}
-                      >
-                        {/* Tag pill */}
-                        <span className={`inline-flex items-center text-xs font-extrabold uppercase tracking-[0.3em] px-2.5 py-1 rounded-full mb-4 ${
-                          isLeft ? "" : "md:ml-auto"
-                        }`}
-                          style={{ background: "rgba(201,23,30,0.08)", color: "#C9171E" }}
-                        >
-                          {node.tag}
-                        </span>
-                        <h3 className="text-lg font-extrabold text-brand-black mb-2 leading-snug">{node.title}</h3>
-                        <p className="text-sm text-gray-600 leading-relaxed font-medium">{node.desc}</p>
-                      </div>
-
-                      {/* Centre icon node */}
-                      <div className="relative flex-shrink-0 flex flex-col items-center">
-                        {/* Outer pulse ring */}
-                        <motion.div
-                          className="absolute rounded-full"
-                          style={{ width: 80, height: 80, background: "rgba(201,23,30,0.08)", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}
-                          animate={{ scale: [1, 1.35, 1], opacity: [0.7, 0, 0.7] }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: idx * 0.4 }}
-                        />
-                        {/* Icon circle */}
-                        <div
-                          className="relative z-10 flex items-center justify-center rounded-2xl"
-                          style={{
-                            width: 60,
-                            height: 60,
-                            background: "linear-gradient(135deg, #C9171E, #A6141A)",
-                            boxShadow: "0 0 16px rgba(201,23,30,0.25)"
-                          }}
-                        >
-                          <Icon size={24} className="text-white" strokeWidth={1.5} />
-                        </div>
-                        {/* Step number */}
-                        <span className="mt-2 text-xs font-extrabold tracking-widest" style={{ color: "rgba(201,23,30,0.9)" }}>{node.step}</span>
-                      </div>
-
-                      {/* Spacer for opposite side */}
-                      <div className="flex-1 hidden md:block" />
-                    </motion.div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Bottom CTA */}
-            <motion.div
-              className="text-center mt-20"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <p className="text-gray-500 text-xs font-medium uppercase tracking-widest mb-5">Ready to begin?</p>
-              <Link
-                href="/contact"
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-sm text-white transition-all duration-300 hover:scale-105"
-                style={{
-                  background: "linear-gradient(135deg, #C9171E, #A6141A)",
-                  boxShadow: "0 4px 20px rgba(201,23,30,0.3)"
-                }}
-              >
-                Start Your Journey
-                <ArrowRight size={16} />
-              </Link>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* ============================================================ */}
-        {/* SECTION 9: TESTIMONIAL + TRUST                               */}
-        {/* ============================================================ */}
-        <section className="bg-gray-50/50 py-20 border-y border-gray-100">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Testimonial card */}
-              <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }} className="bg-white border border-gray-100 rounded-3xl p-10 shadow-sm border-l-4 border-l-brand-red flex flex-col justify-between">
-                <div className="space-y-5">
-                  <p className="text-sm font-extrabold uppercase tracking-[0.3em] text-brand-red">Hyderabad Stories</p>
-                  <blockquote className="text-xl italic font-light text-brand-black leading-relaxed">
-                    "We were extremely worried about GHMC clearances and legal safety in Kokapet. The NexHouz team personally verified the developer's paperwork, cleared our escrow, and made our transition entirely stress-free."
-                  </blockquote>
-                </div>
-                <div className="pt-6 space-y-3">
-                  <div className="flex items-center gap-0.5 text-brand-red">
-                    {[...Array(5)].map((_, i) => <Star key={i} size={14} className="fill-brand-red" />)}
-                  </div>
-                  <div>
-                    <p className="text-xs font-extrabold uppercase tracking-widest text-brand-black">Srinivas R.</p>
-                    <p className="text-xs uppercase tracking-widest text-gray-400 font-medium">Technology Director in Gachibowli</p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Stats grid */}
-              <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }} className="grid grid-cols-2 gap-5">
-                {[
-                  { number: "1,500+", label: "Verified Properties Scanned", color: "text-brand-red" },
-                  { number: "130+", label: "Families Guided & Served", color: "text-brand-red" },
-                  { number: "98%", label: "Client Satisfaction Rate", color: "text-emerald-600" },
-                  { number: "2 Years", label: "Hyderabad Market Authority", color: "text-blue-600" }
-                ].map((stat) => (
-                  <div key={stat.label} className="bg-white border border-gray-100 rounded-3xl p-7 shadow-sm flex flex-col justify-center space-y-2 text-center hover:shadow-md transition-all">
-                    <p className={`text-4xl font-extrabold ${stat.color} tracking-tight`}>{stat.number}</p>
-                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400">{stat.label}</p>
-                  </div>
-                ))}
-              </motion.div>
-            </div>
-          </div>
-        </section>
-
-        {/* ============================================================ */}
-        {/* SECTION 10: NRI SERVICES                                     */}
-        {/* ============================================================ */}
-        <section className="bg-white py-20">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="space-y-3 mb-12">
-              <p className="text-sm font-extrabold uppercase tracking-[0.3em] text-brand-red">Global Investor Desk</p>
-              <h2 className="text-4xl font-extrabold text-brand-black tracking-tight">NRI Property Services in Hyderabad</h2>
-              <p className="text-sm text-gray-500 font-medium max-w-2xl">Specialized real estate services for Non-Resident Indians looking to invest or purchase property in Hyderabad. Simplify property buying with expert guidance and specialized NRI support.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {[
-                { title: "Virtual Property Tours", desc: "Live video tours of properties with a dedicated NexHouz advisor to help you explore properties remotely." },
-                { title: "Dedicated NRI Advisors", desc: "Specialized consultants who understand the unique needs, tax frameworks, and regulations of NRI investors." },
-                { title: "Property Guidance & Support", desc: "Formal support and guidance for your property, helping you navigate post-purchase steps and administration." }
-              ].map((service) => (
-                <motion.div key={service.title} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.4 }} className="bg-gray-50 border border-gray-100 rounded-3xl p-8 flex flex-col justify-between h-60 hover:border-brand-red/20 hover:bg-white hover:shadow-sm transition-all">
-                  <div className="space-y-3">
-                    <span className="w-2 h-2 rounded-full bg-brand-red block" />
-                    <h3 className="text-lg font-extrabold text-brand-black">{service.title}</h3>
-                    <p className="text-xs text-gray-500 leading-relaxed font-medium">{service.desc}</p>
-                  </div>
-                  <Link href="/contact" className="inline-flex items-center gap-1 text-xs font-bold text-brand-black hover:text-brand-red transition-colors">
-                    Request Details <ArrowRight size={11} />
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ============================================================ */}
-        {/* SECTION 11: CALLBACK CTA                                     */}
-        {/* ============================================================ */}
-        <section id="callback-form-section" className="bg-brand-black py-20">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-5 text-white">
-                <p className="text-sm font-extrabold uppercase tracking-[0.3em] text-brand-red">Free Expert Callback</p>
-                <h2 className="text-4xl md:text-5xl font-extrabold leading-tight">Talk to a Hyderabad Property Expert Today.</h2>
-                <p className="text-sm text-white/60 leading-relaxed font-medium">No spam, no pressure, no follow-up. A single, expert conversation to help you make the right call for your property search.</p>
-                <div className="space-y-4 pt-4">
-                  {["100% free, no commitments", "RERA & GHMC verified properties only", "Response within 4 business hours", "Dedicated advisor, not a call center"].map((item) => (
-                    <div key={item} className="flex items-center gap-3 text-sm font-medium text-white/80">
-                      <CheckCircle size={15} className="text-brand-red shrink-0" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-3xl p-8 shadow-2xl">
-                <AnimatePresence mode="wait">
-                  {!isCallbackSubmitted ? (
-                    <motion.form key="form" onSubmit={handleCallbackSubmit} className="space-y-5" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                      <div>
-                        <h3 className="text-xl font-extrabold text-brand-black mb-1">Book Your Free Session</h3>
-                        <p className="text-xs text-gray-500 font-medium">Our property advisor will call you within 4 hours.</p>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Your Full Name</label>
-                        <input type="text" required value={callbackForm.name} onChange={(e) => setCallbackForm({ ...callbackForm, name: e.target.value })} placeholder="e.g. Siddharth Reddy" className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-red transition-all" />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Phone Number</label>
-                        <input type="tel" required value={callbackForm.phone} onChange={(e) => setCallbackForm({ ...callbackForm, phone: e.target.value })} placeholder="+91 98765 43210" className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-red transition-all" />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Preferred Location</label>
-                        <select value={callbackForm.location} onChange={(e) => setCallbackForm({ ...callbackForm, location: e.target.value })} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-red transition-all cursor-pointer">
-                          {["Kokapet", "Narsingi", "Tellapur", "Jubilee Hills", "Gachibowli", "Anywhere in Hyderabad"].map((l) => <option key={l} value={l}>{l}</option>)}
-                        </select>
-                      </div>
-                      <button type="submit" className="w-full py-4 bg-brand-red hover:bg-brand-red/90 text-white font-extrabold uppercase tracking-wider text-sm rounded-xl transition-all shadow-lg shadow-brand-red/20">
-                        Request Free Callback
-                      </button>
-                      <p className="text-xs text-gray-400 text-center font-medium">No spam. Zero pressure. Just expert guidance.</p>
-                    </motion.form>
-                  ) : (
-                    <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center py-10 text-center space-y-4">
-                      <div className="w-14 h-14 rounded-full bg-brand-red flex items-center justify-center">
-                        <Check size={24} className="text-white" />
-                      </div>
-                      <h4 className="text-xl font-extrabold text-brand-black">Callback Confirmed!</h4>
-                      <p className="text-sm text-gray-500 font-medium max-w-xs">A senior Hyderabad property advisor will call you within 4 hours with curated options.</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
-        </section>
-
+        <MicroMarkets />
+        <JourneySection />
+        <SocialProof />
+        <NriDesk />
+        <ConversionSection
+          form={callbackForm}
+          setForm={setCallbackForm}
+          submitted={isCallbackSubmitted}
+          onSubmit={handleCallbackSubmit}
+        />
       </main>
 
       <Footer />
+      {/* Clearance for the mobile sticky action bar */}
+      <div className="h-20 lg:hidden bg-[#F6F1E7]" />
+      <StickyActionBar />
 
-      {/* ============================================================ */}
-      {/* INQUIRY MODAL                                                 */}
-      {/* ============================================================ */}
+      {/* Inquiry modal */}
       <AnimatePresence>
         {selectedProperty && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} exit={{ opacity: 0 }} onClick={() => setSelectedProperty(null)} className="absolute inset-0 bg-black" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: "spring", damping: 30, stiffness: 220 }} className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 z-10 border border-gray-100 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-extrabold text-brand-black">Safe Property Inquiry</h3>
-                <button onClick={() => setSelectedProperty(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"><X size={18} /></button>
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.55 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedProperty(null)}
+              className="absolute inset-0 bg-black"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 20 }}
+              transition={{ type: "spring", damping: 30, stiffness: 220 }}
+              className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 lg:p-8 z-10 border border-[#EEE9E0] max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="text-[20px] lg:text-[22px] font-semibold text-[#0A0A0A]">Enquire about this home</h3>
+                <button
+                  onClick={() => setSelectedProperty(null)}
+                  aria-label="Close"
+                  className="p-2 hover:bg-[#FAF7F1] rounded-full transition-colors cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl mb-6 border border-gray-100">
-                <img src={selectedProperty.image} alt={selectedProperty.title} className="w-14 h-14 object-cover rounded-xl shrink-0" />
+              <div className="flex items-center gap-3 p-3 bg-[#FAF7F1] rounded-xl mb-6 border border-[#EEE9E0]">
+                <img
+                  src={selectedProperty.image}
+                  alt={selectedProperty.title}
+                  className="w-14 h-14 object-cover rounded-lg shrink-0"
+                />
                 <div>
-                  <p className="text-sm font-extrabold text-brand-black">{selectedProperty.title}</p>
-                  <p className="text-xs text-gray-500">{selectedProperty.location}</p>
-                  <p className="text-sm font-extrabold text-brand-red mt-0.5">₹{(selectedProperty.price / 10000000).toFixed(1)} Cr</p>
+                  <p className="text-[15px] font-semibold text-[#0A0A0A]">{selectedProperty.title}</p>
+                  <p className="text-[13px] text-[#6b6659]">{selectedProperty.location}</p>
+                  <p className="text-[15px] font-bold text-[#D31E28] mt-0.5">{formatCr(selectedProperty.price)}</p>
                 </div>
               </div>
               <AnimatePresence mode="wait">
                 {!isInquirySubmitted ? (
-                  <motion.form key="inquiry-form" onSubmit={handleInquirySubmit} className="space-y-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    {[{ label: "Full Name", field: "name", type: "text", placeholder: "e.g. Siddharth Reddy" }, { label: "Email Address", field: "email", type: "email", placeholder: "siddharth@email.com" }, { label: "Phone Number", field: "phone", type: "tel", placeholder: "+91 99889 98899" }].map((f) => (
-                      <div key={f.field} className="space-y-1">
-                        <label className="text-xs font-bold uppercase tracking-wider text-gray-500">{f.label}</label>
-                        <input type={f.type} required value={(inquiryForm as any)[f.field]} onChange={(e) => setInquiryForm({ ...inquiryForm, [f.field]: e.target.value })} placeholder={f.placeholder} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 text-sm font-medium rounded-xl focus:outline-none focus:border-brand-red transition-all" />
-                      </div>
+                  <motion.form
+                    key="inquiry-form"
+                    onSubmit={handleInquirySubmit}
+                    className="space-y-3.5"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    {[
+                      { field: "name", type: "text", placeholder: "Your name" },
+                      { field: "email", type: "email", placeholder: "Email address" },
+                      { field: "phone", type: "tel", placeholder: "Phone / WhatsApp number" },
+                    ].map((f) => (
+                      <input
+                        key={f.field}
+                        type={f.type}
+                        required
+                        value={(inquiryForm as any)[f.field]}
+                        onChange={(e) => setInquiryForm({ ...inquiryForm, [f.field]: e.target.value })}
+                        placeholder={f.placeholder}
+                        className="w-full border-[1.5px] border-[#e0d9cb] rounded-[10px] px-[18px] py-4 text-base text-[#0A0A0A] placeholder-[#948d7c] focus:outline-none focus:border-[#D31E28] transition-colors"
+                      />
                     ))}
-                    <div className="space-y-1">
-                      <label className="text-xs font-bold uppercase tracking-wider text-gray-500">Your Specific Needs</label>
-                      <textarea rows={3} value={inquiryForm.notes} onChange={(e) => setInquiryForm({ ...inquiryForm, notes: e.target.value })} className="w-full bg-gray-50 border border-gray-200 px-4 py-3 text-sm font-medium rounded-xl focus:outline-none focus:border-brand-red transition-all resize-none" placeholder="Share your budget, commute needs, or any specific questions…" />
-                    </div>
-                    <button type="submit" className="w-full py-4 bg-brand-red hover:bg-brand-red/90 text-white font-extrabold uppercase tracking-wider text-sm rounded-xl transition-all">Submit Consultation Request</button>
-                    <div className="flex items-start gap-2 text-xs text-gray-400 pt-2">
-                      <Info size={12} className="shrink-0 mt-0.5" />
-                      <span>All consultations are completely confidential, private, and free. No spam guaranteed.</span>
+                    <textarea
+                      rows={3}
+                      value={inquiryForm.notes}
+                      onChange={(e) => setInquiryForm({ ...inquiryForm, notes: e.target.value })}
+                      placeholder="Share your budget, commute needs, or any specific questions…"
+                      className="w-full border-[1.5px] border-[#e0d9cb] rounded-[10px] px-[18px] py-4 text-base text-[#0A0A0A] placeholder-[#948d7c] focus:outline-none focus:border-[#D31E28] transition-colors resize-none"
+                    />
+                    <button
+                      type="submit"
+                      className="w-full bg-[#D31E28] hover:bg-[#B8171F] text-white text-[17px] font-semibold py-[18px] rounded-[10px] cursor-pointer shadow-[0_6px_18px_rgba(211,30,40,0.3)] transition-colors"
+                    >
+                      Request advisor callback
+                    </button>
+                    <div className="flex items-start gap-2 text-[13px] text-[#948d7c] pt-1">
+                      <Info size={13} className="shrink-0 mt-0.5" />
+                      <span>Completely confidential, private and free. No spam, ever.</span>
                     </div>
                   </motion.form>
                 ) : (
-                  <motion.div key="inquiry-success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8 space-y-4">
-                    <div className="w-14 h-14 rounded-full bg-brand-red flex items-center justify-center mx-auto">
-                      <Check size={22} className="text-white" />
+                  <motion.div
+                    key="inquiry-success"
+                    initial={{ opacity: 0, scale: 0.96 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-8"
+                  >
+                    <div className="w-14 h-14 rounded-full bg-[#D31E28] flex items-center justify-center mx-auto">
+                      <Check size={22} className="text-white" strokeWidth={3} />
                     </div>
-                    <h4 className="text-xl font-extrabold text-brand-black">Inquiry Verified!</h4>
-                    <p className="text-sm text-gray-500 font-medium">A senior Hyderabad property advisor will call you within 4 hours with RERA clearances and structural documents.</p>
+                    <div className="text-[22px] font-semibold text-[#0A0A0A] mt-4">Enquiry received</div>
+                    <p className="text-[15px] leading-relaxed text-[#57534a] mt-2">
+                      A certified advisor will call you within 4 hours with the full audit report for this property.
+                    </p>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -1982,8 +1379,6 @@ export default function HomePage() {
           </div>
         )}
       </AnimatePresence>
-
-
-    </>
+    </div>
   );
 }

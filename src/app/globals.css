@@ -52,6 +52,15 @@ body {
   font-family: var(--font-cormorant), serif;
 }
 
+/* Homepage redesign type system — Archivo (UI/body) + Cormorant Garamond (display) */
+.font-archivo {
+  font-family: var(--font-archivo), "Archivo", ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-display), "Cormorant Garamond", Georgia, serif;
+}
+
 .text-sans {
   font-family: var(--font-inter), sans-serif;
 }

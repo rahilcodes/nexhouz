@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Menu, X, Heart, Phone, Building2, Home, LayoutGrid, Scale,
-  Globe, UserCheck, Info, Users, Briefcase, Calculator,
-  ArrowLeftRight, Ruler, ChevronDown, Sparkles, ArrowRight, AlertTriangle
+  X, Phone, Home, LayoutGrid, Scale, Globe, UserCheck, Info,
+  Briefcase, Calculator, ArrowLeftRight, Ruler, ChevronDown, Sparkles, Check,
 } from "lucide-react";
+import { CONTAINER, PHONE_DISPLAY, PHONE_TEL } from "@/components/ui/theme";
 
-const menus = [
+export const menus = [
   {
     label: "Properties",
     items: [
@@ -46,177 +46,200 @@ const menus = [
 ];
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedMobile, setExpandedMobile] = useState<string | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const router = useRouter();
   const pathname = usePathname();
-  const closeTimer = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  // On the homepage the CTA scrolls to the callback form; elsewhere it opens /contact
+  const handleBookSession = () => {
+    const form = document.getElementById("callback-form-section");
+    if (form) {
+      form.scrollIntoView({ behavior: "smooth" });
+    } else {
+      router.push("/contact");
+    }
+  };
 
-  useEffect(() => {
-    setIsOpen(false);
-    setActiveMenu(null);
-  }, [pathname]);
-
-  const handleMouseEnter = (label: string) => {
+  const handleEnter = (label: string) => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setActiveMenu(label);
   };
-
-  const handleMouseLeave = () => {
+  const handleLeave = () => {
     closeTimer.current = setTimeout(() => setActiveMenu(null), 120);
   };
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "py-3 bg-white/95 backdrop-blur-xl border-b border-black/6 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.08)]"
-          : "py-4 bg-white border-b border-black/5"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between gap-6">
-        {/* Logo */}
-        <Link href="/" className="group flex items-center shrink-0 focus:outline-none">
-          <img
-            src="/images/logo_black_text_mainlogo.png"
-            alt="NexHouz"
-            className="h-9 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
-          />
-        </Link>
-
-        {/* Desktop Nav */}
-        <nav className="hidden lg:flex items-center gap-1">
-          {menus.map((menu) => (
-            <div
-              key={menu.label}
-              className="relative"
-              onMouseEnter={() => handleMouseEnter(menu.label)}
-              onMouseLeave={handleMouseLeave}
-            >
-              <button
-                className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-bold tracking-widest uppercase transition-all cursor-pointer ${
-                  activeMenu === menu.label
-                    ? "text-brand-red bg-brand-red/4"
-                    : "text-brand-black/55 hover:text-brand-black hover:bg-gray-50"
-                }`}
-              >
-                {menu.label}
-                <ChevronDown
-                  size={11}
-                  className={`transition-transform duration-200 ${activeMenu === menu.label ? "rotate-180 text-brand-red" : ""}`}
-                />
-              </button>
-
-              {/* Dropdown panel */}
-              <AnimatePresence>
-                {activeMenu === menu.label && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.97 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.97 }}
-                    transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                    onMouseEnter={() => handleMouseEnter(menu.label)}
-                    onMouseLeave={handleMouseLeave}
-                    className="absolute top-full left-0 mt-2 w-72 bg-white border border-gray-100 rounded-2xl shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15)] overflow-hidden z-50"
-                  >
-                    <div className="p-2">
-                      {menu.items.map((item) => {
-                        const Icon = item.icon;
-                        const isActive = pathname === item.href;
-                        return (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            className={`flex items-start gap-3 p-3 rounded-xl transition-all group/item ${
-                              isActive ? "bg-brand-red/4" : "hover:bg-gray-50"
-                            }`}
-                          >
-                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
-                              isActive ? "bg-brand-red text-white" : "bg-gray-100 text-gray-500 group-hover/item:bg-brand-red/10 group-hover/item:text-brand-red"
-                            }`}>
-                              <Icon size={15} className="stroke-[1.8]" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className={`text-[12px] font-bold ${isActive ? "text-brand-red" : "text-brand-black group-hover/item:text-brand-red"} transition-colors`}>
-                                  {item.label}
-                                </span>
-                                {"badge" in item && item.badge && (
-                                  <span className="text-xs font-extrabold uppercase tracking-wider bg-brand-red text-white px-1.5 py-0.5 rounded-full">
-                                    {item.badge}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-gray-400 font-medium mt-0.5 leading-snug">{item.desc}</p>
-                            </div>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                    {/* Footer link */}
-                    <div className="px-3 pb-3">
-                      <div className="border-t border-gray-100 pt-2.5 flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-widest text-gray-400">NexHouz</span>
-                        <Link href="/contact" className="text-xs font-bold text-brand-red hover:underline flex items-center gap-1">
-                          Talk to Expert <ArrowRight size={9} />
-                        </Link>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
-        </nav>
-
-        {/* Right Controls */}
-        <div className="hidden lg:flex items-center gap-3 shrink-0">
-          <a href="tel:+918585854853" className="flex items-center gap-1.5 text-sm font-bold text-brand-black/55 hover:text-brand-black transition-colors">
-            <Phone size={12} className="stroke-[2]" />
-            <span>+91 85858 54853</span>
-          </a>
-          <Link href="/dashboard?tab=saved" className="p-2 hover:bg-gray-50 rounded-full transition-colors text-brand-black/40 hover:text-brand-black" aria-label="Saved">
-            <Heart size={16} className="stroke-[2]" />
-          </Link>
-          <Link href="/contact" className="flex items-center justify-center text-xs font-extrabold tracking-widest text-white bg-brand-red hover:bg-brand-red/90 px-5 py-2.5 rounded-full uppercase transition-all shadow-sm hover:shadow-lg hover:shadow-brand-red/20 hover:scale-105 active:scale-95 whitespace-nowrap">
-            Book Free Consultation
-          </Link>
+    <header className="relative z-[60] bg-white font-archivo">
+      {/* Trust strip */}
+      <div className="hidden lg:block px-6 xl:px-[60px] py-3 bg-[#0A0A0A] text-white">
+        <div className={`${CONTAINER} flex items-center justify-between`}>
+          <div className="flex gap-8 text-sm font-medium">
+            {["RERA Registered", "GHMC Approved", "100% Legal-Clear Properties"].map((t) => (
+              <span key={t} className="flex items-center gap-1.5">
+                <Check size={13} className="text-[#D31E28]" strokeWidth={3} /> {t}
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-7 text-sm font-medium items-center">
+            <a href={PHONE_TEL} className="flex items-center gap-1.5 text-white hover:text-[#f3c9cb] transition-colors">
+              <Phone size={13} /> {PHONE_DISPLAY}
+            </a>
+            <span className="text-[#f3c9cb]">Mon–Sun · 9 AM – 8 PM</span>
+          </div>
         </div>
+      </div>
 
-        {/* Mobile toggle */}
-        <div className="lg:hidden flex items-center gap-2">
-          <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-brand-black focus:outline-none cursor-pointer" aria-label="Toggle menu">
-            {isOpen ? <X size={22} /> : <Menu size={22} />}
+      {/* Nav row */}
+      <div className="px-4 md:px-6 xl:px-[60px] border-b border-[#EEE9E0] bg-white">
+        <div className={`${CONTAINER} flex items-center justify-between py-3 lg:py-3.5`}>
+          <Link href="/" className="shrink-0" aria-label="NexHouz home">
+            <img
+              src="/images/logo_black_text_mainlogo.png"
+              alt="NexHouz"
+              className="h-10 lg:h-[52px] xl:h-[58px] w-auto object-contain"
+            />
+          </Link>
+
+          {/* Desktop menu */}
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-3">
+            {menus.map((menu) => (
+              <div
+                key={menu.label}
+                className="relative"
+                onMouseEnter={() => handleEnter(menu.label)}
+                onMouseLeave={handleLeave}
+              >
+                <button
+                  className={`flex items-center gap-1.5 px-3 xl:px-4 py-2.5 rounded-lg text-[15px] xl:text-base font-medium transition-colors cursor-pointer ${
+                    activeMenu === menu.label ? "text-[#D31E28] bg-[#FAF7F1]" : "text-[#2b2823] hover:text-[#D31E28]"
+                  }`}
+                >
+                  {menu.label}
+                  <ChevronDown
+                    size={14}
+                    className={`transition-transform duration-200 ${
+                      activeMenu === menu.label ? "rotate-180 text-[#D31E28]" : "text-[#948d7c]"
+                    }`}
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {activeMenu === menu.label && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+                      onMouseEnter={() => handleEnter(menu.label)}
+                      onMouseLeave={handleLeave}
+                      className="absolute top-full left-0 mt-2 w-80 bg-white border border-[#EEE9E0] rounded-2xl shadow-[0_18px_50px_rgba(30,25,15,0.14)] overflow-hidden"
+                    >
+                      <div className="p-2">
+                        {menu.items.map((item) => {
+                          const Icon = item.icon;
+                          const isActive = pathname === item.href;
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              onClick={() => setActiveMenu(null)}
+                              className={`flex items-start gap-3.5 p-3 rounded-xl transition-colors group/item ${
+                                isActive ? "bg-[#FAF7F1]" : "hover:bg-[#FAF7F1]"
+                              }`}
+                            >
+                              <div
+                                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                                  isActive
+                                    ? "bg-[#D31E28] text-white"
+                                    : "bg-[#FAF7F1] text-[#8A6D2F] group-hover/item:bg-[#D31E28] group-hover/item:text-white"
+                                }`}
+                              >
+                                <Icon size={16} className="stroke-[1.8]" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className={`text-[15px] font-semibold transition-colors ${
+                                      isActive ? "text-[#D31E28]" : "text-[#0A0A0A] group-hover/item:text-[#D31E28]"
+                                    }`}
+                                  >
+                                    {item.label}
+                                  </span>
+                                  {"badge" in item && item.badge && (
+                                    <span className="text-[10px] font-bold uppercase tracking-wider bg-[#D31E28] text-white px-1.5 py-0.5 rounded-full">
+                                      {item.badge}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-[13px] text-[#948d7c] mt-0.5 leading-snug">{item.desc}</p>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+          </nav>
+
+          {/* Desktop CTA */}
+          <button
+            onClick={handleBookSession}
+            className="hidden lg:inline-block bg-[#D31E28] hover:bg-[#B8171F] text-white text-[15px] xl:text-base font-semibold px-6 xl:px-7 py-3.5 xl:py-4 rounded-lg cursor-pointer shadow-[0_4px_14px_rgba(211,30,40,0.25)] transition-colors whitespace-nowrap"
+          >
+            Book Free Expert Session
+          </button>
+
+          {/* Mobile hamburger */}
+          <button
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open menu"
+            className="lg:hidden w-11 h-11 rounded-[10px] bg-[#f4efe6] flex flex-col items-center justify-center gap-1 cursor-pointer"
+          >
+            <span className="w-[18px] h-0.5 bg-[#0A0A0A]" />
+            <span className="w-[18px] h-0.5 bg-[#0A0A0A]" />
+            <span className="w-[18px] h-0.5 bg-[#0A0A0A]" />
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile menu overlay */}
       <AnimatePresence>
-        {isOpen && (
+        {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-xl lg:hidden max-h-[85vh] overflow-y-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 bg-white overflow-y-auto lg:hidden"
           >
-            <div className="p-4 space-y-1">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#EEE9E0]">
+              <img src="/images/logo_black_text_mainlogo.png" alt="NexHouz" className="h-10 w-auto object-contain" />
+              <button
+                onClick={() => setMobileOpen(false)}
+                aria-label="Close menu"
+                className="w-11 h-11 rounded-[10px] bg-[#f4efe6] flex items-center justify-center cursor-pointer"
+              >
+                <X size={20} className="text-[#0A0A0A]" />
+              </button>
+            </div>
+            <div className="p-4 pb-10">
               {menus.map((menu) => (
-                <div key={menu.label}>
+                <div key={menu.label} className="border-b border-[#f0ebe1]">
                   <button
                     onClick={() => setExpandedMobile(expandedMobile === menu.label ? null : menu.label)}
-                    className="w-full flex items-center justify-between px-3 py-3 text-xs font-extrabold uppercase tracking-widest text-brand-black/70 hover:text-brand-black cursor-pointer"
+                    className="w-full flex items-center justify-between px-2 py-4 text-base font-semibold text-[#0A0A0A] cursor-pointer"
                   >
                     {menu.label}
-                    <ChevronDown size={13} className={`transition-transform ${expandedMobile === menu.label ? "rotate-180 text-brand-red" : ""}`} />
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform ${expandedMobile === menu.label ? "rotate-180 text-[#D31E28]" : "text-[#948d7c]"}`}
+                    />
                   </button>
                   <AnimatePresence>
                     {expandedMobile === menu.label && (
@@ -227,20 +250,20 @@ export default function Navbar() {
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden"
                       >
-                        <div className="pl-3 pb-2 space-y-1">
+                        <div className="pb-3 space-y-1">
                           {menu.items.map((item) => {
                             const Icon = item.icon;
                             return (
                               <Link
                                 key={item.href}
                                 href={item.href}
-                                onClick={() => setIsOpen(false)}
-                                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-colors"
+                                onClick={() => setMobileOpen(false)}
+                                className="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-[#FAF7F1] transition-colors"
                               >
-                                <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 shrink-0">
-                                  <Icon size={14} className="stroke-[1.8]" />
+                                <div className="w-9 h-9 rounded-[10px] bg-[#FAF7F1] flex items-center justify-center text-[#8A6D2F] shrink-0">
+                                  <Icon size={15} className="stroke-[1.8]" />
                                 </div>
-                                <span className="text-sm font-semibold text-brand-black">{item.label}</span>
+                                <span className="text-[15px] font-medium text-[#2b2823]">{item.label}</span>
                               </Link>
                             );
                           })}
@@ -250,19 +273,27 @@ export default function Navbar() {
                   </AnimatePresence>
                 </div>
               ))}
-              <div className="pt-3 border-t border-gray-100 space-y-2">
-                <a href="tel:+918585854853" className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-brand-black/60">
-                  <Phone size={13} /> +91 85858 54853
+              <div className="pt-5 space-y-3">
+                <a
+                  href={PHONE_TEL}
+                  className="flex items-center justify-center gap-2 border-[1.5px] border-[#d8d2c6] text-[#0A0A0A] text-base font-semibold py-4 rounded-xl"
+                >
+                  <Phone size={15} /> {PHONE_DISPLAY}
                 </a>
-                <Link href="/contact" onClick={() => setIsOpen(false)} className="flex items-center justify-center text-xs font-extrabold tracking-widest text-white bg-brand-red py-3.5 uppercase rounded-full hover:bg-brand-red/90 transition-colors">
-                  Book Free Consultation
-                </Link>
+                <button
+                  onClick={() => {
+                    setMobileOpen(false);
+                    setTimeout(handleBookSession, 150);
+                  }}
+                  className="w-full bg-[#D31E28] hover:bg-[#B8171F] text-white text-base font-semibold py-4 rounded-xl cursor-pointer shadow-[0_6px_16px_rgba(211,30,40,0.25)] transition-colors"
+                >
+                  Book Free Expert Session
+                </button>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
     </header>
   );
 }
