@@ -496,8 +496,8 @@ function runLocalFallback(
         if (nextState.profile.property_type && p.type === nextState.profile.property_type) score += 15;
 
         // Priorities
-        if (nextState.profile.priority === "Schools" && p.nearby && p.nearby.schools >= 8) score += 10;
-        if (nextState.profile.priority === "Commute" && p.nearby && p.nearby.itParks >= 4) score += 10;
+        if (nextState.profile.priority === "Schools" && p.nearby && p.nearby.schools !== undefined && p.nearby.schools >= 8) score += 10;
+        if (nextState.profile.priority === "Commute" && p.nearby && p.nearby.itParks !== undefined && p.nearby.itParks >= 4) score += 10;
         if (nextState.profile.priority === "Luxury Lifestyle" && p.scores.architecturalIntegrity >= 92) score += 10;
         if (nextState.profile.priority === "Appreciation" && p.recommendationReport && p.recommendationReport.futureAppreciation >= 9) score += 10;
 

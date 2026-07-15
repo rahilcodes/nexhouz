@@ -54,14 +54,28 @@ export function normalizeProperty(dbProp: any): Property {
     co: Number(dbProp.locations?.co ?? 587)
   };
 
+  let cleanDescription = dbProp.description || "";
+  const customStatsMatch = cleanDescription.match(/<!-- CONNECTIVITY_STATS:([\s\S]*?)-->/);
+  let customStats: Record<string, number> = {};
+  
+  if (customStatsMatch) {
+    try {
+      customStats = JSON.parse(customStatsMatch[1].trim());
+      cleanDescription = cleanDescription.replace(/<!-- CONNECTIVITY_STATS:[\s\S]*?-->/g, "").trim();
+    } catch (e) {
+      console.error("Error parsing custom connectivity stats:", e);
+    }
+  }
+
   const nearby: NearbyAmenities = {
-    hospitals: dbProp.nearby_hospitals ?? 12,
-    malls: dbProp.nearby_malls ?? 6,
-    schools: dbProp.nearby_schools ?? 10,
-    restaurants: dbProp.nearby_restaurants ?? 15,
-    metroStations: dbProp.nearby_metro_stations ?? 2,
-    railwayStations: dbProp.nearby_railway_stations ?? 1,
-    itParks: dbProp.nearby_it_parks ?? 4
+    ...(dbProp.nearby_hospitals !== null && dbProp.nearby_hospitals !== undefined ? { hospitals: dbProp.nearby_hospitals } : {}),
+    ...(dbProp.nearby_malls !== null && dbProp.nearby_malls !== undefined ? { malls: dbProp.nearby_malls } : {}),
+    ...(dbProp.nearby_schools !== null && dbProp.nearby_schools !== undefined ? { schools: dbProp.nearby_schools } : {}),
+    ...(dbProp.nearby_restaurants !== null && dbProp.nearby_restaurants !== undefined ? { restaurants: dbProp.nearby_restaurants } : {}),
+    ...(dbProp.nearby_metro_stations !== null && dbProp.nearby_metro_stations !== undefined ? { metroStations: dbProp.nearby_metro_stations } : {}),
+    ...(dbProp.nearby_railway_stations !== null && dbProp.nearby_railway_stations !== undefined ? { railwayStations: dbProp.nearby_railway_stations } : {}),
+    ...(dbProp.nearby_it_parks !== null && dbProp.nearby_it_parks !== undefined ? { itParks: dbProp.nearby_it_parks } : {}),
+    ...customStats
   };
 
   // Extract Recommendation Report
@@ -91,7 +105,7 @@ export function normalizeProperty(dbProp: any): Property {
     area: `${Number(dbProp.area_sqft).toLocaleString()} sq ft`,
     possession: dbProp.possession_status,
     investmentType: dbProp.investment_type,
-    description: dbProp.description,
+    description: cleanDescription,
     architect: dbProp.architect || "",
     featured: dbProp.featured || false,
     image: primaryImage,
@@ -498,6 +512,22 @@ export async function saveProperty(form: any): Promise<{ success: boolean; error
       }
     }
 
+    const standardKeys = ["hospitals", "malls", "schools", "restaurants", "metroStations", "railwayStations", "itParks"];
+    const customStats: Record<string, number> = {};
+    if (form.nearby) {
+      Object.keys(form.nearby).forEach(key => {
+        if (!standardKeys.includes(key)) {
+          customStats[key] = (form.nearby as any)[key];
+        }
+      });
+    }
+
+    let descriptionClean = (form.description || "").replace(/\n\n<!-- CONNECTIVITY_STATS:[\s\S]*?-->/g, "").trim();
+    let descriptionPayload = descriptionClean;
+    if (Object.keys(customStats).length > 0) {
+      descriptionPayload = `${descriptionClean}\n\n<!-- CONNECTIVITY_STATS:${JSON.stringify(customStats)} -->`;
+    }
+
     const propertyPayload = {
       project_id: projectId,
       location_id: locationId,
@@ -509,7 +539,7 @@ export async function saveProperty(form: any): Promise<{ success: boolean; error
       area_sqft: areaSqft,
       possession_status: form.possession,
       investment_type: form.investmentType,
-      description: form.description,
+      description: descriptionPayload,
       architect: form.architect || builderName,
       featured: !!form.featured,
       score_architectural: Number(form.scores?.architecturalIntegrity ?? 90),
@@ -517,13 +547,13 @@ export async function saveProperty(form: any): Promise<{ success: boolean; error
       score_spatial: Number(form.scores?.spatialEfficiency ?? 90),
       score_automation: form.scores?.automationTier ?? "Tier 2 (Pro)",
       
-      nearby_hospitals: form.nearby?.hospitals ?? 12,
-      nearby_malls: form.nearby?.malls ?? 6,
-      nearby_schools: form.nearby?.schools ?? 10,
-      nearby_restaurants: form.nearby?.restaurants ?? 15,
-      nearby_metro_stations: form.nearby?.metroStations ?? 2,
-      nearby_railway_stations: form.nearby?.railwayStations ?? 1,
-      nearby_it_parks: form.nearby?.itParks ?? 4,
+      nearby_hospitals: form.nearby?.hospitals !== undefined ? form.nearby.hospitals : null,
+      nearby_malls: form.nearby?.malls !== undefined ? form.nearby.malls : null,
+      nearby_schools: form.nearby?.schools !== undefined ? form.nearby.schools : null,
+      nearby_restaurants: form.nearby?.restaurants !== undefined ? form.nearby.restaurants : null,
+      nearby_metro_stations: form.nearby?.metroStations !== undefined ? form.nearby.metroStations : null,
+      nearby_railway_stations: form.nearby?.railwayStations !== undefined ? form.nearby.railwayStations : null,
+      nearby_it_parks: form.nearby?.itParks !== undefined ? form.nearby.itParks : null,
       uds_per_acre: form.type === "Apartment" ? Number(form.udsPerAcre ?? 100) : null,
       brochure_url: form.brochureUrl || null
     };

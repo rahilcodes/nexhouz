@@ -173,6 +173,39 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
     }
   };
 
+  const nearbyItems: { key: string; count: number }[] = [];
+  if (property.nearby) {
+    Object.keys(property.nearby).forEach(key => {
+      const val = (property.nearby as any)[key];
+      if (val !== undefined && val !== null) {
+        nearbyItems.push({ key, count: val });
+      }
+    });
+  }
+
+  const FACILITY_MAP: Record<string, { icon: any; label: string; color: string }> = {
+    hospitals: { icon: Stethoscope, label: "Hospitals", color: "#ef4444" },
+    malls: { icon: ShoppingBag, label: "Shopping Malls", color: "#8b5cf6" },
+    schools: { icon: GraduationCap, label: "Schools", color: "#3b82f6" },
+    restaurants: { icon: UtensilsCrossed, label: "Restaurants", color: "#f97316" },
+    metroStations: { icon: Navigation, label: "Metro Stations", color: "#6366f1" },
+    railwayStations: { icon: Train, label: "Railway Stations", color: "#0891b2" },
+    itParks: { icon: Building2, label: "IT Parks", color: "#16a34a" },
+  };
+
+  const getFacilityMeta = (key: string) => {
+    if (FACILITY_MAP[key]) return FACILITY_MAP[key];
+    const label = key
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, str => str.toUpperCase())
+      .trim();
+    return {
+      icon: MapPin,
+      label,
+      color: "#948d7c"
+    };
+  };
+
   // Scroll to tab section
   const scrollToSection = (tab: string) => {
     setActiveTab(tab);
@@ -522,47 +555,27 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                   </div>
 
                   <div className="p-6">
-                    {/* Nearby Amenities */}
-                    <div className="mb-6">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8A6D2F] mb-3">Nearby Amenities (Within 5km)</p>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {[
-                          { icon: Stethoscope, label: "Hospitals", count: property.nearby?.hospitals ?? 20, color: "#ef4444" },
-                          { icon: ShoppingBag, label: "Shopping Malls", count: property.nearby?.malls ?? 11, color: "#8b5cf6" },
-                          { icon: GraduationCap, label: "Schools", count: property.nearby?.schools ?? 20, color: "#3b82f6" },
-                          { icon: UtensilsCrossed, label: "Restaurants", count: property.nearby?.restaurants ?? 20, color: "#f97316" },
-                        ].map(({ icon: Icon, label, count, color }) => (
-                          <div key={label} className="text-center p-4 rounded-xl border border-[#EEE9E0] bg-[#FAF7F1] hover:border-[#d8d2c6] transition-colors">
-                            <div className="w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: `${color}12` }}>
-                              <Icon size={16} style={{ color }} />
-                            </div>
-                            <p className="text-xl font-bold text-[#0A0A0A]">{count}+</p>
-                            <p className="text-xs font-medium text-[#948d7c] mt-0.5">{label}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Transportation */}
+                    {/* Dynamic Proximity Stats */}
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8A6D2F] mb-3">Transportation & Connectivity</p>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        {[
-                          { icon: Navigation, label: "Metro Stations", count: property.nearby?.metroStations ?? 3, color: "#6366f1" },
-                          { icon: Train, label: "Railway Stations", count: property.nearby?.railwayStations ?? 3, color: "#0891b2" },
-                          { icon: Building2, label: "IT Parks", count: property.nearby?.itParks ?? 5, color: "#16a34a" },
-                        ].map(({ icon: Icon, label, count, color }) => (
-                          <div key={label} className="flex items-center gap-3 p-3.5 rounded-xl border border-[#EEE9E0] bg-[#FAF7F1]">
-                            <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: `${color}10` }}>
-                              <Icon size={15} style={{ color }} />
-                            </div>
-                            <div>
-                              <p className="text-lg font-bold text-[#0A0A0A] leading-none">{count}</p>
-                              <p className="text-xs font-medium text-[#948d7c] mt-0.5">{label}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8A6D2F] mb-4">Neighborhood Connectivity & Proximity Stats (Within 5km)</p>
+                      {nearbyItems.length === 0 ? (
+                        <p className="text-xs text-[#948d7c] italic bg-[#FAF7F1] p-4 rounded-xl border border-[#EEE9E0]">No connectivity stats listed for this neighborhood.</p>
+                      ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                          {nearbyItems.map(({ key, count }) => {
+                            const { icon: Icon, label, color } = getFacilityMeta(key);
+                            return (
+                              <div key={key} className="text-center p-4 rounded-xl border border-[#EEE9E0] bg-[#FAF7F1] hover:border-[#d8d2c6] transition-colors">
+                                <div className="w-9 h-9 rounded-full flex items-center justify-center mx-auto mb-2" style={{ background: `${color}12` }}>
+                                  <Icon size={16} style={{ color }} />
+                                </div>
+                                <p className="text-xl font-bold text-[#0A0A0A]">{count}+</p>
+                                <p className="text-xs font-semibold text-[#948d7c] mt-0.5">{label}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

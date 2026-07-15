@@ -6,13 +6,14 @@ export interface LuxuryScore {
 }
 
 export interface NearbyAmenities {
-  hospitals: number;
-  malls: number;
-  schools: number;
-  restaurants: number;
-  metroStations: number;
-  railwayStations: number;
-  itParks: number;
+  hospitals?: number;
+  malls?: number;
+  schools?: number;
+  restaurants?: number;
+  metroStations?: number;
+  railwayStations?: number;
+  itParks?: number;
+  [key: string]: number | undefined;
 }
 
 export interface AQIData {

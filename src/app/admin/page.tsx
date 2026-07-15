@@ -164,6 +164,9 @@ export default function AdminPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [isCustomLocation, setIsCustomLocation] = useState(false);
   const [customLocationText, setCustomLocationText] = useState("");
+  const [newFacilityName, setNewFacilityName] = useState("");
+  const [newFacilityValue, setNewFacilityValue] = useState(0);
+  const [showAddFacility, setShowAddFacility] = useState(false);
   const [imageInput, setImageInput] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -489,6 +492,56 @@ export default function AdminPage() {
     } else {
       return `₹${parseFloat((price / 100000).toFixed(2))} Lakhs`;
     }
+  };
+
+  const getLabelFromKey = (key: string): string => {
+    const DEFAULT_FACILITIES = [
+      { key: "hospitals", label: "Hospitals" },
+      { key: "malls", label: "Shopping Malls" },
+      { key: "schools", label: "Schools" },
+      { key: "restaurants", label: "Restaurants" },
+      { key: "metroStations", label: "Metro Stations" },
+      { key: "railwayStations", label: "Railway Stations" },
+      { key: "itParks", label: "IT Parks" },
+    ];
+    const def = DEFAULT_FACILITIES.find(d => d.key === key);
+    if (def) return def.label;
+    return key
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, str => str.toUpperCase())
+      .trim();
+  };
+
+  const removeNearbyFacility = (key: string) => {
+    setForm(f => {
+      const updatedNearby = { ...f.nearby };
+      delete (updatedNearby as any)[key];
+      return { ...f, nearby: updatedNearby };
+    });
+  };
+
+  const handleAddFacility = () => {
+    if (!newFacilityName.trim()) return;
+    // Convert name to camelCase key
+    const key = newFacilityName
+      .trim()
+      .replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, (match, index) => {
+        if (+match === 0) return "";
+        return index === 0 ? match.toLowerCase() : match.toUpperCase();
+      })
+      .replace(/\s+/g, "");
+
+    setForm(f => ({
+      ...f,
+      nearby: {
+        ...f.nearby,
+        [key]: newFacilityValue
+      }
+    }));
+
+    setNewFacilityName("");
+    setNewFacilityValue(0);
+    setShowAddFacility(false);
   };
 
   const startEdit = (p: any) => {
@@ -1056,29 +1109,107 @@ export default function AdminPage() {
                     {/* Connectivity Stats */}
                     <div className="border-t pt-5 space-y-4">
                       <div>
-                        <h4 className="text-xs font-extrabold text-brand-red uppercase tracking-wider">Neighborhood Connectivity Stats (Within 5km)</h4>
-                        <p className="text-xs text-gray-400 mt-0.5">Specify proximity count for nearby facilities.</p>
+                        <h4 className="text-xs font-extrabold text-[#D31E28] uppercase tracking-wider">Neighborhood Connectivity Stats (Within 5km)</h4>
+                        <p className="text-xs text-gray-400 mt-0.5">Specify proximity count for nearby facilities. You can remove facilities or add custom ones.</p>
                       </div>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        {[
-                          { key: "hospitals", label: "Hospitals" },
-                          { key: "malls", label: "Shopping Malls" },
-                          { key: "schools", label: "Schools" },
-                          { key: "restaurants", label: "Restaurants" },
-                          { key: "metroStations", label: "Metro Stations" },
-                          { key: "railwayStations", label: "Railway Stations" },
-                          { key: "itParks", label: "IT Parks" },
-                        ].map(n => (
-                          <div key={n.key} className="space-y-1">
-                            <label className="text-xs font-bold uppercase tracking-widest text-gray-400">{n.label}</label>
-                            <input
-                              type="number" min={0}
-                              className="w-full bg-gray-50 border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
-                              value={(form.nearby as any)[n.key] ?? 0}
-                              onChange={e => setNearby(n.key, parseInt(e.target.value) || 0)}
-                            />
-                          </div>
-                        ))}
+                      
+                      {Object.keys(form.nearby || {}).length === 0 ? (
+                        <p className="text-xs text-gray-400 italic">No connectivity stats listed. Add some defaults or a custom facility below.</p>
+                      ) : (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                          {Object.keys(form.nearby || {}).map(key => {
+                            const label = getLabelFromKey(key);
+                            return (
+                              <div key={key} className="space-y-1 relative bg-gray-50/50 p-3 rounded-xl border border-gray-100">
+                                <div className="flex justify-between items-center mb-1">
+                                  <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 truncate pr-2" title={label}>{label}</label>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeNearbyFacility(key)}
+                                    className="text-gray-300 hover:text-red-500 cursor-pointer transition-colors p-0.5 rounded"
+                                    title="Remove facility"
+                                  >
+                                    <X size={12} />
+                                  </button>
+                                </div>
+                                <input
+                                  type="number" min={0}
+                                  className="w-full bg-white border rounded-xl px-4 py-2.5 text-xs font-semibold outline-none focus:border-[#D31E28]"
+                                  value={(form.nearby as any)[key] ?? 0}
+                                  onChange={e => setNearby(key, parseInt(e.target.value) || 0)}
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Add Facility options */}
+                      <div className="pt-2 border-t border-dashed border-gray-150 space-y-3">
+                        <div className="flex flex-wrap gap-2 items-center">
+                          {["hospitals", "malls", "schools", "restaurants", "metroStations", "railwayStations", "itParks"]
+                            .filter(k => !(form.nearby && k in form.nearby))
+                            .map(k => {
+                              const label = getLabelFromKey(k);
+                              const defaultValue = (DEFAULT_NEARBY as any)[k] ?? 0;
+                              return (
+                                <button
+                                  key={k}
+                                  type="button"
+                                  onClick={() => setNearby(k, defaultValue)}
+                                  className="px-2.5 py-1.5 bg-[#FAF7F1] border hover:border-[#D31E28] rounded-xl text-[10px] font-bold uppercase tracking-wider text-gray-500 hover:text-[#D31E28] cursor-pointer transition-colors"
+                                >
+                                  + {label}
+                                </button>
+                              );
+                            })}
+                          
+                          {showAddFacility ? (
+                            <div className="flex gap-2 items-center bg-[#FAF7F1] p-3 rounded-xl border border-gray-200 w-full sm:w-auto mt-2">
+                              <input
+                                type="text"
+                                placeholder="e.g. Airports"
+                                value={newFacilityName}
+                                onChange={e => setNewFacilityName(e.target.value)}
+                                className="bg-white border rounded-lg px-2.5 py-1.5 text-xs font-semibold outline-none focus:border-[#D31E28] w-36"
+                              />
+                              <input
+                                type="number"
+                                min={0}
+                                placeholder="Count"
+                                value={newFacilityValue || ""}
+                                onChange={e => setNewFacilityValue(parseInt(e.target.value) || 0)}
+                                className="bg-white border rounded-lg px-2.5 py-1.5 text-xs font-semibold outline-none focus:border-[#D31E28] w-16"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleAddFacility}
+                                className="px-3 py-1.5 bg-[#0A0A0A] hover:bg-gray-800 text-white rounded-lg text-xs font-bold cursor-pointer"
+                              >
+                                Add
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setShowAddFacility(false);
+                                  setNewFacilityName("");
+                                  setNewFacilityValue(0);
+                                }}
+                                className="text-xs text-gray-400 hover:text-gray-600 cursor-pointer font-bold px-1"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setShowAddFacility(true)}
+                              className="px-3 py-1.5 bg-[#0A0A0A] hover:bg-[#D31E28] text-white rounded-xl text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-colors"
+                            >
+                              + Custom Facility
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
 
