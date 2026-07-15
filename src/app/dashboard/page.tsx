@@ -111,7 +111,13 @@ export default function DashboardPage() {
   // Filter actual properties that are favorited
   const savedProperties = liveProperties.filter((p) => favorites.includes(p.id));
 
-  const formatPrice = (price: number) => `₹${(price / 10000000).toFixed(1)} Cr`;
+  const formatPrice = (price: number) => {
+    if (price >= 10000000) {
+      return `₹${parseFloat((price / 10000000).toFixed(2))} Cr`;
+    } else {
+      return `₹${parseFloat((price / 100000).toFixed(2))} Lakhs`;
+    }
+  };
 
   const tabs: { key: "listings" | "compare" | "visit"; label: string }[] = [
     { key: "listings", label: `Saved (${savedProperties.length})` },

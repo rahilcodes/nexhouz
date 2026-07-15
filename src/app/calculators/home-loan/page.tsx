@@ -23,8 +23,8 @@ export default function HomeLoanCalculatorPage() {
   const totalInterest = totalPayable - eligibleLoan;
 
   const formatCr = (n: number) => {
-    if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)} Cr`;
-    if (n >= 100000) return `₹${(n / 100000).toFixed(2)} L`;
+    if (n >= 10000000) return `₹${parseFloat((n / 10000000).toFixed(2))} Cr`;
+    if (n >= 100000) return `₹${parseFloat((n / 100000).toFixed(2))} Lakhs`;
     return `₹${n.toLocaleString("en-IN")}`;
   };
 

@@ -32,9 +32,9 @@ const TYPING_MESSAGES = [
 // Helper to format currency in INR
 function formatINR(price: number): string {
   if (price >= 10000000) {
-    return `₹${(price / 10000000).toFixed(1)} Cr`;
+    return `₹${parseFloat((price / 10000000).toFixed(2))} Cr`;
   }
-  return `₹${(price / 100000).toFixed(0)} L`;
+  return `₹${parseFloat((price / 100000).toFixed(2))} Lakhs`;
 }
 
 export default function FloatingChat() {

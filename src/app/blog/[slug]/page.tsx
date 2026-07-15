@@ -41,7 +41,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   // Showcase a matching property on the sidebar for high conversion
   const featuredProp = properties[0];
-  const priceCr = `₹${parseFloat((featuredProp.price / 10000000).toFixed(2))} Cr`;
+  const priceCr = featuredProp.price >= 10000000
+    ? `₹${parseFloat((featuredProp.price / 10000000).toFixed(2))} Cr`
+    : `₹${parseFloat((featuredProp.price / 100000).toFixed(2))} Lakhs`;
 
   return (
     <div className="font-archivo bg-white">

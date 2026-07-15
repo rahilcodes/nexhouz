@@ -45,7 +45,13 @@ const scrollToCallback = () => {
   document.getElementById("callback-form-section")?.scrollIntoView({ behavior: "smooth" });
 };
 
-const formatCr = (price: number) => `₹${parseFloat((price / 10000000).toFixed(2))} Cr`;
+const formatCr = (price: number) => {
+  if (price >= 10000000) {
+    return `₹${parseFloat((price / 10000000).toFixed(2))} Cr`;
+  } else {
+    return `₹${parseFloat((price / 100000).toFixed(2))} Lakhs`;
+  }
+};
 
 
 const possessionLabel = (p: Property) =>

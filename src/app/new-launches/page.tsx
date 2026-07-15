@@ -66,6 +66,14 @@ export default function NewLaunchesPage() {
     loadProperties();
   }, []);
 
+  const formatPrice = (price: number) => {
+    if (price >= 10000000) {
+      return `₹${parseFloat((price / 10000000).toFixed(2))} Cr`;
+    } else {
+      return `₹${parseFloat((price / 100000).toFixed(2))} Lakhs`;
+    }
+  };
+
   const newLaunchProperties = liveProperties.filter(p => p.possession === "Under Construction");
 
   const toggleFavorite = (id: string, e: React.MouseEvent) => {
@@ -213,7 +221,7 @@ export default function NewLaunchesPage() {
                             {property.location.split(",")[0]}
                           </span>
                           <span className="text-[17px] lg:text-lg font-bold text-[#D31E28] whitespace-nowrap">
-                            ₹{(property.price / 10000000).toFixed(1)} Cr
+                            {formatPrice(property.price)}
                           </span>
                         </div>
                         <Link

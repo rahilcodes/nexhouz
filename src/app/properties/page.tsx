@@ -253,7 +253,11 @@ function PropertiesExplorerContent() {
   });
 
   const formatPrice = (price: number) => {
-    return `₹${(price / 10000000).toFixed(1)} Cr`;
+    if (price >= 10000000) {
+      return `₹${parseFloat((price / 10000000).toFixed(2))} Cr`;
+    } else {
+      return `₹${parseFloat((price / 100000).toFixed(2))} Lakhs`;
+    }
   };
 
   // Shared filter dropdown option data

@@ -483,6 +483,14 @@ export default function AdminPage() {
   const setNearby = (k: string, v: any) => setForm(f => ({ ...f, nearby: { ...f.nearby, [k]: v } }));
   const setAqi = (k: string, v: any) => setForm(f => ({ ...f, aqi: { ...f.aqi, [k]: v } }));
 
+  const formatPrice = (price: number) => {
+    if (price >= 10000000) {
+      return `₹${parseFloat((price / 10000000).toFixed(2))} Cr`;
+    } else {
+      return `₹${parseFloat((price / 100000).toFixed(2))} Lakhs`;
+    }
+  };
+
   const startEdit = (p: any) => {
     setForm({
       ...EMPTY_FORM,
@@ -901,7 +909,7 @@ export default function AdminPage() {
                         </td>
                         <td className="px-6 py-4 font-semibold text-gray-600">{listing.location}</td>
                         <td className="px-6 py-4 font-extrabold text-gray-700">{listing.bhk} BHK</td>
-                        <td className="px-6 py-4 font-black text-brand-red">₹{(listing.price / 10000000).toFixed(2)} Cr</td>
+                        <td className="px-6 py-4 font-black text-brand-red">{formatPrice(listing.price)}</td>
                         <td className="px-6 py-4">
                           <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-extrabold tracking-wider uppercase ${
                             listing.possession === "Ready" ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-red-50 text-red-600 border border-red-100"
@@ -1615,7 +1623,7 @@ export default function AdminPage() {
                         <div>
                           <p className="text-sm font-extrabold text-gray-900 leading-tight">{form.title || "Untitled Property"}</p>
                           <p className="text-xs text-gray-500 font-semibold mt-1">{form.bhk} BHK · {form.area} · {form.location}</p>
-                          <p className="text-sm font-black text-brand-red mt-1">₹{(form.price / 10000000).toFixed(2)} Cr</p>
+                          <p className="text-sm font-black text-brand-red mt-1">{formatPrice(form.price)}</p>
                         </div>
                       </div>
 

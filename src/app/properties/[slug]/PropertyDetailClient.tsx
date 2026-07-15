@@ -37,11 +37,16 @@ function getFloorPlans(bhk: number, area: string, price: number) {
   configs.push({ type: `${bhk - (bhk > 2 ? 2 : 1)} BHK`, size: Math.round(areaNum * 0.62), facing: "South" });
   configs.push({ type: `${bhk - (bhk > 2 ? 2 : 1)} BHK`, size: Math.round(areaNum * 0.58), facing: "North" });
 
-  return configs.map(c => ({
-    ...c,
-    price: Math.round((c.size * ppsf) / 100000) * 100000,
-    priceLabel: `₹${((c.size * ppsf) / 10000000).toFixed(1)} Cr`
-  }));
+  return configs.map(c => {
+    const cost = Math.round((c.size * ppsf) / 100000) * 100000;
+    return {
+      ...c,
+      price: cost,
+      priceLabel: cost >= 10000000
+        ? `₹${parseFloat((cost / 10000000).toFixed(2))} Cr`
+        : `₹${parseFloat((cost / 100000).toFixed(2))} Lakhs`
+    };
+  });
 }
 
 const TABS = ["Overview", "Pricing", "Amenities", "Location", "Air Quality", "About"];
@@ -153,12 +158,20 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
     ? property.floorPlans.map((fp: any) => ({
         ...fp,
         priceLabel: fp.price >= 10000000
-          ? `₹${(fp.price / 10000000).toFixed(1)} Cr`
-          : `₹${(fp.price / 100000).toFixed(1)} L`,
+          ? `₹${parseFloat((fp.price / 10000000).toFixed(2))} Cr`
+          : `₹${parseFloat((fp.price / 100000).toFixed(2))} Lakhs`,
       }))
     : getFloorPlans(property.bhk, property.area, property.price);
   const floorPlans = rawFloorPlans;
   const relatedProperties = properties.filter(p => p.id !== property.id && p.type === property.type).slice(0, 2);
+
+  const formatPrice = (price: number) => {
+    if (price >= 10000000) {
+      return `₹${parseFloat((price / 10000000).toFixed(2))} Cr`;
+    } else {
+      return `₹${parseFloat((price / 100000).toFixed(2))} Lakhs`;
+    }
+  };
 
   // Scroll to tab section
   const scrollToSection = (tab: string) => {
@@ -333,7 +346,7 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                 {/* Quick stats bar */}
                 <div className="grid grid-cols-3 gap-4 mt-4">
                   {[
-                    { label: "Starting Price", value: `₹${(property.price / 10000000).toFixed(1)} Cr`, red: true },
+                    { label: "Starting Price", value: formatPrice(property.price), red: true },
                     { label: "Property Type", value: property.type, red: false },
                     { label: "Super Built-up", value: property.area, red: false },
                   ].map(s => (
@@ -685,7 +698,7 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                             <p className="text-[15px] font-semibold text-[#0A0A0A] group-hover:text-[#D31E28] transition-colors leading-snug mb-2">{prop.title}</p>
                             <div className="flex items-center justify-between">
                               <span className="text-xs text-[#6b6659] font-medium">{prop.bhk} BHK · {prop.area}</span>
-                              <span className="text-[13px] font-bold text-[#D31E28]">₹{(prop.price / 10000000).toFixed(1)} Cr</span>
+                              <span className="text-[13px] font-bold text-[#D31E28]">{formatPrice(prop.price)}</span>
                             </div>
                           </div>
                         </Link>
@@ -702,7 +715,7 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
               {/* Price Card */}
               <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] p-5">
                 <div className="flex items-baseline justify-between mb-4">
-                  <p className="text-[28px] font-bold text-[#0A0A0A]">₹{(property.price / 10000000).toFixed(1)} Cr</p>
+                  <p className="text-[28px] font-bold text-[#0A0A0A]">{formatPrice(property.price)}</p>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-[#8A6D2F] bg-[#F6F1E7] px-2.5 py-1 rounded-full">Onwards</span>
                 </div>
                 <div className="flex items-center gap-2 p-2.5 rounded-xl bg-[#FAF7F1] border border-[#EEE9E0] mb-3">

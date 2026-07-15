@@ -16,6 +16,13 @@ import { getAdvisorReply, AdvisorState } from "@/lib/chatService";
 import { fetchAllProperties } from "@/lib/db";
 import { Property } from "@/data/properties";
 
+const formatPrice = (price: number) => {
+  if (price >= 10000000) {
+    return `₹${parseFloat((price / 10000000).toFixed(2))} Cr`;
+  }
+  return `₹${parseFloat((price / 100000).toFixed(2))} Lakhs`;
+};
+
 // ─────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────
@@ -242,7 +249,7 @@ function ConversationSummary({ profile, recommendedProperties }: {
       {/* Profile summary */}
       <div className="p-4 grid grid-cols-2 gap-2 border-b border-[#EEE9E0]">
         {[
-          { icon: "💰", label: "Budget", value: profile.budget ? `₹${(profile.budget / 10000000).toFixed(1)} Cr` : "N/A" },
+          { icon: "💰", label: "Budget", value: profile.budget ? formatPrice(profile.budget) : "N/A" },
           { icon: "🏠", label: "Purpose", value: profile.purpose || "N/A" },
           { icon: "🏢", label: "Commute", value: profile.office_location || "N/A" },
           { icon: "🏗️", label: "Type", value: profile.property_type || "N/A" },
@@ -279,7 +286,7 @@ function ConversationSummary({ profile, recommendedProperties }: {
               </div>
               <div className="flex flex-col items-end shrink-0">
                 <span className="text-[10.5px] font-bold text-[#D31E28]">
-                  ₹{prop.price >= 10000000 ? `${(prop.price / 10000000).toFixed(1)} Cr` : `${(prop.price / 100000).toFixed(0)}L`}
+                  {formatPrice(prop.price)}
                 </span>
                 <ChevronRight size={10} className="text-[#948d7c] group-hover:text-[#D31E28] transition-colors" />
               </div>
@@ -338,7 +345,7 @@ function PropertyCard({ prop, matchScore }: { prop: Property; matchScore?: numbe
         </div>
         <div className="flex items-center justify-between pt-1.5 border-t border-[#EEE9E0]">
           <span className="text-[12px] font-bold text-[#D31E28]">
-            ₹{prop.price >= 10000000 ? `${(prop.price / 10000000).toFixed(2)} Cr` : `${(prop.price / 100000).toFixed(0)} L`}
+            {formatPrice(prop.price)}
           </span>
           <span className="text-[9px] font-bold uppercase tracking-widest text-[#0A0A0A] group-hover:text-[#D31E28] transition-colors flex items-center gap-0.5">
             View <ArrowRight size={8} />

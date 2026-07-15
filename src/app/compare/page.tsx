@@ -82,8 +82,16 @@ export default function ComparePage() {
   const activeProps = selected.filter(Boolean) as Property[];
   const hasComparison = activeProps.length >= 2;
 
+  const formatPrice = (price: number) => {
+    if (price >= 10000000) {
+      return `₹${parseFloat((price / 10000000).toFixed(2))} Cr`;
+    } else {
+      return `₹${parseFloat((price / 100000).toFixed(2))} Lakhs`;
+    }
+  };
+
   const compareFields = [
-    { key: "price", label: "Price", format: (p: Property) => `₹${(p.price / 10000000).toFixed(1)} Cr` },
+    { key: "price", label: "Price", format: (p: Property) => formatPrice(p.price) },
     { key: "type", label: "Property Type", format: (p: Property) => p.type },
     { key: "bhk", label: "Bedrooms", format: (p: Property) => `${p.bhk} BHK` },
     { key: "area", label: "Built-up Area", format: (p: Property) => p.area },
@@ -145,7 +153,7 @@ export default function ComparePage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-semibold text-[#0A0A0A] truncate">{prop.title}</p>
                         <p className="text-[12px] text-[#948d7c]">{prop.location.split(",")[0]}</p>
-                        <p className="text-sm font-bold text-[#D31E28] mt-0.5">₹{(prop.price / 10000000).toFixed(1)} Cr</p>
+                        <p className="text-sm font-bold text-[#D31E28] mt-0.5">{formatPrice(prop.price)}</p>
                       </div>
                       <button
                         onClick={() => handleRemove(idx)}
@@ -199,7 +207,7 @@ export default function ComparePage() {
                                 <div>
                                   <p className="text-[13px] font-semibold text-[#0A0A0A]">{p.title}</p>
                                   <p className="text-[12px] text-[#948d7c]">
-                                    {p.location.split(",")[0]} · ₹{(p.price / 10000000).toFixed(1)} Cr
+                                    {p.location.split(",")[0]} · {formatPrice(p.price)}
                                   </p>
                                 </div>
                                 {alreadySelected && <Check size={12} className="ml-auto text-[#D31E28]" />}
