@@ -114,3 +114,9 @@ body {
     transform: translateX(100%);
   }
 }
+
+@media (min-width: 1024px) {
+  body {
+    zoom: 0.8;
+  }
+}
