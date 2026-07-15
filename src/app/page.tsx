@@ -708,6 +708,13 @@ function FeaturedSection({
                   <span className="absolute left-3.5 top-3.5 bg-emerald-500 text-white rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                     <ShieldCheck size={11} /> 100% Legal Clear
                   </span>
+                  {/* Bottom overlay badges */}
+                  <div className="absolute left-3.5 bottom-3.5 bg-[#D31E28] text-white rounded-full px-3.5 py-1.5 text-[9.5px] font-black uppercase tracking-widest leading-none z-10 shadow-sm">
+                    {property.possession === "Ready" ? "READY TO MOVE" : "UNDER CONSTRUCTION"}
+                  </div>
+                  <div className="absolute right-3.5 bottom-3.5 bg-[#0A0A0A]/95 text-white rounded-full px-3.5 py-1.5 text-[10.5px] font-extrabold tracking-wide leading-none z-10 shadow-sm">
+                    {property.type}
+                  </div>
                   <button
                     onClick={(e) => onToggleFavorite(property.id, e)}
                     aria-label="Save property"
@@ -725,7 +732,7 @@ function FeaturedSection({
                       {property.location.split(",")[0]}
                     </span>
                     <span className="text-[17px] lg:text-lg font-bold text-[#D31E28] whitespace-nowrap">
-                      {formatCr(property.price)}
+                      {formatCr(property.price)} Onwards
                     </span>
                   </div>
                   <Link
@@ -743,7 +750,7 @@ function FeaturedSection({
                       <span className="text-[#e0d9cb]">|</span>
                       <span>{property.area}</span>
                       <span className="text-[#e0d9cb]">|</span>
-                      <span>{property.possession === "Ready" ? "Ready" : possessionLabel(property)}</span>
+                      <span>{property.type === "Apartment" ? `${property.udsPerAcre ?? 100} Flats/Acre` : (property.possession === "Ready" ? "Ready" : possessionLabel(property))}</span>
                     </div>
                     <button
                       onClick={() => onEnquire(property)}
