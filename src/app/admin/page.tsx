@@ -112,6 +112,7 @@ const EMPTY_FORM = {
   nearby: { ...DEFAULT_NEARBY },
   aqi: { ...DEFAULT_AQI },
   floorPlans: [] as FloorPlan[],
+  showRecommendationReport: true,
   recommendationReport: {
     investmentPotential: 8,
     familyFriendliness: 8,
@@ -548,6 +549,7 @@ export default function AdminPage() {
     setForm({
       ...EMPTY_FORM,
       ...p,
+      showRecommendationReport: !!p.recommendationReport,
       recommendationReport: p.recommendationReport || { ...EMPTY_FORM.recommendationReport }
     });
     setIsCustomLocation(false);
@@ -1355,54 +1357,67 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                     <div className="space-y-1">
+                    <div className="space-y-1">
                       <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Property Description</label>
                       <textarea
-                        rows={3} className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red resize-none"
+                        rows={8} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#D31E28] resize-y leading-relaxed"
                         placeholder="Detailed copy about the design, framing, and views..." value={form.description}
                         onChange={e => setField("description", e.target.value)}
                       />
                     </div>
 
                     <div className="border-t pt-5 space-y-4">
-                      <div>
-                        <h4 className="text-xs font-extrabold text-brand-red uppercase tracking-wider">NexHouz Recommendation Scores (1-10)</h4>
-                        <p className="text-xs text-gray-400 mt-0.5">Adjust sliders for dynamic scorecard on property details page.</p>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                        <div>
+                          <h4 className="text-xs font-extrabold text-[#D31E28] uppercase tracking-wider">NexHouz Recommendation Scores (1-10)</h4>
+                          <p className="text-xs text-gray-400 mt-0.5">Adjust sliders for dynamic scorecard on property details page.</p>
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            className="w-4.5 h-4.5 rounded border-gray-300 text-[#D31E28] focus:ring-[#D31E28] cursor-pointer"
+                            checked={form.showRecommendationReport}
+                            onChange={e => setField("showRecommendationReport", e.target.checked)}
+                          />
+                          <span className="text-[11px] font-extrabold uppercase tracking-wider text-gray-600">Show on Live Listing</span>
+                        </label>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                        {[
-                          { key: "investmentPotential", label: "Investment Potential" },
-                          { key: "familyFriendliness", label: "Family Friendliness" },
-                          { key: "commuteConvenience", label: "Commute Convenience" },
-                          { key: "schoolAccess", label: "School Access" },
-                          { key: "hospitalAccess", label: "Hospital Access" },
-                          { key: "futureAppreciation", label: "Future Appreciation" },
-                          { key: "builderTrustRating", label: "Builder Trust Rating" },
-                        ].map(s => (
-                          <div key={s.key} className="space-y-1">
-                            <div className="flex items-center justify-between text-xs font-bold text-gray-500">
-                              <span>{s.label}</span>
-                              <span className="text-brand-black font-extrabold">{(form.recommendationReport as any)[s.key]} / 10</span>
+                      <div className={`space-y-5 transition-all duration-200 ${form.showRecommendationReport ? "opacity-100" : "opacity-30 pointer-events-none"}`}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                          {[
+                            { key: "investmentPotential", label: "Investment Potential" },
+                            { key: "familyFriendliness", label: "Family Friendliness" },
+                            { key: "commuteConvenience", label: "Commute Convenience" },
+                            { key: "schoolAccess", label: "School Access" },
+                            { key: "hospitalAccess", label: "Hospital Access" },
+                            { key: "futureAppreciation", label: "Future Appreciation" },
+                            { key: "builderTrustRating", label: "Builder Trust Rating" },
+                          ].map(s => (
+                            <div key={s.key} className="space-y-1">
+                              <div className="flex items-center justify-between text-xs font-bold text-gray-500">
+                                <span>{s.label}</span>
+                                <span className="text-[#0A0A0A] font-extrabold">{(form.recommendationReport as any)[s.key]} / 10</span>
+                              </div>
+                              <input
+                                type="range" min={1} max={10} step={1}
+                                className="w-full h-1 bg-gray-200 accent-[#D31E28] rounded-lg appearance-none cursor-pointer"
+                                value={(form.recommendationReport as any)[s.key]}
+                                onChange={e => setReport(s.key, parseInt(e.target.value))}
+                              />
                             </div>
-                            <input
-                              type="range" min={1} max={10} step={1}
-                              className="w-full h-1 bg-gray-200 accent-brand-red rounded-lg appearance-none cursor-pointer"
-                              value={(form.recommendationReport as any)[s.key]}
-                              onChange={e => setReport(s.key, parseInt(e.target.value))}
-                            />
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
 
-                      <div className="space-y-1 pt-2">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Why NexHouz Recommends This (Summary Block)</label>
-                        <textarea
-                          rows={2} className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red resize-none"
-                          placeholder="Summarize the core values that make this property an exceptional pick..."
-                          value={form.recommendationReport.whyRecommended}
-                          onChange={e => setReport("whyRecommended", e.target.value)}
-                        />
+                        <div className="space-y-1 pt-2">
+                          <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Why NexHouz Recommends This (Summary Block)</label>
+                          <textarea
+                            rows={5} className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-[#D31E28] resize-y leading-relaxed"
+                            placeholder="Summarize the core values that make this property an exceptional pick..."
+                            value={form.recommendationReport.whyRecommended}
+                            onChange={e => setReport("whyRecommended", e.target.value)}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

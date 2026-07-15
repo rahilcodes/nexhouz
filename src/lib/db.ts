@@ -691,7 +691,7 @@ export async function saveProperty(form: any): Promise<{ success: boolean; error
       throw new Error(`Failed to clean old recommendation report: ${repDelErr.message}`);
     }
 
-    if (form.recommendationReport) {
+    if (form.showRecommendationReport && form.recommendationReport) {
       const rep = form.recommendationReport;
       const { error: repInsErr } = await supabase.from("property_recommendation_reports").insert({
         property_id: propertyId,
