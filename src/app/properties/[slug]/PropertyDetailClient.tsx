@@ -390,47 +390,28 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                   ))}
                 </div>
 
-                {/* NexHouz Recommendation Report Card */}
-                {property.recommendationReport && (
-                  <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] p-6 mt-4 space-y-5">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="w-2 h-2 rounded-full bg-[#D31E28] animate-pulse" />
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D31E28]">NexHouz Recommendation Report</p>
-                      </div>
-                      <h3 className="font-display font-semibold text-[22px] md:text-[24px] leading-[1.2] text-[#0A0A0A]">Why We Recommend This Property</h3>
-                    </div>
-
-                    <p className="text-sm text-[#57534a] leading-relaxed bg-[#FAF7F1] p-4 rounded-xl border border-[#EEE9E0]">
-                      {property.recommendationReport.whyRecommended}
+                {/* Project Description Card (exchanged position, scrolled by About tab) */}
+                <div ref={el => { sectionRefs.current["About"] = el; }} className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] overflow-hidden mt-4">
+                  <div className="px-6 py-5 border-b border-[#f0ebe1]">
+                    <CardHeader eyebrow="Project Description" title={`About ${property.title}`} />
+                  </div>
+                  <div className="p-6 space-y-4">
+                    <p className="text-[15px] text-[#57534a] leading-[1.7]">{property.description}</p>
+                    <p className="text-[15px] text-[#57534a] leading-[1.7]">
+                      Commissioned through <strong className="text-[#0A0A0A] font-semibold">{property.architect}</strong>, this structure represents a validated benchmark of modern luxury living in {property.location}. The design incorporates low-vibration structural anchors, natural thermal ventilation, and energy-efficient systems to ensure both comfort and sustainability.
                     </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-1">
-                      {[
-                        { label: "Investment Potential", val: property.recommendationReport.investmentPotential },
-                        { label: "Family Friendliness", val: property.recommendationReport.familyFriendliness },
-                        { label: "Commute Convenience", val: property.recommendationReport.commuteConvenience },
-                        { label: "School Access", val: property.recommendationReport.schoolAccess },
-                        { label: "Hospital Access", val: property.recommendationReport.hospitalAccess },
-                        { label: "Future Appreciation Potential", val: property.recommendationReport.futureAppreciation },
-                        { label: "Builder Trust Rating", val: property.recommendationReport.builderTrustRating },
-                      ].map((item) => (
-                        <div key={item.label} className="space-y-1.5">
-                          <div className="flex justify-between text-[11px] font-semibold text-[#948d7c] uppercase tracking-wider">
-                            <span>{item.label}</span>
-                            <span className="text-[#0A0A0A] font-bold">{item.val} / 10</span>
-                          </div>
-                          <div className="w-full h-1.5 bg-[#f0ebe1] rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-[#D31E28] rounded-full"
-                              style={{ width: `${item.val * 10}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))}
+                    {/* Investment type badge */}
+                    <div className="flex items-center gap-2 pt-2">
+                      <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border border-[#f3d6d4] bg-[#faf0f0] text-[#D31E28]">
+                        {property.investmentType}
+                      </span>
+                      <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#F6F1E7] text-[#8A6D2F]">
+                        {property.type}
+                      </span>
                     </div>
                   </div>
-                )}
+                </div>
               </section>
 
               {/* ── PRICING & FLOOR PLANS ─────────────────── */}
@@ -634,8 +615,50 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                 </div>
               </section>
 
-              {/* ── ABOUT ─────────────────────────────────── */}
-              <section ref={el => { sectionRefs.current["About"] = el; }}>
+              {/* ── ABOUT / RECOMMENDATION REPORT ─────────── */}
+              <section className="space-y-4">
+                {/* NexHouz Recommendation Report Card (exchanged position, placed in About tab section) */}
+                {property.recommendationReport && (
+                  <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] p-6 space-y-5 mb-4">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="w-2 h-2 rounded-full bg-[#D31E28] animate-pulse" />
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#D31E28]">NexHouz Recommendation Report</p>
+                      </div>
+                      <h3 className="font-display font-semibold text-[22px] md:text-[24px] leading-[1.2] text-[#0A0A0A]">Why We Recommend This Property</h3>
+                    </div>
+
+                    <p className="text-sm text-[#57534a] leading-relaxed bg-[#FAF7F1] p-4 rounded-xl border border-[#EEE9E0]">
+                      {property.recommendationReport.whyRecommended}
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 pt-1">
+                      {[
+                        { label: "Investment Potential", val: property.recommendationReport.investmentPotential },
+                        { label: "Family Friendliness", val: property.recommendationReport.familyFriendliness },
+                        { label: "Commute Convenience", val: property.recommendationReport.commuteConvenience },
+                        { label: "School Access", val: property.recommendationReport.schoolAccess },
+                        { label: "Hospital Access", val: property.recommendationReport.hospitalAccess },
+                        { label: "Future Appreciation Potential", val: property.recommendationReport.futureAppreciation },
+                        { label: "Builder Trust Rating", val: property.recommendationReport.builderTrustRating },
+                      ].map((item) => (
+                        <div key={item.label} className="space-y-1.5">
+                          <div className="flex justify-between text-[11px] font-semibold text-[#948d7c] uppercase tracking-wider">
+                            <span>{item.label}</span>
+                            <span className="text-[#0A0A0A] font-bold">{item.val} / 10</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-[#f0ebe1] rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-[#D31E28] rounded-full"
+                              style={{ width: `${item.val * 10}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
                 <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] overflow-hidden">
                   <div className="px-6 py-5 border-b border-[#f0ebe1]">
                     <CardHeader eyebrow="Project Description" title={`About ${property.title}`} />
