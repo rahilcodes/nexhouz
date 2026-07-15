@@ -390,7 +390,7 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                   ))}
                 </div>
 
-                {/* Project Description Card (exchanged position, scrolled by About tab) */}
+                {/* Project Description Card */}
                 <div ref={el => { sectionRefs.current["About"] = el; }} className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] overflow-hidden mt-4">
                   <div className="px-6 py-5 border-b border-[#f0ebe1]">
                     <CardHeader eyebrow="Project Description" title={`About ${property.title}`} />
@@ -401,11 +401,8 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                       Commissioned through <strong className="text-[#0A0A0A] font-semibold">{property.architect}</strong>, this structure represents a validated benchmark of modern luxury living in {property.location}. The design incorporates low-vibration structural anchors, natural thermal ventilation, and energy-efficient systems to ensure both comfort and sustainability.
                     </p>
 
-                    {/* Investment type badge */}
+                    {/* Property type badge */}
                     <div className="flex items-center gap-2 pt-2">
-                      <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border border-[#f3d6d4] bg-[#faf0f0] text-[#D31E28]">
-                        {property.investmentType}
-                      </span>
                       <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#F6F1E7] text-[#8A6D2F]">
                         {property.type}
                       </span>
@@ -659,27 +656,7 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
                   </div>
                 )}
                 
-                <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] overflow-hidden">
-                  <div className="px-6 py-5 border-b border-[#f0ebe1]">
-                    <CardHeader eyebrow="Project Description" title={`About ${property.title}`} />
-                  </div>
-                  <div className="p-6 space-y-4">
-                    <p className="text-[15px] text-[#57534a] leading-[1.7]">{property.description}</p>
-                    <p className="text-[15px] text-[#57534a] leading-[1.7]">
-                      Commissioned through <strong className="text-[#0A0A0A] font-semibold">{property.architect}</strong>, this structure represents a validated benchmark of modern luxury living in {property.location}. The design incorporates low-vibration structural anchors, natural thermal ventilation, and energy-efficient systems to ensure both comfort and sustainability.
-                    </p>
 
-                    {/* Investment type badge */}
-                    <div className="flex items-center gap-2 pt-2">
-                      <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border border-[#f3d6d4] bg-[#faf0f0] text-[#D31E28]">
-                        {property.investmentType}
-                      </span>
-                      <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#F6F1E7] text-[#8A6D2F]">
-                        {property.type}
-                      </span>
-                    </div>
-                  </div>
-                </div>
 
                 {/* Why Choose NexHouz */}
                 <div className="bg-white rounded-2xl border border-[#EEE9E0] shadow-[0_1px_3px_rgba(30,25,15,0.04)] p-6 mt-4">

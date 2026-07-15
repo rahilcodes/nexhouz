@@ -96,7 +96,6 @@ export default function ComparePage() {
     { key: "bhk", label: "Bedrooms", format: (p: Property) => `${p.bhk} BHK` },
     { key: "area", label: "Built-up Area", format: (p: Property) => p.area },
     { key: "possession", label: "Possession", format: (p: Property) => p.possession },
-    { key: "investmentType", label: "Investment Type", format: (p: Property) => p.investmentType },
     { key: "investmentYield", label: "Projected Yield", format: (p: Property) => `${p.scores.investmentYield}% p.a.` },
     { key: "architecturalIntegrity", label: "Architecture Score", format: (p: Property) => `${p.scores.architecturalIntegrity}/100` },
     { key: "automationTier", label: "Flats/Acre / Auto Tier", format: (p: Property) => p.type === "Apartment" ? `${p.udsPerAcre ?? 100} Flats/Acre` : p.scores.automationTier },

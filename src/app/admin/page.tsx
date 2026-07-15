@@ -1303,7 +1303,7 @@ export default function AdminPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <label className="text-xs font-bold uppercase tracking-widest text-gray-400">RERA Number</label>
                         <input
@@ -1319,17 +1319,6 @@ export default function AdminPage() {
                           placeholder="e.g. Dec 2027 or Ready" value={form.possessionDate || ""}
                           onChange={e => setField("possessionDate", e.target.value)}
                         />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-400">Investment Strategy</label>
-                        <select
-                          className="w-full bg-gray-50 border rounded-xl px-4 py-3 text-xs font-semibold outline-none focus:border-brand-red"
-                          value={form.investmentType} onChange={e => setField("investmentType", e.target.value)}
-                        >
-                          <option value="Capital Appreciation">Capital Appreciation</option>
-                          <option value="High-Yield Rental">High-Yield Rental</option>
-                          <option value="Generational Estate">Generational Estate</option>
-                        </select>
                       </div>
                     </div>
 

@@ -49,7 +49,6 @@ function PropertiesExplorerContent() {
   const [selectedType, setSelectedType] = useState<string>("All");
   const [selectedBHK, setSelectedBHK] = useState<string>("All");
   const [selectedPossession, setSelectedPossession] = useState<string>("All");
-  const [selectedInvestment, setSelectedInvestment] = useState<string>("All");
   const [maxPrice, setMaxPrice] = useState<number>(300000000); // up to ₹30 Cr
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -115,7 +114,6 @@ function PropertiesExplorerContent() {
     if (selectedType !== "All") count++;
     if (selectedBHK !== "All") count++;
     if (selectedPossession !== "All") count++;
-    if (selectedInvestment !== "All") count++;
     if (maxPrice < 300000000) count++;
     if (selectedAmenities.length > 0) count += selectedAmenities.length;
     if (searchQuery !== "") count++;
@@ -189,7 +187,6 @@ function PropertiesExplorerContent() {
     setSelectedType("All");
     setSelectedBHK("All");
     setSelectedPossession("All");
-    setSelectedInvestment("All");
     setMaxPrice(300000000);
     setSelectedAmenities([]);
     setSearchQuery("");
@@ -239,7 +236,6 @@ function PropertiesExplorerContent() {
     const matchType = selectedType === "All" || prop.type === selectedType;
     const matchBHK = selectedBHK === "All" || prop.bhk === parseInt(selectedBHK);
     const matchPossession = selectedPossession === "All" || prop.possession === selectedPossession;
-    const matchInvestment = selectedInvestment === "All" || prop.investmentType === selectedInvestment;
     const matchPrice = prop.price <= maxPrice;
     const matchSearch = searchQuery === "" ||
       prop.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -249,7 +245,7 @@ function PropertiesExplorerContent() {
     const matchAmenities = selectedAmenities.length === 0 ||
       selectedAmenities.every((amenity) => prop.amenities.includes(amenity));
 
-    return matchLocation && matchType && matchBHK && matchPossession && matchInvestment && matchPrice && matchSearch && matchAmenities;
+    return matchLocation && matchType && matchBHK && matchPossession && matchPrice && matchSearch && matchAmenities;
   });
 
   const formatPrice = (price: number) => {
@@ -339,19 +335,6 @@ function PropertiesExplorerContent() {
         { value: "All", label: "All statuses" },
         { value: "Ready", label: "Ready to Move" },
         { value: "Under Construction", label: "Under Construction" }
-      ]
-    },
-    {
-      key: "investment",
-      label: "Investment Goal",
-      selected: selectedInvestment,
-      setSelected: setSelectedInvestment,
-      display: selectedInvestment === "All" ? "All profiles" : selectedInvestment,
-      options: [
-        { value: "All", label: "All profiles" },
-        { value: "Capital Appreciation", label: "Capital Appreciation" },
-        { value: "High-Yield Rental", label: "High-Yield Rental" },
-        { value: "Generational Estate", label: "Generational Estate" }
       ]
     }
   ];
