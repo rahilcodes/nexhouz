@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserCheck, Check, Clock, Shield, Award } from "lucide-react";
+import { UserCheck, Check, Clock, Shield, Award, Star } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { CONTAINER, SECTION_X, Reveal, Eyebrow } from "@/components/ui/theme";

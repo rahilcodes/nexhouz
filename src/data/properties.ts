@@ -78,6 +78,32 @@ export interface Property {
   plotSizeUnit?: string;
 }
 
+// Known Hyderabad micro-market names used to normalize free-form neighbourhood
+// strings (e.g. "Kokapet Elite Cliffs" → "Kokapet") for filters and suggestions.
+export const KNOWN_AREAS = [
+  "Kokapet",
+  "Jubilee Hills",
+  "Banjara Hills",
+  "Financial District",
+  "Narsingi",
+  "Tellapur",
+  "Gandipet",
+  "Madhapur",
+  "Gachibowli",
+  "Hitec City",
+  "Kondapur",
+  "Gopanpally",
+  "Kollur",
+  "Miyapur",
+];
+
+export const areaOf = (location: string): string => {
+  const neighbourhood = location.split(",")[0].trim();
+  return (
+    KNOWN_AREAS.find((a) => neighbourhood.toLowerCase().includes(a.toLowerCase())) || neighbourhood
+  );
+};
+
 
 export const properties: Property[] = [
   {

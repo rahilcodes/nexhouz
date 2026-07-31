@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { fetchAllProperties, saveProperty, deleteProperty, fetchLeads, updateLeadStatus, fetchAiCrmLeads, saveSiteVisit, fetchAllBlogPosts, saveBlogPost, deleteBlogPost, fetchAllBuilderLogos, saveBuilderLogo, deleteBuilderLogo } from "@/lib/db";
+import { fetchAllProperties, saveProperty, deleteProperty, fetchLeads, updateLeadStatus, fetchAiCrmLeads, saveSiteVisit, fetchAllBlogPosts, saveBlogPost, deleteBlogPost, fetchAllBuilderLogos, saveBuilderLogo, deleteBuilderLogo, fetchAllHeroBanners, saveHeroBanner, deleteHeroBanner } from "@/lib/db";
 import { Property, FloorPlan } from "@/data/properties";
 import {
   LayoutDashboard, List, Plus, LogOut, Eye, EyeOff,
@@ -128,7 +128,7 @@ const EMPTY_FORM = {
   }
 };
 
-type View = "dashboard" | "listings" | "add" | "edit" | "leads" | "ai_crm" | "ai_brain" | "blog" | "builders";
+type View = "dashboard" | "listings" | "add" | "edit" | "leads" | "ai_crm" | "ai_brain" | "blog" | "builders" | "banners";
 interface Toast { message: string; type: "success" | "error"; }
 
 export default function AdminPage() {
@@ -159,6 +159,11 @@ export default function AdminPage() {
   const [builderLogosList, setBuilderLogosList] = useState<any[]>([]);
   const [isBuildersLoading, setIsBuildersLoading] = useState(false);
   const [builderLogoForm, setBuilderLogoForm] = useState({ id: "", name: "", logo_url: "", website_url: "", display_order: 0, active: true });
+
+  // Hero Banner Slides States
+  const [heroBannersList, setHeroBannersList] = useState<any[]>([]);
+  const [isBannersLoading, setIsBannersLoading] = useState(false);
+  const [bannerForm, setBannerForm] = useState({ id: "", image_url: "", alt_text: "", display_order: 0, active: true });
 
   // AI CRM States
   const [aiLeads, setAiLeads] = useState<any[]>([]);
@@ -431,6 +436,25 @@ export default function AdminPage() {
       console.error("Error loading builder logos:", e);
     } finally {
       setIsBuildersLoading(false);
+    }
+  }
+
+  // Load hero banners on view === "banners"
+  useEffect(() => {
+    if (view === "banners" && isLoggedIn) {
+      loadBanners();
+    }
+  }, [view, isLoggedIn]);
+
+  async function loadBanners() {
+    setIsBannersLoading(true);
+    try {
+      const banners = await fetchAllHeroBanners();
+      setHeroBannersList(banners);
+    } catch (e) {
+      console.error("Error loading hero banners:", e);
+    } finally {
+      setIsBannersLoading(false);
     }
   }
 
@@ -777,7 +801,8 @@ export default function AdminPage() {
             { id: "ai_crm", label: "AI Advisor CRM", icon: BrainCircuit },
             { id: "ai_brain", label: "AI Brain Config", icon: Sparkles },
             { id: "blog", label: "Manage Blog", icon: BookOpen },
-            { id: "builders", label: "Partner Builders", icon: Building }
+            { id: "builders", label: "Partner Builders", icon: Building },
+            { id: "banners", label: "Banner Slides", icon: ImageIcon }
           ].map(item => {
             const Icon = item.icon;
             const active = view === item.id || (item.id === "listings" && (view === "add" || view === "edit"));
@@ -825,6 +850,7 @@ export default function AdminPage() {
             {view === "ai_brain" && "AI Brain Configuration"}
             {view === "blog" && "Manage Blog Posts"}
             {view === "builders" && "Partner Builder Logos"}
+            {view === "banners" && "Homepage Banner Slides"}
           </h2>
           <div className="flex items-center gap-4">
             {isDebugMode && (
@@ -2964,6 +2990,175 @@ CREATE POLICY "Allow public update on site_visits" ON site_visits FOR UPDATE USI
                                       if (ok) {
                                         showToast("Builder logo removed.", "success");
                                         loadBuilders();
+                                      } else {
+                                        showToast("Failed to delete.", "error");
+                                      }
+                                    }
+                                  }}
+                                  className="w-8 h-8 rounded-lg border border-red-150 hover:bg-red-50 flex items-center justify-center text-red-600 cursor-pointer"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: HOMEPAGE BANNER SLIDES */}
+          {view === "banners" && (
+            <div className="space-y-6">
+              {/* Add/Edit Form */}
+              <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-6 space-y-4">
+                <h3 className="text-sm font-extrabold text-brand-black uppercase tracking-wider">
+                  {bannerForm.id ? "Edit Banner Slide" : "Add New Banner Slide"}
+                </h3>
+                <p className="text-xs text-gray-400 font-medium">
+                  Recommended size: <strong>1920 × 1080 px</strong> (16:9 landscape), JPG or PNG, under ~400 KB. Keep key visuals on the right half — the left side is covered by the headline overlay on desktop.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="space-y-1 lg:col-span-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Banner Image URL *</label>
+                    <input type="text" className="w-full bg-gray-50 border rounded-xl px-3 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
+                      placeholder="https://... (1920x1080 px)"
+                      value={bannerForm.image_url}
+                      onChange={e => setBannerForm(p => ({ ...p, image_url: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Caption / Alt Text</label>
+                    <input type="text" className="w-full bg-gray-50 border rounded-xl px-3 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
+                      placeholder="e.g. Festive offer — zero brokerage"
+                      value={bannerForm.alt_text}
+                      onChange={e => setBannerForm(p => ({ ...p, alt_text: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Display Order</label>
+                    <input type="number" className="w-full bg-gray-50 border rounded-xl px-3 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
+                      placeholder="1, 2, 3..."
+                      value={bannerForm.display_order || ""}
+                      onChange={e => setBannerForm(p => ({ ...p, display_order: parseInt(e.target.value) || 0 }))}
+                    />
+                  </div>
+                </div>
+                {bannerForm.image_url && (
+                  <div className="rounded-xl overflow-hidden border border-gray-200 max-w-md">
+                    <img src={bannerForm.image_url} alt="Banner preview" className="w-full aspect-video object-cover" />
+                  </div>
+                )}
+                <div className="flex items-center gap-3 pt-2">
+                  <label className="flex items-center gap-2 cursor-pointer select-none">
+                    <input type="checkbox" className="w-4 h-4 rounded text-brand-red"
+                      checked={bannerForm.active}
+                      onChange={e => setBannerForm(p => ({ ...p, active: e.target.checked }))}
+                    />
+                    <span className="text-xs font-bold text-brand-black">Show on homepage</span>
+                  </label>
+                  <div className="flex-1" />
+                  {bannerForm.id && (
+                    <button
+                      onClick={() => setBannerForm({ id: "", image_url: "", alt_text: "", display_order: 0, active: true })}
+                      className="px-4 py-2 border text-gray-500 text-xs font-bold uppercase rounded-xl cursor-pointer hover:bg-gray-50"
+                    >
+                      Clear
+                    </button>
+                  )}
+                  <button
+                    onClick={async () => {
+                      if (!bannerForm.image_url.trim()) {
+                        showToast("Banner image URL is required!", "error");
+                        return;
+                      }
+                      const res = await saveHeroBanner(bannerForm);
+                      if (res.success) {
+                        showToast(bannerForm.id ? "Banner slide updated!" : "Banner slide added!", "success");
+                        setBannerForm({ id: "", image_url: "", alt_text: "", display_order: 0, active: true });
+                        loadBanners();
+                      } else {
+                        showToast(res.error || "Failed to save banner slide.", "error");
+                      }
+                    }}
+                    className="px-5 py-2 bg-brand-red hover:bg-[#b0161f] text-white text-xs font-extrabold uppercase rounded-xl cursor-pointer transition-colors"
+                  >
+                    {bannerForm.id ? "Update Slide" : "Add Slide"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Banner List */}
+              <div className="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-150">
+                  <h3 className="text-sm font-extrabold text-brand-black uppercase tracking-wider">All Banner Slides</h3>
+                  <p className="text-xs text-gray-400 font-medium mt-0.5">Active slides rotate in the homepage hero banner. When none are active, the built-in default slides are shown.</p>
+                </div>
+
+                {isBannersLoading ? (
+                  <div className="py-16 flex justify-center">
+                    <div className="w-8 h-8 border-4 border-brand-red border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : heroBannersList.length === 0 ? (
+                  <div className="text-center py-16">
+                    <ImageIcon size={32} className="text-gray-300 mx-auto mb-3" />
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">No banner slides added yet.</p>
+                    <p className="text-xs text-gray-400 mt-1">Use the form above to add your first banner. Remember to first create the <code className="bg-gray-100 px-1 rounded">hero_banners</code> table in Supabase (see <code className="bg-gray-100 px-1 rounded">supabase/migrations/hero_banners.sql</code>).</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="bg-gray-50 border-b border-gray-150 text-[10px] font-black uppercase tracking-wider text-gray-400">
+                          <th className="px-6 py-3.5 w-32">Preview</th>
+                          <th className="px-6 py-3.5">Caption / Alt Text</th>
+                          <th className="px-6 py-3.5 w-20">Order</th>
+                          <th className="px-6 py-3.5 w-24">Status</th>
+                          <th className="px-6 py-3.5 w-24 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 text-xs font-semibold text-brand-black">
+                        {heroBannersList.map(banner => (
+                          <tr key={banner.id} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-6 py-4">
+                              <img src={banner.image_url} alt={banner.alt_text || "Banner"} className="h-14 w-24 object-cover rounded-lg border" />
+                            </td>
+                            <td className="px-6 py-4 font-extrabold text-gray-900">{banner.alt_text || "—"}</td>
+                            <td className="px-6 py-4 text-gray-400">{banner.display_order || 0}</td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                                banner.active
+                                  ? "bg-green-50 text-green-700 border border-green-200"
+                                  : "bg-gray-100 text-gray-500 border border-gray-200"
+                              }`}>
+                                {banner.active ? "Visible" : "Hidden"}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => setBannerForm({
+                                    id: banner.id || "",
+                                    image_url: banner.image_url || "",
+                                    alt_text: banner.alt_text || "",
+                                    display_order: banner.display_order || 0,
+                                    active: banner.active !== false
+                                  })}
+                                  className="w-8 h-8 rounded-lg border hover:bg-gray-50 flex items-center justify-center text-gray-500 cursor-pointer"
+                                >
+                                  <Pencil size={13} />
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    if (confirm("Delete this banner slide?")) {
+                                      const ok = await deleteHeroBanner(banner.id);
+                                      if (ok) {
+                                        showToast("Banner slide removed.", "success");
+                                        loadBanners();
                                       } else {
                                         showToast("Failed to delete.", "error");
                                       }

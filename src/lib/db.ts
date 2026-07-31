@@ -1060,3 +1060,74 @@ export async function deleteBuilderLogo(id: string): Promise<boolean> {
     return false;
   }
 }
+
+// ─── Homepage Hero Banner Slides ───────────────────────────────────────────────
+export interface HeroBanner {
+  id?: string;
+  image_url: string;
+  alt_text?: string;
+  display_order?: number;
+  active?: boolean;
+}
+
+export async function fetchHeroBanners(): Promise<HeroBanner[]> {
+  try {
+    const { data, error } = await supabase
+      .from("hero_banners")
+      .select("*")
+      .eq("active", true)
+      .order("display_order", { ascending: true });
+    if (error) {
+      console.warn("Error fetching hero banners:", error.message);
+      return [];
+    }
+    return data || [];
+  } catch (e) {
+    console.warn("Connection error fetching hero banners:", e);
+    return [];
+  }
+}
+
+export async function fetchAllHeroBanners(): Promise<HeroBanner[]> {
+  try {
+    const { data, error } = await supabase
+      .from("hero_banners")
+      .select("*")
+      .order("display_order", { ascending: true });
+    if (error) {
+      console.warn("Error fetching all hero banners:", error.message);
+      return [];
+    }
+    return data || [];
+  } catch (e) {
+    console.warn("Connection error fetching all hero banners:", e);
+    return [];
+  }
+}
+
+export async function saveHeroBanner(banner: Partial<HeroBanner>): Promise<{ success: boolean; error?: string }> {
+  try {
+    const payload = { ...banner, active: banner.active !== false };
+    if (!payload.id) delete payload.id;
+    const { error } = await supabase
+      .from("hero_banners")
+      .upsert(payload, { onConflict: "id" });
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  } catch (e: any) {
+    return { success: false, error: e.message || "Unknown error" };
+  }
+}
+
+export async function deleteHeroBanner(id: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("hero_banners")
+      .delete()
+      .eq("id", id);
+    if (error) return false;
+    return true;
+  } catch (e) {
+    return false;
+  }
+}

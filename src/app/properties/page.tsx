@@ -27,7 +27,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { CONTAINER, SECTION_X, Eyebrow } from "@/components/ui/theme";
 import { fetchAllProperties, submitLead } from "@/lib/db";
-import { properties as defaultProperties, Property } from "@/data/properties";
+import { properties as defaultProperties, Property, areaOf } from "@/data/properties";
 import { supabase } from "@/lib/supabaseClient";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -40,16 +40,33 @@ import { supabase } from "@/lib/supabaseClient";
 const possessionShort = (p: Property) =>
   p.possession === "Ready" ? "Ready" : p.possessionDate || "Under Const.";
 
+// Parses a budget label from the homepage search console (e.g. "₹ 50L - ₹ 2Cr",
+// "₹ 10Cr+") into INR bounds. A trailing "+" leaves the range open-ended above.
+const parseBudgetLabel = (label: string): { min: number; max: number } | null => {
+  const amounts = Array.from(label.matchAll(/([\d.]+)\s*(Cr|L)/gi)).map(
+    (m) => parseFloat(m[1]) * (m[2].toLowerCase() === "cr" ? 10000000 : 100000)
+  );
+  if (amounts.length === 0) return null;
+  const openEnded = /\+\s*$/.test(label.trim());
+  return {
+    min: Math.min(...amounts),
+    max: openEnded ? Infinity : Math.max(...amounts),
+  };
+};
+
 function PropertiesExplorerContent() {
   const searchParams = useSearchParams();
   const initialLocation = searchParams.get("location") || "All";
   const initialType = searchParams.get("type") || "All";
+  const initialBhk = searchParams.get("bhk") || "All";
+  const initialPrice = searchParams.get("price") || "";
 
   const [selectedLocation, setSelectedLocation] = useState<string>("All");
   const [selectedType, setSelectedType] = useState<string>("All");
   const [selectedBHK, setSelectedBHK] = useState<string>("All");
   const [selectedPossession, setSelectedPossession] = useState<string>("All");
   const [maxPrice, setMaxPrice] = useState<number>(300000000); // up to ₹30 Cr
+  const [minPrice, setMinPrice] = useState<number>(0);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -115,6 +132,7 @@ function PropertiesExplorerContent() {
     if (selectedBHK !== "All") count++;
     if (selectedPossession !== "All") count++;
     if (maxPrice < 300000000) count++;
+    if (minPrice > 0) count++;
     if (selectedAmenities.length > 0) count += selectedAmenities.length;
     if (searchQuery !== "") count++;
     return count;
@@ -167,7 +185,13 @@ function PropertiesExplorerContent() {
   useEffect(() => {
     if (initialLocation !== "All") setSelectedLocation(initialLocation);
     if (initialType !== "All") setSelectedType(initialType);
-  }, [initialLocation, initialType]);
+    if (initialBhk !== "All" && initialBhk !== "Any") setSelectedBHK(initialBhk.replace("+", ""));
+    const budget = parseBudgetLabel(initialPrice);
+    if (budget) {
+      setMinPrice(budget.min);
+      setMaxPrice(Number.isFinite(budget.max) ? budget.max : 300000000);
+    }
+  }, [initialLocation, initialType, initialBhk, initialPrice]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -188,6 +212,7 @@ function PropertiesExplorerContent() {
     setSelectedBHK("All");
     setSelectedPossession("All");
     setMaxPrice(300000000);
+    setMinPrice(0);
     setSelectedAmenities([]);
     setSearchQuery("");
   };
@@ -234,9 +259,9 @@ function PropertiesExplorerContent() {
   const filteredProperties = liveProperties.filter((prop) => {
     const matchLocation = selectedLocation === "All" || prop.location.toLowerCase().includes(selectedLocation.toLowerCase());
     const matchType = selectedType === "All" || prop.type === selectedType;
-    const matchBHK = selectedBHK === "All" || prop.bhk === parseInt(selectedBHK);
+    const matchBHK = selectedBHK === "All" || Number(prop.bhk) === parseInt(selectedBHK);
     const matchPossession = selectedPossession === "All" || prop.possession === selectedPossession;
-    const matchPrice = prop.price <= maxPrice;
+    const matchPrice = prop.price >= minPrice && prop.price <= maxPrice;
     const matchSearch = searchQuery === "" ||
       prop.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       prop.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -256,6 +281,15 @@ function PropertiesExplorerContent() {
     }
   };
 
+  // Location options reflect the areas of the properties actually loaded, so
+  // every choice in the dropdown is guaranteed to return results.
+  const locationOptions = [
+    { value: "All", label: "All Locations" },
+    ...Array.from(new Set(liveProperties.map((p) => areaOf(p.location))))
+      .sort()
+      .map((name) => ({ value: name, label: name })),
+  ];
+
   // Shared filter dropdown option data
   const filterConfigs: {
     key: string;
@@ -271,17 +305,7 @@ function PropertiesExplorerContent() {
       selected: selectedLocation,
       setSelected: setSelectedLocation,
       display: selectedLocation === "All" ? "All Locations" : selectedLocation,
-      options: [
-        { value: "All", label: "All Locations" },
-        { value: "Kokapet", label: "Kokapet" },
-        { value: "Jubilee Hills", label: "Jubilee Hills" },
-        { value: "Financial District", label: "Financial District" },
-        { value: "Narsingi", label: "Narsingi" },
-        { value: "Tellapur", label: "Tellapur" },
-        { value: "Gandipet", label: "Gandipet" },
-        { value: "Madhapur", label: "Madhapur" },
-        { value: "Gachibowli", label: "Gachibowli" }
-      ]
+      options: locationOptions
     },
     {
       key: "type",
@@ -314,6 +338,8 @@ function PropertiesExplorerContent() {
       display: selectedBHK === "All" ? "All configurations" : `${selectedBHK} BHK`,
       options: [
         { value: "All", label: "All configurations" },
+        { value: "1", label: "1 BHK" },
+        { value: "2", label: "2 BHK" },
         { value: "3", label: "3 BHK" },
         { value: "4", label: "4 BHK" },
         { value: "5", label: "5 BHK" },
@@ -487,20 +513,43 @@ function PropertiesExplorerContent() {
               {/* Dynamic Price Range Selector */}
               <div className="space-y-3 border-b border-[#f0ebe1] pb-5">
                 <div className="flex justify-between items-center">
-                  <span className="text-[13px] font-semibold tracking-[0.1em] uppercase text-[#948d7c]">Maximum Price</span>
-                  <span className="text-[15px] font-bold text-[#D31E28]">₹{(maxPrice / 10000000).toFixed(1)} Cr</span>
+                  <span className="text-[13px] font-semibold tracking-[0.1em] uppercase text-[#948d7c]">Budget Range</span>
+                  <span className="text-[15px] font-bold text-[#D31E28]">
+                    {minPrice > 0 ? formatPrice(minPrice) : "₹0"} – {formatPrice(maxPrice)}
+                  </span>
                 </div>
-                <input
-                  type="range"
-                  min={30000000}
-                  max={300000000}
-                  step={5000000}
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(parseInt(e.target.value))}
-                  className="w-full h-1 bg-[#EEE9E0] appearance-none cursor-pointer accent-[#D31E28] rounded-full"
-                />
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs font-semibold text-[#948d7c]">
+                    <span>Minimum</span>
+                    <span>{minPrice > 0 ? formatPrice(minPrice) : "₹0"}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={300000000}
+                    step={2500000}
+                    value={minPrice}
+                    onChange={(e) => setMinPrice(Math.min(parseInt(e.target.value), maxPrice))}
+                    className="w-full h-1 bg-[#EEE9E0] appearance-none cursor-pointer accent-[#D31E28] rounded-full"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs font-semibold text-[#948d7c]">
+                    <span>Maximum</span>
+                    <span>{formatPrice(maxPrice)}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={5000000}
+                    max={300000000}
+                    step={2500000}
+                    value={maxPrice}
+                    onChange={(e) => setMaxPrice(Math.max(parseInt(e.target.value), minPrice))}
+                    className="w-full h-1 bg-[#EEE9E0] appearance-none cursor-pointer accent-[#D31E28] rounded-full"
+                  />
+                </div>
                 <div className="flex justify-between text-xs font-semibold text-[#948d7c]">
-                  <span>₹3 Cr</span>
+                  <span>₹0</span>
                   <span>₹30 Cr</span>
                 </div>
               </div>

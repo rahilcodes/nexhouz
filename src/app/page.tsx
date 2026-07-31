@@ -24,8 +24,8 @@ import {
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { CONTAINER, Reveal, Eyebrow, PHONE_DISPLAY, PHONE_TEL } from "@/components/ui/theme";
-import { fetchAllProperties, submitLead, fetchBuilderLogos } from "@/lib/db";
-import { properties as defaultProperties, Property } from "@/data/properties";
+import { fetchAllProperties, submitLead, fetchBuilderLogos, fetchHeroBanners } from "@/lib/db";
+import { properties as defaultProperties, Property, areaOf } from "@/data/properties";
 import { supabase } from "@/lib/supabaseClient";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -35,6 +35,8 @@ import { supabase } from "@/lib/supabaseClient";
 //   Display: Cormorant Garamond 600 · UI/body: Archivo
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Default hero banner slides — overridden by active rows in the `hero_banners`
+// table (managed from the admin panel). Recommended image size: 1920 × 1080 px.
 const HERO_SLIDES = [
   { src: "/images/hyderabad_skyline_facade.png", alt: "Kokapet skyline — gated community towers" },
   { src: "/images/hero_modernist_villa.png", alt: "Luxury villa exterior, Tellapur" },
@@ -60,16 +62,17 @@ const possessionLabel = (p: Property) =>
 // ─────────────────────────────────────────────────────────────────────────────
 // HERO — crossfade slider + search console (desktop) / search CTA (mobile)
 // ─────────────────────────────────────────────────────────────────────────────
-function HeroSection({ properties }: { properties: Property[] }) {
+function HeroSection({ properties, slides }: { properties: Property[]; slides: typeof HERO_SLIDES }) {
   const [slide, setSlide] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const startTimer = useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => setSlide((s) => (s + 1) % HERO_SLIDES.length), 5000);
-  }, []);
+    timerRef.current = setInterval(() => setSlide((s) => (s + 1) % slides.length), 5000);
+  }, [slides.length]);
 
   useEffect(() => {
+    setSlide(0);
     startTimer();
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -78,7 +81,7 @@ function HeroSection({ properties }: { properties: Property[] }) {
 
   const go = (n: number) => {
     startTimer();
-    setSlide(((n % HERO_SLIDES.length) + HERO_SLIDES.length) % HERO_SLIDES.length);
+    setSlide(((n % slides.length) + slides.length) % slides.length);
   };
 
   // Search console state
@@ -98,7 +101,7 @@ function HeroSection({ properties }: { properties: Property[] }) {
 
   activeProps.forEach((p) => {
     if (!p.location) return;
-    const name = p.location.split(",")[0].trim();
+    const name = areaOf(p.location);
     if (!seenNames.has(name)) {
       seenNames.add(name);
       suggestedDestinations.push({
@@ -111,9 +114,12 @@ function HeroSection({ properties }: { properties: Property[] }) {
   const searchHref =
     activeTab === "New Launch"
       ? "/new-launches"
-      : `/properties?location=${encodeURIComponent(search.location || "Kokapet")}&type=${encodeURIComponent(
-          activeTab === "Commercial" ? "Commercial" : search.type
-        )}&price=${encodeURIComponent(search.priceRange)}&bhk=${encodeURIComponent(search.bhk)}`;
+      : `/properties?${new URLSearchParams({
+          ...(search.location ? { location: search.location } : {}),
+          type: activeTab === "Commercial" ? "Commercial" : search.type,
+          price: search.priceRange,
+          bhk: search.bhk,
+        }).toString()}`;
 
   const fieldLabel = "text-[13px] font-semibold tracking-[0.1em] text-[#948d7c] mb-2";
   const fieldValue = "flex items-center justify-between gap-2 text-[17px] font-medium text-[#0A0A0A] cursor-pointer";
@@ -122,7 +128,7 @@ function HeroSection({ properties }: { properties: Property[] }) {
     <section className="relative">
       {/* ── Desktop hero — fills the viewport below the header, console included ── */}
       <div className="hidden lg:block relative h-[calc(100vh-132px)] min-h-[560px] max-h-[820px] bg-[#efeae1] z-20">
-        {HERO_SLIDES.map((s, i) => (
+        {slides.map((s, i) => (
           <div
             key={s.src}
             className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
@@ -204,7 +210,7 @@ function HeroSection({ properties }: { properties: Property[] }) {
           >
             <ChevronLeft size={20} />
           </button>
-          {HERO_SLIDES.map((_, i) => (
+          {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => go(i)}
@@ -388,7 +394,7 @@ function HeroSection({ properties }: { properties: Property[] }) {
                       transition={{ duration: 0.15 }}
                       className="absolute top-full left-4 right-4 mt-2 bg-white border border-[#EEE9E0] shadow-[0_18px_50px_rgba(30,25,15,0.14)] rounded-2xl p-2 z-50"
                     >
-                      {["Any", "2", "3", "4", "5+"].map((k) => (
+                      {["Any", "1", "2", "3", "4", "5+"].map((k) => (
                         <button
                           key={k}
                           onClick={() => {
@@ -425,7 +431,7 @@ function HeroSection({ properties }: { properties: Property[] }) {
       {/* ── Mobile hero ── */}
       <div className="lg:hidden">
         <div className="relative h-[400px] overflow-hidden bg-[#efeae1]">
-          {HERO_SLIDES.map((s, i) => (
+          {slides.map((s, i) => (
             <div
               key={s.src}
               className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
@@ -450,7 +456,7 @@ function HeroSection({ properties }: { properties: Property[] }) {
             </h1>
           </div>
           <div className="absolute left-0 right-0 bottom-3.5 flex justify-center gap-2.5">
-            {HERO_SLIDES.map((_, i) => (
+            {slides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => go(i)}
@@ -800,8 +806,8 @@ function FeaturedSection({
 // ─────────────────────────────────────────────────────────────────────────────
 // MICRO-MARKETS
 // ─────────────────────────────────────────────────────────────────────────────
-function MicroMarkets() {
-  const markets = [
+function MicroMarkets({ properties }: { properties: Property[] }) {
+  const fallbackMarkets = [
     {
       name: "Kokapet & Financial District",
       meta: "12 verified residences · ₹1.8 – 5 Cr",
@@ -817,16 +823,47 @@ function MicroMarkets() {
     {
       name: "Jubilee & Banjara Hills",
       meta: "6 verified residences · ₹3 – 15 Cr",
-      img: "/images/obsidian_pavilion.png",
+      img: "/images/hyderabad_skyline_facade.png",
       href: "/properties?location=Jubilee Hills",
     },
     {
-      name: "Lakeside Enclaves",
+      name: "Gandipet Lakeside",
       meta: "5 verified residences · ₹1.5 – 4 Cr",
-      img: "/images/vanguard_penthouse.png",
-      href: "/properties?location=Lakeside",
+      img: "/images/hero_modernist_villa.png",
+      href: "/properties?location=Gandipet",
     },
   ];
+
+  // Suggest the areas where we actually have inventory: top four micro-markets
+  // by listing count, with live counts, price bands and a real listing photo.
+  const priceBand = (values: number[]) => {
+    const toCr = (v: number) => parseFloat((v / 10000000).toFixed(2));
+    const lo = toCr(Math.min(...values));
+    const hi = toCr(Math.max(...values));
+    return lo === hi ? `₹${lo} Cr` : `₹${lo} – ${hi} Cr`;
+  };
+
+  const grouped = new Map<string, Property[]>();
+  properties.forEach((p) => {
+    if (!p.location) return;
+    const area = areaOf(p.location);
+    grouped.set(area, [...(grouped.get(area) || []), p]);
+  });
+
+  const markets =
+    grouped.size >= 2
+      ? Array.from(grouped.entries())
+          .sort((a, b) => b[1].length - a[1].length)
+          .slice(0, 4)
+          .map(([area, props]) => ({
+            name: area,
+            meta: `${props.length} verified residence${props.length === 1 ? "" : "s"} · ${priceBand(
+              props.map((p) => p.price)
+            )}`,
+            img: props[0].image,
+            href: `/properties?location=${encodeURIComponent(area)}`,
+          }))
+      : fallbackMarkets;
   return (
     <section className="px-4 md:px-6 xl:px-[60px] py-14 lg:py-20 bg-[#FAF7F1]">
       <div className={CONTAINER}>
@@ -1055,11 +1092,11 @@ function SocialProof() {
           </div>
           <div className="text-sm text-[#6b6659] mt-1.5">3 BHK, Kokapet · relocated from Bengaluru</div>
           <blockquote className="font-display italic font-medium text-[19px] md:text-[24px] lg:text-[28px] leading-[1.5] text-[#2b2823] mt-8 lg:mt-10">
-            &ldquo;As an NRI in Dubai, I bought a villa in Tellapur entirely over virtual tours. Their audit report gave
+            &ldquo;As an NRI in Florida, I bought a villa in Tellapur entirely over virtual tours. Their audit report gave
             me more confidence than my own site visit would have.&rdquo;
           </blockquote>
           <div className="text-[15px] font-semibold text-[#0A0A0A] mt-4 lg:mt-5 tracking-wide">
-            SANDEEP REDDY · NRI INVESTOR, DUBAI
+            UDAY KIRAN · NRI INVESTOR, FLORIDA, USA
           </div>
         </Reveal>
         <div className="grid grid-cols-2 gap-3 lg:gap-[18px]">
@@ -1288,6 +1325,7 @@ export default function HomePage() {
   const [callbackForm, setCallbackForm] = useState({ name: "", phone: "", location: "Kokapet" });
   const [isCallbackSubmitted, setIsCallbackSubmitted] = useState(false);
   const [builderLogos, setBuilderLogos] = useState<typeof DEFAULT_BUILDER_LOGOS>(DEFAULT_BUILDER_LOGOS);
+  const [heroSlides, setHeroSlides] = useState<typeof HERO_SLIDES>(HERO_SLIDES);
 
   useEffect(() => {
     const isDev = process.env.NODE_ENV === "development";
@@ -1329,6 +1367,13 @@ export default function HomePage() {
     // Load builder logos
     fetchBuilderLogos().then(logos => {
       if (logos && logos.length > 0) setBuilderLogos(logos as any);
+    }).catch(() => {/* use defaults */});
+
+    // Load hero banner slides
+    fetchHeroBanners().then(banners => {
+      if (banners && banners.length > 0) {
+        setHeroSlides(banners.map(b => ({ src: b.image_url, alt: b.alt_text || "NexHouz banner" })));
+      }
     }).catch(() => {/* use defaults */});
   }, []);
 
@@ -1392,7 +1437,7 @@ export default function HomePage() {
       <Navbar />
 
       <main>
-        <HeroSection properties={liveProperties} />
+        <HeroSection properties={liveProperties} slides={heroSlides} />
         <StatsBar />
         <WhySection />
         <TrustBand />
@@ -1405,7 +1450,7 @@ export default function HomePage() {
           isDebugMode={isDebugMode}
           dbError={dbError}
         />
-        <MicroMarkets />
+        <MicroMarkets properties={liveProperties} />
         <PartnerLogosSlider logos={builderLogos} />
         <JourneySection />
         <SocialProof />
