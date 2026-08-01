@@ -27,7 +27,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { CONTAINER, SECTION_X, Eyebrow } from "@/components/ui/theme";
 import { fetchAllProperties, submitLead } from "@/lib/db";
-import { properties as defaultProperties, Property, areaOf } from "@/data/properties";
+import { properties as defaultProperties, Property, topAreas } from "@/data/properties";
 import { supabase } from "@/lib/supabaseClient";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -281,13 +281,11 @@ function PropertiesExplorerContent() {
     }
   };
 
-  // Location options reflect the areas of the properties actually loaded, so
+  // Same top-10 areas the homepage suggests, so both filters stay in sync and
   // every choice in the dropdown is guaranteed to return results.
   const locationOptions = [
     { value: "All", label: "All Locations" },
-    ...Array.from(new Set(liveProperties.map((p) => areaOf(p.location))))
-      .sort()
-      .map((name) => ({ value: name, label: name })),
+    ...topAreas(liveProperties, 10).map((name) => ({ value: name, label: name })),
   ];
 
   // Shared filter dropdown option data

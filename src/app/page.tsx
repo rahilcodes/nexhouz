@@ -25,7 +25,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { CONTAINER, Reveal, Eyebrow, PHONE_DISPLAY, PHONE_TEL } from "@/components/ui/theme";
 import { fetchAllProperties, submitLead, fetchBuilderLogos, fetchHeroBanners } from "@/lib/db";
-import { properties as defaultProperties, Property, areaOf } from "@/data/properties";
+import { properties as defaultProperties, Property, areaOf, topAreas } from "@/data/properties";
 import { supabase } from "@/lib/supabaseClient";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -86,7 +86,7 @@ function HeroSection({ properties, slides }: { properties: Property[]; slides: t
 
   // Search console state
   const [activeTab, setActiveTab] = useState<"Buy" | "Commercial" | "New Launch">("Buy");
-  const [search, setSearch] = useState({ location: "", type: "Apartment", priceRange: "₹ 50L - ₹ 5Cr+", bhk: "3" });
+  const [search, setSearch] = useState({ location: "", type: "Apartment", priceRange: "Any Budget", bhk: "3" });
   const [openField, setOpenField] = useState<null | "location" | "type" | "budget" | "bhk">(null);
 
   useEffect(() => {
@@ -96,20 +96,11 @@ function HeroSection({ properties, slides }: { properties: Property[]; slides: t
   }, []);
 
   const activeProps = properties.length > 0 ? properties : defaultProperties;
-  const suggestedDestinations: { name: string; desc: string }[] = [];
-  const seenNames = new Set<string>();
-
-  activeProps.forEach((p) => {
-    if (!p.location) return;
-    const name = areaOf(p.location);
-    if (!seenNames.has(name)) {
-      seenNames.add(name);
-      suggestedDestinations.push({
-        name,
-        desc: p.location,
-      });
-    }
-  });
+  // Top 10 areas by inventory — same list the properties page filter shows
+  const suggestedDestinations = topAreas(activeProps, 10).map((name) => ({
+    name,
+    desc: activeProps.find((p) => areaOf(p.location) === name)?.location || name,
+  }));
 
   const searchHref =
     activeTab === "New Launch"
@@ -357,7 +348,7 @@ function HeroSection({ properties, slides }: { properties: Property[]; slides: t
                       transition={{ duration: 0.15 }}
                       className="absolute top-full left-4 right-4 mt-2 bg-white border border-[#EEE9E0] shadow-[0_18px_50px_rgba(30,25,15,0.14)] rounded-2xl p-2 z-50"
                     >
-                      {["₹ 50L - ₹ 5Cr+", "₹ 50L - ₹ 2Cr", "₹ 2Cr - ₹ 5Cr", "₹ 5Cr - ₹ 10Cr", "₹ 10Cr+"].map((b) => (
+                      {["Any Budget", "₹ 50L - ₹ 1Cr", "₹ 1Cr - ₹ 2Cr", "₹ 2Cr - ₹ 3Cr", "₹ 3Cr - ₹ 5Cr", "₹ 5Cr+"].map((b) => (
                         <button
                           key={b}
                           onClick={() => {
@@ -394,7 +385,7 @@ function HeroSection({ properties, slides }: { properties: Property[]; slides: t
                       transition={{ duration: 0.15 }}
                       className="absolute top-full left-4 right-4 mt-2 bg-white border border-[#EEE9E0] shadow-[0_18px_50px_rgba(30,25,15,0.14)] rounded-2xl p-2 z-50"
                     >
-                      {["Any", "1", "2", "3", "4", "5+"].map((k) => (
+                      {["Any", "1", "2", "3", "4", "5", "6"].map((k) => (
                         <button
                           key={k}
                           onClick={() => {

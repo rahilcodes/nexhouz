@@ -11,7 +11,7 @@ import { motion } from "framer-motion";
 
 export const PHONE_DISPLAY = "+91 85858 54853";
 export const PHONE_TEL = "tel:+918585854853";
-export const EMAIL = "Info@nexhouz.com";
+export const EMAIL = "admin@nexhouz.com";
 
 // Centers section content on large screens so cards keep design proportions
 export const CONTAINER = "max-w-[1400px] mx-auto w-full";

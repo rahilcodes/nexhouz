@@ -49,7 +49,7 @@ export default function ContactPage() {
       label: "Corporate Address",
       value: (
         <>
-          B 609, 6th Floor, B-Block Asian Sun City,<br />
+          B-609, B Block, 6th Floor, Asian Sun City,<br />
           Behind AMB Mall, Kothaguda X Road,<br />
           Kondapur, Hyderabad, Telangana 500084
         </>
@@ -69,7 +69,7 @@ export default function ContactPage() {
       icon: Mail,
       label: "Email",
       value: (
-        <a href="mailto:Info@nexhouz.com" className="hover:text-[#f3c9cb] transition-colors">Info@nexhouz.com</a>
+        <a href="mailto:admin@nexhouz.com" className="hover:text-[#f3c9cb] transition-colors">admin@nexhouz.com</a>
       ),
     },
     {

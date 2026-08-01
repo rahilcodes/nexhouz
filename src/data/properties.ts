@@ -104,6 +104,21 @@ export const areaOf = (location: string): string => {
   );
 };
 
+// Top areas by listing count — the single source for location suggestions on the
+// homepage and the location filter on the properties page, so both stay in sync.
+export const topAreas = (props: Property[], limit = 10): string[] => {
+  const counts = new Map<string, number>();
+  props.forEach((p) => {
+    if (!p.location) return;
+    const area = areaOf(p.location);
+    counts.set(area, (counts.get(area) || 0) + 1);
+  });
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, limit)
+    .map(([area]) => area);
+};
+
 
 export const properties: Property[] = [
   {

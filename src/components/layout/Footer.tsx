@@ -61,7 +61,7 @@ export default function Footer() {
                 {EMAIL}
               </a>
               <span className="font-normal text-[#57534a]">
-                Asian Sun City, Kothaguda X Road, Kondapur, Hyderabad 500084
+                B-609, B Block, Asian Sun City, Kothaguda X Road, Kondapur, Hyderabad 500084
               </span>
               <span className="font-normal text-[#57534a]">WhatsApp us for instant AI matching</span>
             </div>

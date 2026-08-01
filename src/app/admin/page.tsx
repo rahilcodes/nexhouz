@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { fetchAllProperties, saveProperty, deleteProperty, fetchLeads, updateLeadStatus, fetchAiCrmLeads, saveSiteVisit, fetchAllBlogPosts, saveBlogPost, deleteBlogPost, fetchAllBuilderLogos, saveBuilderLogo, deleteBuilderLogo, fetchAllHeroBanners, saveHeroBanner, deleteHeroBanner } from "@/lib/db";
 import { Property, FloorPlan } from "@/data/properties";
@@ -2849,7 +2849,7 @@ CREATE POLICY "Allow public update on site_visits" ON site_visits FOR UPDATE USI
                   <div className="space-y-1">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Logo Image URL</label>
                     <input type="text" className="w-full bg-gray-50 border rounded-xl px-3 py-2.5 text-xs font-semibold outline-none focus:border-brand-red"
-                      placeholder="https://... or leave empty for initials"
+                      placeholder="https://... or upload below"
                       value={builderLogoForm.logo_url}
                       onChange={e => setBuilderLogoForm(p => ({ ...p, logo_url: e.target.value }))}
                     />
@@ -2870,6 +2870,28 @@ CREATE POLICY "Allow public update on site_visits" ON site_visits FOR UPDATE USI
                       onChange={e => setBuilderLogoForm(p => ({ ...p, display_order: parseInt(e.target.value) || 0 }))}
                     />
                   </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="flex-1">
+                    <ImageDropZone
+                      label="Drag & drop the logo image here, or click to browse"
+                      uploading={isUploadingImage}
+                      onFile={async (f) => {
+                        const url = await uploadImageToSupabase(f);
+                        if (url) {
+                          setBuilderLogoForm(p => ({ ...p, logo_url: url }));
+                          showToast("Logo image uploaded!", "success");
+                        } else {
+                          showToast("Upload failed — check the storage bucket and try again.", "error");
+                        }
+                      }}
+                    />
+                  </div>
+                  {builderLogoForm.logo_url && (
+                    <div className="shrink-0 border border-gray-200 rounded-xl p-2 bg-white">
+                      <img src={builderLogoForm.logo_url} alt="Logo preview" className="h-12 w-auto max-w-[120px] object-contain" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-3 pt-2">
                   <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -3048,6 +3070,19 @@ CREATE POLICY "Allow public update on site_visits" ON site_visits FOR UPDATE USI
                     />
                   </div>
                 </div>
+                <ImageDropZone
+                  label="Drag & drop the banner image here (1920×1080 px), or click to browse"
+                  uploading={isUploadingImage}
+                  onFile={async (f) => {
+                    const url = await uploadImageToSupabase(f);
+                    if (url) {
+                      setBannerForm(p => ({ ...p, image_url: url }));
+                      showToast("Banner image uploaded!", "success");
+                    } else {
+                      showToast("Upload failed — check the storage bucket and try again.", "error");
+                    }
+                  }}
+                />
                 {bannerForm.image_url && (
                   <div className="rounded-xl overflow-hidden border border-gray-200 max-w-md">
                     <img src={bannerForm.image_url} alt="Banner preview" className="w-full aspect-video object-cover" />
@@ -3250,6 +3285,42 @@ CREATE POLICY "Allow public update on site_visits" ON site_visits FOR UPDATE USI
         </div>
       )}
 
+    </div>
+  );
+}
+
+// ─── Image Drop Zone (drag & drop or click-to-browse upload) ───
+function ImageDropZone({ label, onFile, uploading }: { label: string; onFile: (f: File) => void; uploading: boolean }) {
+  const [drag, setDrag] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  return (
+    <div
+      onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+      onDragLeave={() => setDrag(false)}
+      onDrop={(e) => { e.preventDefault(); setDrag(false); const f = e.dataTransfer.files?.[0]; if (f) onFile(f); }}
+      onClick={() => inputRef.current?.click()}
+      className={`border-2 border-dashed rounded-xl px-4 py-5 text-center cursor-pointer transition-colors ${
+        drag ? "border-brand-red bg-red-50" : "border-gray-200 hover:border-gray-300 bg-gray-50"
+      }`}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = ""; }}
+      />
+      {uploading ? (
+        <div className="flex items-center justify-center gap-2 text-xs font-bold text-gray-500">
+          <div className="w-4 h-4 border-2 border-brand-red border-t-transparent rounded-full animate-spin" />
+          Uploading…
+        </div>
+      ) : (
+        <div className="text-xs font-bold text-gray-500">
+          <ImageIcon size={18} className="mx-auto mb-1.5 text-gray-400" />
+          {label}
+        </div>
+      )}
     </div>
   );
 }
