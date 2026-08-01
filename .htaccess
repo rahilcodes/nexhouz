@@ -1,36 +1,20 @@
-# Force DirectoryIndex for all subfolders
 DirectoryIndex index.html
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # 1. If the request is already pointing inside the out/ directory, do nothing
-  RewriteCond %{REQUEST_URI} ^/out/ [NC]
+  # Serve existing file or directory directly
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
-  # 2. Append trailing slash to requests for directories inside out/ to prevent mod_dir from redirecting to /out/...
-  # We only do this if the request doesn't already end in a slash.
-  RewriteCond %{REQUEST_URI} !/$
-  RewriteCond %{DOCUMENT_ROOT}/out/$1 -d [OR]
-  RewriteCond out/$1 -d
-  RewriteRule ^(.*)$ $1/ [R=301,L]
+  # Rewrite property detail paths to allow dynamic client-side loading
+  RewriteRule ^properties/[^/]+/?$ properties/kokapet-summit-villa/index.html [L]
 
-  # 3. Transparently rewrite requests to existing files/folders inside the out/ directory
-  # We check both relative paths and %{DOCUMENT_ROOT}-based absolute paths for maximum compatibility.
-  RewriteCond %{DOCUMENT_ROOT}/out/$1 -f [OR]
-  RewriteCond %{DOCUMENT_ROOT}/out/$1 -d [OR]
-  RewriteCond out/$1 -f [OR]
-  RewriteCond out/$1 -d
-  RewriteRule ^(.*)$ out/$1 [L]
-
-  # 4. SPA Fallback for dynamic (admin-added) properties that aren't in out/
-  RewriteRule ^properties/([^/]+)/?$ out/properties/kokapet-summit-villa/index.html [L]
-
-  # 4. General fallback for any other clean Next.js routes to the SPA root index.html
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
+  # General SPA fallback for other routes
   RewriteCond %{REQUEST_URI} !^/_next/
   RewriteCond %{REQUEST_URI} !^/images/
-  RewriteRule ^(.*)$ out/index.html [L]
+  RewriteCond %{REQUEST_URI} !^/index\.html$
+  RewriteRule ^(.*)$ index.html [L]
 </IfModule>
