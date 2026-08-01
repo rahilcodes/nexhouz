@@ -53,10 +53,10 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon.png", type: "image/png", sizes: "512x512" }
+      { url: "/favicon.png", type: "image/png" },
+      { url: "/images/logo_black_text_mainlogo.png", type: "image/png" }
     ],
-    shortcut: "/favicon.ico",
+    shortcut: "/favicon.png",
     apple: "/favicon.png"
   },
   openGraph: {
