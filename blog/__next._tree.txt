@@ -7,4 +7,4 @@
 :HL["/images/obsidian_pavilion.png","image"]
 :HL["/images/hyderabad_luxury_towers.png","image"]
 :HL["/images/hero_modernist_villa.png","image"]
-0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"blog","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"gNy7R7CXsdyqGM0-6ZB5n"}
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"blog","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"UfsaWJ5CGMw-BItMIZRXG"}
