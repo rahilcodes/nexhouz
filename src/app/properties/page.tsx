@@ -401,11 +401,11 @@ function PropertiesExplorerContent() {
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-10 items-start">
 
-            {/* SIDEBAR FILTERS (Clean, Independent Scroll Sticky Sidebar) */}
-            <aside className="hidden lg:block bg-white border border-[#EEE9E0] rounded-2xl p-5 space-y-4 sticky top-20 max-h-[calc(100vh-90px)] overflow-y-auto shrink-0 shadow-sm [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[#e0d9cb] hover:[&::-webkit-scrollbar-thumb]:bg-[#D31E28] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent pr-1">
+            {/* SIDEBAR FILTERS (Full Viewport Height Sticky Sidebar) */}
+            <aside className="hidden lg:flex flex-col bg-white border border-[#EEE9E0] rounded-2xl p-5 space-y-4 sticky top-20 h-[calc(100vh-100px)] shrink-0 shadow-sm overflow-hidden">
 
               {/* Sidebar Header */}
-              <div className="flex items-center justify-between border-b border-[#EEE9E0] pb-4">
+              <div className="flex items-center justify-between border-b border-[#EEE9E0] pb-3.5 shrink-0">
                 <div className="flex items-center gap-2.5">
                   <SlidersHorizontal size={16} className="text-[#D31E28]" />
                   <span className="text-sm font-bold tracking-wider text-[#0A0A0A] uppercase">Filters</span>
@@ -425,6 +425,9 @@ function PropertiesExplorerContent() {
                   </button>
                 )}
               </div>
+
+              {/* Scrollable Filter Content Container */}
+              <div className="flex-1 overflow-y-auto space-y-4 pr-1.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[#e0d9cb] hover:[&::-webkit-scrollbar-thumb]:bg-[#D31E28] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
 
               {/* 1. Property Type Chips */}
               <div className="space-y-2.5 border-b border-[#EEE9E0] pb-5">
@@ -646,6 +649,8 @@ function PropertiesExplorerContent() {
                     })}
                   </div>
                 )}
+              </div>
+
               </div>
 
             </aside>
