@@ -401,8 +401,8 @@ function PropertiesExplorerContent() {
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-10 items-start">
 
-            {/* SIDEBAR FILTERS (Clean Non-Scrollbar Sticky Sidebar) */}
-            <aside className="hidden lg:block bg-white border border-[#EEE9E0] rounded-2xl p-5 space-y-4 sticky top-20 shrink-0 shadow-sm">
+            {/* SIDEBAR FILTERS (Smooth Hidden-Scrollbar Sticky Sidebar) */}
+            <aside className="hidden lg:block bg-white border border-[#EEE9E0] rounded-2xl p-5 space-y-4 sticky top-20 max-h-[calc(100vh-100px)] overflow-y-auto shrink-0 shadow-sm [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
 
               {/* Sidebar Header */}
               <div className="flex items-center justify-between border-b border-[#EEE9E0] pb-3.5">
