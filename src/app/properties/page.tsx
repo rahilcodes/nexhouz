@@ -401,8 +401,8 @@ function PropertiesExplorerContent() {
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-10 items-start">
 
-            {/* SIDEBAR FILTERS (Clean, Sticky Desktop Sidebar) */}
-            <aside className="hidden lg:block bg-white border border-[#EEE9E0] rounded-2xl p-6 space-y-6 sticky top-24 shrink-0 shadow-sm">
+            {/* SIDEBAR FILTERS (Clean, Independent Scroll Sticky Sidebar) */}
+            <aside className="hidden lg:block bg-white border border-[#EEE9E0] rounded-2xl p-5 space-y-4 sticky top-20 max-h-[calc(100vh-90px)] overflow-y-auto shrink-0 shadow-sm [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[#e0d9cb] hover:[&::-webkit-scrollbar-thumb]:bg-[#D31E28] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent pr-1">
 
               {/* Sidebar Header */}
               <div className="flex items-center justify-between border-b border-[#EEE9E0] pb-4">
