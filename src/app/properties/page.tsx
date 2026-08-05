@@ -81,6 +81,9 @@ function PropertiesExplorerContent() {
   const [sortBy, setSortBy] = useState<string>(initialSort);
 
   // UI States
+  const [showLocationPopover, setShowLocationPopover] = useState(false);
+  const [showBudgetPopover, setShowBudgetPopover] = useState(false);
+  const [showAmenitiesPopover, setShowAmenitiesPopover] = useState(false);
   const [showAmenitiesAccordion, setShowAmenitiesAccordion] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
@@ -399,40 +402,15 @@ function PropertiesExplorerContent() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-10 items-start">
-
-            {/* SIDEBAR FILTERS (Full Viewport Height with Independent Scroll) */}
-            <aside className="hidden lg:flex flex-col bg-white border border-[#EEE9E0] rounded-2xl p-5 sticky top-20 h-[calc(100vh-100px)] shrink-0 shadow-sm overflow-hidden">
-
-              {/* Fixed Sidebar Header */}
-              <div className="flex items-center justify-between border-b border-[#EEE9E0] pb-3.5 mb-4 shrink-0">
-                <div className="flex items-center gap-2.5">
-                  <SlidersHorizontal size={16} className="text-[#D31E28]" />
-                  <span className="text-sm font-bold tracking-wider text-[#0A0A0A] uppercase">Filters</span>
-                  {activeFilterCount > 0 && (
-                    <span className="bg-[#D31E28] text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
-                      {activeFilterCount}
-                    </span>
-                  )}
-                </div>
-                {activeFilterCount > 0 && (
-                  <button
-                    onClick={resetFilters}
-                    className="text-xs font-bold text-[#948d7c] hover:text-[#D31E28] uppercase flex items-center gap-1 transition-colors cursor-pointer"
-                  >
-                    <RotateCcw size={12} />
-                    <span>Reset</span>
-                  </button>
-                )}
-              </div>
-
-              {/* Scrollable Filters Inner Body */}
-              <div className="flex-1 overflow-y-auto space-y-4 pr-1.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-[#e0d9cb] hover:[&::-webkit-scrollbar-thumb]:bg-[#D31E28] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
-
-              {/* 1. Property Type Chips */}
-              <div className="space-y-2.5 border-b border-[#EEE9E0] pb-5">
-                <label className="text-xs font-bold tracking-wider uppercase text-[#948d7c] block">Property Type</label>
-                <div className="grid grid-cols-2 gap-1.5">
+          {/* TOP HORIZONTAL FILTER BAR (Desktop & Tablet) */}
+          <div className="hidden lg:block bg-white border border-[#EEE9E0] rounded-2xl p-4 mb-6 sticky top-20 z-30 shadow-sm transition-all">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              
+              {/* Left Group: Quick Filter Pills & Dropdowns */}
+              <div className="flex items-center gap-2.5 flex-wrap">
+                
+                {/* 1. Property Type Segment */}
+                <div className="flex items-center bg-[#FAF7F1] p-1 border border-[#e0d9cb] rounded-xl">
                   {[
                     { value: "All", label: "All Types" },
                     { value: "Apartment", label: "Apartments" },
@@ -444,10 +422,10 @@ function PropertiesExplorerContent() {
                       <button
                         key={t.value}
                         onClick={() => setSelectedType(t.value)}
-                        className={`px-3 py-2 text-xs font-bold rounded-xl transition-all text-center cursor-pointer border ${
+                        className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                           active
-                            ? "bg-[#0A0A0A] text-white border-[#0A0A0A]"
-                            : "bg-[#FAF7F1] text-[#57534a] border-[#e0d9cb] hover:border-[#0A0A0A] hover:text-[#0A0A0A]"
+                            ? "bg-[#0A0A0A] text-white shadow-xs"
+                            : "text-[#57534a] hover:text-[#0A0A0A]"
                         }`}
                       >
                         {t.label}
@@ -455,146 +433,180 @@ function PropertiesExplorerContent() {
                     );
                   })}
                 </div>
-              </div>
 
-              {/* 2. BHK Multi-Choice Chips */}
-              <div className="space-y-2.5 border-b border-[#EEE9E0] pb-5">
-                <label className="text-xs font-bold tracking-wider uppercase text-[#948d7c] block">Bedrooms (BHK)</label>
-                <div className="flex flex-wrap gap-1.5">
+                {/* 2. BHK Multi-Choice Pills */}
+                <div className="flex items-center bg-[#FAF7F1] p-1 border border-[#e0d9cb] rounded-xl">
                   {["All", "1", "2", "3", "4", "5+"].map((bhk) => {
                     const active = selectedBHK === bhk;
                     return (
                       <button
                         key={bhk}
                         onClick={() => setSelectedBHK(bhk)}
-                        className={`px-3.5 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer border ${
+                        className={`px-2.5 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                           active
-                            ? "bg-[#D31E28] text-white border-[#D31E28]"
-                            : "bg-[#FAF7F1] text-[#57534a] border-[#e0d9cb] hover:border-[#D31E28] hover:text-[#D31E28]"
+                            ? "bg-[#D31E28] text-white shadow-xs"
+                            : "text-[#57534a] hover:text-[#D31E28]"
                         }`}
                       >
-                        {bhk === "All" ? "Any" : `${bhk} BHK`}
+                        {bhk === "All" ? "Any BHK" : `${bhk} BHK`}
                       </button>
                     );
                   })}
                 </div>
-              </div>
 
-              {/* 3. Location Multi-Select & Search */}
-              <div className="space-y-3 border-b border-[#EEE9E0] pb-5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold tracking-wider uppercase text-[#948d7c]">Locations</label>
-                  {selectedLocations.length > 0 && (
-                    <button
-                      onClick={() => setSelectedLocations([])}
-                      className="text-[11px] font-bold text-[#D31E28] hover:underline"
-                    >
-                      Clear ({selectedLocations.length})
-                    </button>
+                {/* 3. Location Multi-Select Popover */}
+                <div className="relative">
+                  <button
+                    onClick={() => {
+                      setShowLocationPopover(!showLocationPopover);
+                      setShowBudgetPopover(false);
+                    }}
+                    className={`flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                      selectedLocations.length > 0
+                        ? "bg-[#D31E28] text-white border-[#D31E28]"
+                        : "bg-[#FAF7F1] text-[#0A0A0A] border-[#e0d9cb] hover:border-[#0A0A0A]"
+                    }`}
+                  >
+                    <MapPin size={14} />
+                    <span>
+                      {selectedLocations.length === 0
+                        ? "Location"
+                        : selectedLocations.length === 1
+                        ? selectedLocations[0]
+                        : `${selectedLocations.length} Areas`}
+                    </span>
+                    <ChevronDown size={14} className={`transition-transform ${showLocationPopover ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {/* Location Dropdown Menu */}
+                  {showLocationPopover && (
+                    <div className="absolute left-0 top-full mt-2 w-72 bg-white border border-[#EEE9E0] rounded-2xl shadow-xl p-4 z-50 space-y-3">
+                      <div className="flex items-center justify-between border-b border-[#EEE9E0] pb-2">
+                        <span className="text-xs font-bold tracking-wider uppercase text-[#948d7c]">Select Areas</span>
+                        {selectedLocations.length > 0 && (
+                          <button
+                            onClick={() => setSelectedLocations([])}
+                            className="text-[11px] font-bold text-[#D31E28] hover:underline"
+                          >
+                            Clear ({selectedLocations.length})
+                          </button>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Search location…"
+                          value={locationSearchInput}
+                          onChange={(e) => setLocationSearchInput(e.target.value)}
+                          className="w-full bg-[#FAF7F1] border border-[#e0d9cb] rounded-lg pl-8 pr-3 py-1.5 text-xs font-medium focus:outline-none focus:border-[#D31E28]"
+                        />
+                        <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#948d7c]" />
+                      </div>
+                      <div className="space-y-1 max-h-56 overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-[#e0d9cb] [&::-webkit-scrollbar-thumb]:rounded-full">
+                        {filteredAreaList.map((loc) => {
+                          const isChecked = selectedLocations.includes(loc.name);
+                          return (
+                            <button
+                              key={loc.name}
+                              onClick={() => toggleLocation(loc.name)}
+                              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                                isChecked ? "bg-[#FAF7F1] text-[#D31E28]" : "text-[#57534a] hover:bg-[#FAF7F1] hover:text-[#0A0A0A]"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 truncate">
+                                {isChecked ? <CheckSquare size={14} className="text-[#D31E28] shrink-0" /> : <Square size={14} className="text-[#c9c2b2] shrink-0" />}
+                                <span className="truncate">{loc.name}</span>
+                              </div>
+                              <span className="text-[10px] text-[#948d7c] bg-white border border-[#EEE9E0] px-1.5 py-0.5 rounded-md shrink-0 ml-1">
+                                {loc.count}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   )}
                 </div>
 
-                {/* Quick Area Search */}
+                {/* 4. Budget Range Popover Button */}
                 <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search areas (e.g. Kondapur, Kokapet)…"
-                    value={locationSearchInput}
-                    onChange={(e) => setLocationSearchInput(e.target.value)}
-                    className="w-full bg-[#FAF7F1] border border-[#e0d9cb] rounded-lg pl-8 pr-3 py-2 text-xs font-medium text-[#0A0A0A] placeholder-[#948d7c] focus:outline-none focus:border-[#D31E28]"
-                  />
-                  <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#948d7c]" />
-                </div>
+                  <button
+                    onClick={() => {
+                      setShowBudgetPopover(!showBudgetPopover);
+                      setShowLocationPopover(false);
+                    }}
+                    className={`flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
+                      minPrice > 0 || maxPrice < 300000000
+                        ? "bg-[#D31E28] text-white border-[#D31E28]"
+                        : "bg-[#FAF7F1] text-[#0A0A0A] border-[#e0d9cb] hover:border-[#0A0A0A]"
+                    }`}
+                  >
+                    <span className="font-extrabold text-xs">₹</span>
+                    <span>
+                      {minPrice > 0 || maxPrice < 300000000
+                        ? `${minPrice > 0 ? formatPrice(minPrice) : "₹0"} - ${formatPrice(maxPrice)}`
+                        : "Budget"}
+                    </span>
+                    <ChevronDown size={14} className={`transition-transform ${showBudgetPopover ? "rotate-180" : ""}`} />
+                  </button>
 
-                {/* Locations Checkbox List */}
-                <div className="space-y-1 max-h-48 overflow-y-auto pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                  {filteredAreaList.map((loc) => {
-                    const isChecked = selectedLocations.includes(loc.name);
-                    return (
-                      <button
-                        key={loc.name}
-                        onClick={() => toggleLocation(loc.name)}
-                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                          isChecked ? "bg-[#FAF7F1] text-[#D31E28]" : "text-[#57534a] hover:bg-[#FAF7F1] hover:text-[#0A0A0A]"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          {isChecked ? (
-                            <CheckSquare size={14} className="text-[#D31E28] shrink-0" />
-                          ) : (
-                            <Square size={14} className="text-[#c9c2b2] shrink-0" />
-                          )}
-                          <span className="truncate">{loc.name}</span>
-                        </div>
-                        <span className="text-[10px] text-[#948d7c] bg-white border border-[#EEE9E0] px-1.5 py-0.5 rounded-md shrink-0 ml-1">
-                          {loc.count}
+                  {/* Budget Dropdown Menu */}
+                  {showBudgetPopover && (
+                    <div className="absolute left-0 top-full mt-2 w-72 bg-white border border-[#EEE9E0] rounded-2xl shadow-xl p-4 z-50 space-y-3">
+                      <div className="flex justify-between items-center border-b border-[#EEE9E0] pb-2">
+                        <span className="text-xs font-bold tracking-wider uppercase text-[#948d7c]">Budget Range</span>
+                        <span className="text-xs font-bold text-[#D31E28]">
+                          {minPrice > 0 ? formatPrice(minPrice) : "₹0"} – {formatPrice(maxPrice)}
                         </span>
-                      </button>
-                    );
-                  })}
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {[
+                          { label: "< ₹1 Cr", min: 0, max: 10000000 },
+                          { label: "₹1–2 Cr", min: 10000000, max: 20000000 },
+                          { label: "₹2–3 Cr", min: 20000000, max: 30000000 },
+                          { label: "₹3–5 Cr", min: 30000000, max: 50000000 },
+                          { label: "₹5 Cr+", min: 50000000, max: 300000000 }
+                        ].map((preset) => {
+                          const active = minPrice === preset.min && maxPrice === preset.max;
+                          return (
+                            <button
+                              key={preset.label}
+                              onClick={() => applyBudgetPreset(preset.min, preset.max)}
+                              className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
+                                active
+                                  ? "bg-[#D31E28] text-white border-[#D31E28]"
+                                  : "bg-[#FAF7F1] text-[#57534a] border-[#e0d9cb] hover:border-[#D31E28] hover:text-[#D31E28]"
+                              }`}
+                            >
+                              {preset.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <div className="space-y-1.5 pt-1">
+                        <input
+                          type="range"
+                          min={0}
+                          max={300000000}
+                          step={2500000}
+                          value={maxPrice}
+                          onChange={(e) => setMaxPrice(parseInt(e.target.value))}
+                          className="w-full h-1.5 bg-[#EEE9E0] appearance-none cursor-pointer accent-[#D31E28] rounded-full"
+                        />
+                        <div className="flex justify-between text-[10px] font-semibold text-[#948d7c]">
+                          <span>₹0</span>
+                          <span>₹15 Cr</span>
+                          <span>₹30 Cr</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
 
-              {/* 4. Budget Range & Presets */}
-              <div className="space-y-3 border-b border-[#EEE9E0] pb-5">
-                <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold tracking-wider uppercase text-[#948d7c]">Budget Range</label>
-                  <span className="text-xs font-bold text-[#D31E28]">
-                    {minPrice > 0 ? formatPrice(minPrice) : "₹0"} – {formatPrice(maxPrice)}
-                  </span>
-                </div>
-
-                {/* Quick Budget Preset Chips */}
-                <div className="flex flex-wrap gap-1">
+                {/* 5. Move-In Status Segment */}
+                <div className="flex items-center bg-[#FAF7F1] p-1 border border-[#e0d9cb] rounded-xl">
                   {[
-                    { label: "< ₹1 Cr", min: 0, max: 10000000 },
-                    { label: "₹1–2 Cr", min: 10000000, max: 20000000 },
-                    { label: "₹2–3 Cr", min: 20000000, max: 30000000 },
-                    { label: "₹3–5 Cr", min: 30000000, max: 50000000 },
-                    { label: "₹5 Cr+", min: 50000000, max: 300000000 }
-                  ].map((preset) => {
-                    const active = minPrice === preset.min && maxPrice === preset.max;
-                    return (
-                      <button
-                        key={preset.label}
-                        onClick={() => applyBudgetPreset(preset.min, preset.max)}
-                        className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
-                          active
-                            ? "bg-[#D31E28] text-white border-[#D31E28]"
-                            : "bg-[#FAF7F1] text-[#57534a] border-[#e0d9cb] hover:border-[#D31E28] hover:text-[#D31E28]"
-                        }`}
-                      >
-                        {preset.label}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Slider */}
-                <div className="space-y-2 pt-1">
-                  <input
-                    type="range"
-                    min={0}
-                    max={300000000}
-                    step={2500000}
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(parseInt(e.target.value))}
-                    className="w-full h-1.5 bg-[#EEE9E0] appearance-none cursor-pointer accent-[#D31E28] rounded-full"
-                  />
-                  <div className="flex justify-between text-[11px] font-semibold text-[#948d7c]">
-                    <span>₹0</span>
-                    <span>₹15 Cr</span>
-                    <span>₹30 Cr</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 5. Move-In Status */}
-              <div className="space-y-2 border-b border-[#EEE9E0] pb-5">
-                <label className="text-xs font-bold tracking-wider uppercase text-[#948d7c] block">Move-In Status</label>
-                <div className="grid grid-cols-3 gap-1">
-                  {[
-                    { value: "All", label: "All" },
+                    { value: "All", label: "All Status" },
                     { value: "Ready", label: "Ready" },
                     { value: "Under Construction", label: "Under Const." }
                   ].map((s) => {
@@ -603,10 +615,10 @@ function PropertiesExplorerContent() {
                       <button
                         key={s.value}
                         onClick={() => setSelectedPossession(s.value)}
-                        className={`px-2 py-2 text-[11px] font-bold rounded-xl transition-all cursor-pointer border text-center ${
+                        className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                           active
-                            ? "bg-[#0A0A0A] text-white border-[#0A0A0A]"
-                            : "bg-[#FAF7F1] text-[#57534a] border-[#e0d9cb] hover:border-[#0A0A0A]"
+                            ? "bg-[#0A0A0A] text-white shadow-xs"
+                            : "text-[#57534a] hover:text-[#0A0A0A]"
                         }`}
                       >
                         {s.label}
@@ -614,49 +626,30 @@ function PropertiesExplorerContent() {
                     );
                   })}
                 </div>
-              </div>
-
-              {/* 6. Accordion Amenities */}
-              <div>
-                <button
-                  onClick={() => setShowAmenitiesAccordion(!showAmenitiesAccordion)}
-                  className="w-full flex items-center justify-between text-xs font-bold tracking-wider uppercase text-[#948d7c] hover:text-[#0A0A0A] py-1 transition-colors cursor-pointer"
-                >
-                  <span>Features & Amenities ({selectedAmenities.length})</span>
-                  <ChevronDown
-                    size={14}
-                    className={`transition-transform duration-200 ${showAmenitiesAccordion ? "rotate-180 text-[#D31E28]" : ""}`}
-                  />
-                </button>
-                {showAmenitiesAccordion && (
-                  <div className="space-y-1.5 pt-3 max-h-48 overflow-y-auto pr-1">
-                    {amenitiesList.map((amenity) => {
-                      const checked = selectedAmenities.includes(amenity);
-                      return (
-                        <button
-                          key={amenity}
-                          onClick={() => handleAmenityToggle(amenity)}
-                          className="w-full flex items-center gap-2 text-xs font-medium text-[#57534a] hover:text-[#0A0A0A] text-left cursor-pointer py-1"
-                        >
-                          {checked ? (
-                            <CheckSquare size={14} className="text-[#D31E28] shrink-0" />
-                          ) : (
-                            <Square size={14} className="text-[#c9c2b2] shrink-0" />
-                          )}
-                          <span className="truncate">{amenity}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
 
               </div>
 
-            </aside>
+              {/* Right Group: Active Filter Count & Reset Button */}
+              {activeFilterCount > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="bg-[#D31E28] text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+                    {activeFilterCount} Active
+                  </span>
+                  <button
+                    onClick={resetFilters}
+                    className="text-xs font-bold text-[#948d7c] hover:text-[#D31E28] uppercase flex items-center gap-1 transition-colors cursor-pointer px-2 py-1 rounded-lg hover:bg-[#FAF7F1]"
+                  >
+                    <RotateCcw size={12} />
+                    <span>Reset</span>
+                  </button>
+                </div>
+              )}
 
-            {/* PROPERTIES GRID & RESULTS PANEL */}
-            <section className="lg:col-span-3 space-y-5">
+            </div>
+          </div>
+
+          {/* MAIN PROPERTIES CONTENT SECTION */}
+          <section className="w-full space-y-6">
 
               {/* Top Controls: Active Filter Chips + Sort Dropdown + View Toggle */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EEE9E0] pb-4">
@@ -831,8 +824,8 @@ function PropertiesExplorerContent() {
                     viewMode === "list"
                       ? "space-y-4 lg:space-y-6"
                       : viewMode === "compact"
-                      ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6"
-                      : "grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6"
+                      ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6"
+                      : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
                   }
                 >
                   <AnimatePresence mode="popLayout">
@@ -992,7 +985,6 @@ function PropertiesExplorerContent() {
 
             </section>
 
-          </div>
         </div>
       </section>
 
