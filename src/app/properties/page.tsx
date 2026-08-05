@@ -334,14 +334,14 @@ function PropertiesExplorerContent() {
   return (
     <>
       {/* PAGE HEADER */}
-      <section className={`${SECTION_X} pt-10 pb-8 lg:pt-14 lg:pb-10 bg-[#FAF7F1] border-b border-[#EEE9E0]`}>
+      <section className={`${SECTION_X} pt-6 pb-5 lg:pt-8 lg:pb-6 bg-[#FAF7F1] border-b border-[#EEE9E0]`}>
         <div className={`${CONTAINER} flex flex-col lg:flex-row lg:items-end justify-between gap-6 lg:gap-10`}>
           <div className="max-w-[680px]">
             <Eyebrow>Verified Real Estate Directory</Eyebrow>
-            <h1 className="font-display font-semibold text-[32px] md:text-[44px] lg:text-[48px] leading-[1.2] text-[#0A0A0A] mt-3">
+            <h1 className="font-display font-semibold text-[28px] md:text-[38px] lg:text-[42px] leading-[1.2] text-[#0A0A0A] mt-2">
               Explore Hyderabad Luxury Estates
             </h1>
-            <p className="text-[15px] lg:text-base leading-[1.65] text-[#57534a] mt-2.5 max-w-xl">
+            <p className="text-sm lg:text-[15px] leading-[1.6] text-[#57534a] mt-1.5 max-w-xl">
               100% RERA-verified luxury apartments, penthouses, and gated community villas across Hyderabad&apos;s prime corridors.
             </p>
           </div>
@@ -353,7 +353,7 @@ function PropertiesExplorerContent() {
               placeholder="Search by project name, builder, or area…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border-[1.5px] border-[#e0d9cb] rounded-xl pl-11 pr-10 py-3.5 text-sm font-medium text-[#0A0A0A] placeholder-[#948d7c] focus:outline-none focus:border-[#D31E28] transition-colors shadow-sm"
+              className="w-full bg-white border-[1.5px] border-[#e0d9cb] rounded-xl pl-11 pr-10 py-3 text-sm font-medium text-[#0A0A0A] placeholder-[#948d7c] focus:outline-none focus:border-[#D31E28] transition-colors shadow-sm"
             />
             <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#948d7c]" />
             {searchQuery && (
@@ -369,7 +369,7 @@ function PropertiesExplorerContent() {
       </section>
 
       {/* EXPLORER BODY */}
-      <section className={`${SECTION_X} py-8 lg:py-12 bg-white`}>
+      <section className={`${SECTION_X} py-4 lg:py-6 bg-white`}>
         <div className={CONTAINER}>
 
           {/* Mobile Filter Toggle */}
@@ -504,7 +504,7 @@ function PropertiesExplorerContent() {
                 </div>
 
                 {/* Locations Checkbox List */}
-                <div className="space-y-1 max-h-44 overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-[#e0d9cb] [&::-webkit-scrollbar-thumb]:rounded-full">
+                <div className="space-y-1 max-h-64 overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-[#e0d9cb] [&::-webkit-scrollbar-thumb]:rounded-full">
                   {filteredAreaList.map((loc) => {
                     const isChecked = selectedLocations.includes(loc.name);
                     return (
