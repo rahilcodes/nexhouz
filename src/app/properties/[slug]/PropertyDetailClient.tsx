@@ -223,6 +223,7 @@ export default function PropertyDetailClient({ slug: propSlug }: PropertyDetailC
     e.preventDefault();
     const success = await submitLead({
       propertyId: property.id,
+      propertyName: property.title,
       name: inquiryForm.name,
       email: "",
       phone: inquiryForm.phone,

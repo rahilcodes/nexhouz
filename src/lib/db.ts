@@ -252,13 +252,49 @@ export function toE164(raw: string): string {
   return `+${digits}`;
 }
 
-function sendLeadToWylto(name: string, phone: string): void {
-  const phoneNumber = toE164(phone || "");
+export interface LeadInput {
+  propertyId?: string;
+  // Sent to Wylto only — Supabase links the property through property_id.
+  propertyName?: string;
+  name: string;
+  email: string;
+  phone: string;
+  notes: string;
+  leadType: "general" | "callback" | "property_inquiry" | "ai_advisor";
+}
+
+const LEAD_SOURCE_LABELS: Record<LeadInput["leadType"], string> = {
+  general: "Website - Contact Form",
+  callback: "Website - Callback Request",
+  property_inquiry: "Website - Property Enquiry",
+  ai_advisor: "Website - AI Chatbot",
+};
+
+// The chatbot stores generated placeholder emails; never pass those on as real addresses.
+const isPlaceholderEmail = (email: string) => /@(example\.com|nexhouz\.ai)$/i.test(email);
+
+// Every key is always present (empty string when unknown) so Wylto's field
+// mapping sees the same shape for every lead.
+function sendLeadToWylto(lead: LeadInput): void {
+  const phoneNumber = toE164(lead.phone || "");
   if (!phoneNumber) return;
+  const email = (lead.email || "").trim();
+  const payload = {
+    name: (lead.name || "").trim() || "Website Lead",
+    phoneNumber,
+    email: isPlaceholderEmail(email) ? "" : email,
+    source: LEAD_SOURCE_LABELS[lead.leadType],
+    leadType: lead.leadType,
+    message: (lead.notes || "").trim(),
+    propertyName: lead.propertyName || "",
+    propertyId: lead.propertyId || "",
+    pageUrl: typeof window !== "undefined" ? window.location.href : "",
+    submittedAt: new Date().toISOString(),
+  };
   fetch(WYLTO_WEBHOOK_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: name.trim() || "Website Lead", phoneNumber }),
+    body: JSON.stringify(payload),
   })
     .then((res) => {
       if (!res.ok) console.error(`Wylto webhook error: HTTP ${res.status}`);
@@ -266,15 +302,8 @@ function sendLeadToWylto(name: string, phone: string): void {
     .catch((e) => console.error("Wylto webhook connection error:", e));
 }
 
-export async function submitLead(lead: {
-  propertyId?: string;
-  name: string;
-  email: string;
-  phone: string;
-  notes: string;
-  leadType: "general" | "callback" | "property_inquiry" | "ai_advisor";
-}): Promise<boolean> {
-  sendLeadToWylto(lead.name, lead.phone);
+export async function submitLead(lead: LeadInput): Promise<boolean> {
+  sendLeadToWylto(lead);
   try {
     const { error } = await supabase
       .from("leads")
@@ -299,15 +328,8 @@ export async function submitLead(lead: {
   }
 }
 
-export async function submitLeadAndGetId(lead: {
-  propertyId?: string;
-  name: string;
-  email: string;
-  phone: string;
-  notes: string;
-  leadType: "general" | "callback" | "property_inquiry" | "ai_advisor";
-}): Promise<string | null> {
-  sendLeadToWylto(lead.name, lead.phone);
+export async function submitLeadAndGetId(lead: LeadInput): Promise<string | null> {
+  sendLeadToWylto(lead);
   try {
     const { data, error } = await supabase
       .rpc("create_lead_v2", {

@@ -92,6 +92,7 @@ export default function DashboardPage() {
     setIsSubmitting(true);
     const propertyTitles = savedProperties.map((p) => p.title).join(", ");
     const success = await submitLead({
+      propertyName: propertyTitles,
       name: bookingForm.name,
       email: bookingForm.email,
       phone: bookingForm.phone,

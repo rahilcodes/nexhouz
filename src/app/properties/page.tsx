@@ -257,6 +257,7 @@ function PropertiesExplorerContent() {
     e.preventDefault();
     const success = await submitLead({
       propertyId: selectedProperty?.id,
+      propertyName: selectedProperty?.title,
       name: inquiryForm.name,
       email: inquiryForm.email,
       phone: inquiryForm.phone,

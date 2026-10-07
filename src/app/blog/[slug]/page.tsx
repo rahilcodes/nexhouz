@@ -11,6 +11,14 @@ export const revalidate = 60; // Revalidate pages every 60 seconds
 
 export async function generateStaticParams() {
   const posts = await fetchPublishedBlogPosts();
+  if (!posts || posts.length === 0) {
+    return [
+      { slug: "sovereign-asset-portfolios" },
+      { slug: "sustainable-monolith" },
+      { slug: "decentralizing-gachibowli" },
+      { slug: "rise-of-architectural-minimalism" }
+    ];
+  }
   return posts.map((post) => ({
     slug: post.slug,
   }));
