@@ -5,16 +5,32 @@ import { UserCheck, Check, Clock, Shield, Award, Star } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { CONTAINER, SECTION_X, Reveal, Eyebrow } from "@/components/ui/theme";
+import { submitLead } from "@/lib/db";
 
 
 export default function ExpertAdvisoryPage() {
   const [form, setForm] = useState({ name: "", phone: "", budget: "", location: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3000);
+    setIsSubmitting(true);
+    const success = await submitLead({
+      name: form.name,
+      email: "",
+      phone: form.phone,
+      notes: `Expert session request. Budget: ${form.budget}. Preferred location: ${form.location}.${
+        form.message ? ` Message: ${form.message}` : ""
+      }`,
+      leadType: "callback",
+    });
+    setIsSubmitting(false);
+    if (success) {
+      setSubmitted(true);
+      setForm({ name: "", phone: "", budget: "", location: "", message: "" });
+      setTimeout(() => setSubmitted(false), 3000);
+    }
   };
 
   const inputClass =
@@ -126,9 +142,10 @@ export default function ExpertAdvisoryPage() {
                     </div>
                     <button
                       type="submit"
-                      className="w-full py-[18px] bg-[#D31E28] hover:bg-[#B8171F] text-white font-semibold text-[17px] rounded-[10px] transition-colors shadow-[0_6px_18px_rgba(211,30,40,0.25)]"
+                      disabled={isSubmitting}
+                      className="w-full py-[18px] bg-[#D31E28] hover:bg-[#B8171F] disabled:opacity-60 text-white font-semibold text-[17px] rounded-[10px] transition-colors shadow-[0_6px_18px_rgba(211,30,40,0.25)]"
                     >
-                      Book free expert session
+                      {isSubmitting ? "Booking…" : "Book free expert session"}
                     </button>
                   </div>
                 </form>

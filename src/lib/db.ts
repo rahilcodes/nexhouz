@@ -233,6 +233,39 @@ export async function fetchFeaturedProperties(): Promise<Property[]> {
   }
 }
 
+// ─── Wylto CRM webhook ─────────────────────────────────────────────────────────
+// Every website lead is mirrored to Wylto in addition to the Supabase `leads`
+// table. It is fire-and-forget: a Wylto outage must never block or fail a form,
+// and the lead is still saved to the admin dashboard either way.
+const WYLTO_WEBHOOK_URL = "https://server.wylto.com/webhook/GW49HBQWHx5erDzpQ7";
+
+// Wylto expects E.164 numbers (e.g. +919987543210). A bare 10-digit number is
+// treated as an Indian mobile.
+export function toE164(raw: string): string {
+  const trimmed = raw.trim();
+  const digits = trimmed.replace(/\D/g, "");
+  if (!digits) return "";
+  if (trimmed.startsWith("+")) return `+${digits}`;
+  if (digits.startsWith("00")) return `+${digits.slice(2)}`;
+  if (digits.length === 10) return `+91${digits}`;
+  if (digits.length === 11 && digits.startsWith("0")) return `+91${digits.slice(1)}`;
+  return `+${digits}`;
+}
+
+function sendLeadToWylto(name: string, phone: string): void {
+  const phoneNumber = toE164(phone || "");
+  if (!phoneNumber) return;
+  fetch(WYLTO_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: name.trim() || "Website Lead", phoneNumber }),
+  })
+    .then((res) => {
+      if (!res.ok) console.error(`Wylto webhook error: HTTP ${res.status}`);
+    })
+    .catch((e) => console.error("Wylto webhook connection error:", e));
+}
+
 export async function submitLead(lead: {
   propertyId?: string;
   name: string;
@@ -241,6 +274,7 @@ export async function submitLead(lead: {
   notes: string;
   leadType: "general" | "callback" | "property_inquiry" | "ai_advisor";
 }): Promise<boolean> {
+  sendLeadToWylto(lead.name, lead.phone);
   try {
     const { error } = await supabase
       .from("leads")
@@ -273,6 +307,7 @@ export async function submitLeadAndGetId(lead: {
   notes: string;
   leadType: "general" | "callback" | "property_inquiry" | "ai_advisor";
 }): Promise<string | null> {
+  sendLeadToWylto(lead.name, lead.phone);
   try {
     const { data, error } = await supabase
       .rpc("create_lead_v2", {
